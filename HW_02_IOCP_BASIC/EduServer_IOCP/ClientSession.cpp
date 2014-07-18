@@ -101,6 +101,7 @@ bool ClientSession::PostRecv() const
 	//↑ 반드시 있어야함..ㅠㅠ
 	//내부에  wsabuf도 반드시 buf를 가리키게 할 것.
 	//wsabuf.len이 0이면 recv할 때 아무것도 못받음 dwTransferred가 0이 됨
+	//context를 초기화할때, buf도 mBuffer를 알아서 가리키도록 하는 것이 나을듯(len도 buffersize만큼 초기화해놓고..)
 
 	return true;
 }
