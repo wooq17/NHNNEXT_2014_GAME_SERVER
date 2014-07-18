@@ -1,0 +1,28 @@
+﻿Build started 2014-07-17 오후 5:46:30.
+     1>Project "D:\Downloads\GSP_HOMEWORK-master\HW_02_IOCP_BASIC\EduServer_IOCP\EduServer_IOCP.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"stdafx.h" /Fp"Debug\EduServer_IOCP.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt stdafx.cpp
+         stdafx.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Debug\EduServer_IOCP.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt ClientSession.cpp EduServer_IOCP.cpp Exception.cpp FastSpinlock.cpp IocpManager.cpp SessionManager.cpp
+         SessionManager.cpp
+         IocpManager.cpp
+     1>d:\downloads\gsp_homework-master\hw_02_iocp_basic\eduserver_iocp\iocpmanager.cpp(52): warning C4101: 'dwThreadId' : unreferenced local variable
+         FastSpinlock.cpp
+         Exception.cpp
+         EduServer_IOCP.cpp
+         ClientSession.cpp
+         Generating Code...
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\Downloads\GSP_HOMEWORK-master\HW_02_IOCP_BASIC\Debug\EduServer_IOCP.exe" /INCREMENTAL /NOLOGO winmm.lib ws2_32.lib DbgHelp.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\Downloads\GSP_HOMEWORK-master\HW_02_IOCP_BASIC\Debug\EduServer_IOCP.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\Downloads\GSP_HOMEWORK-master\HW_02_IOCP_BASIC\Debug\EduServer_IOCP.lib" /MACHINE:X86 Debug\ClientSession.obj
+         Debug\EduServer_IOCP.obj
+         Debug\Exception.obj
+         Debug\FastSpinlock.obj
+         Debug\IocpManager.obj
+         Debug\SessionManager.obj
+         Debug\stdafx.obj
+         EduServer_IOCP.vcxproj -> D:\Downloads\GSP_HOMEWORK-master\HW_02_IOCP_BASIC\Debug\EduServer_IOCP.exe
+     1>Done Building Project "D:\Downloads\GSP_HOMEWORK-master\HW_02_IOCP_BASIC\EduServer_IOCP\EduServer_IOCP.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:03.30
