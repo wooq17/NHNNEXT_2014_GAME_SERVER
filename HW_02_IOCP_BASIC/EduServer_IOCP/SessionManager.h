@@ -17,12 +17,16 @@ public:
 	int IncreaseConnectionCount() { return InterlockedIncrement(&mCurrentConnectionCount); }
 	int DecreaseConnectionCount() { return InterlockedDecrement(&mCurrentConnectionCount); }
 
+	// 없어서 만들었음..
+	ClientSession* GetClientFromList(SOCKET sock) { return mClientList[sock]; }
+
 
 private:
 	typedef std::map<SOCKET, ClientSession*> ClientList;
 	ClientList	mClientList;
 
 	//TODO: mLock; 선언
+	FastSpinlock mLock;
 
 	volatile long mCurrentConnectionCount;
 };
