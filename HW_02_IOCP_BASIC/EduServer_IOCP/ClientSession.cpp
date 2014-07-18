@@ -8,7 +8,7 @@
 bool ClientSession::OnConnect(SOCKADDR_IN* addr)
 {
 	//TODO: 이 영역 lock으로 보호 할 것
-	mLock.EnterLock();
+	FastSpinlockGuard lck( mLock );
 	CRASH_ASSERT(LThreadType == THREAD_MAIN_ACCEPT);
 
 	/// make socket non-blocking
@@ -23,19 +23,18 @@ bool ClientSession::OnConnect(SOCKADDR_IN* addr)
 	if (SOCKET_ERROR == setsockopt(mSocket, SOL_SOCKET, SO_RCVBUF, (const char*)&opt, sizeof(int)) )
 	{
 		printf_s("[DEBUG] SO_RCVBUF change error: %d\n", GetLastError()) ;
-		mLock.LeaveLock();
 		return false;
 	}
 	
 	//TODO: 여기에서 CreateIoCompletionPort((HANDLE)mSocket, ...);사용하여 연결할 것
 	//HANDLE handle = 0; 
-	HANDLE handle = CreateIoCompletionPort( (HANDLE)mSocket, GIocpManager->GetComletionPort(), (DWORD)mSocket, 0 );
+	//HANDLE handle = CreateIoCompletionPort( (HANDLE)mSocket, GIocpManager->GetCompletionPort(), (DWORD)mSocket, 0 );
+	HANDLE handle = CreateIoCompletionPort( (HANDLE)mSocket, GIocpManager->GetCompletionPort(), (DWORD)this, 0 );
 	//DONE
 
-	if (handle != GIocpManager->GetComletionPort())
+	if (handle != GIocpManager->GetCompletionPort())
 	{
 		printf_s("[DEBUG] CreateIoCompletionPort error: %d\n", GetLastError());
-		mLock.LeaveLock();
 		return false;
 	}
 
@@ -46,17 +45,15 @@ bool ClientSession::OnConnect(SOCKADDR_IN* addr)
 
 	GSessionManager->IncreaseConnectionCount();
 
-	mLock.LeaveLock();
 	return PostRecv() ;
 }
 
 void ClientSession::Disconnect(DisconnectReason dr)
 {
 	//TODO: 이 영역 lock으로 보호할 것
-	mLock.EnterLock();
+	FastSpinlockGuard lck( mLock );
 	if ( !IsConnected() )
 	{
-		mLock.LeaveLock();
 		return;
 	}
 	
@@ -77,7 +74,6 @@ void ClientSession::Disconnect(DisconnectReason dr)
 	closesocket(mSocket) ;
 
 	mConnected = false ;
-	mLock.LeaveLock();
 }
 
 bool ClientSession::PostRecv() const
@@ -88,12 +84,23 @@ bool ClientSession::PostRecv() const
 	OverlappedIOContext* recvContext = new OverlappedIOContext(this, IO_RECV);
 
 	//TODO: WSARecv 사용하여 구현할 것
-	if ( !WSARecv( mSocket, &recvContext->mWsaBuf, 1, NULL, 0, &(recvContext->mOverlapped), NULL ) )
+	recvContext->mWsaBuf.buf = recvContext->mBuffer;
+	recvContext->mWsaBuf.len = BUFSIZE;
+	DWORD dwBytes = 0;
+	DWORD dwFlags = 0;
+	if ( WSARecv( mSocket, &(recvContext->mWsaBuf), 1, &dwBytes, &dwFlags, &(recvContext->mOverlapped), NULL ) )
 	{
-		return false;
+		if ( WSAGetLastError() != WSA_IO_PENDING )
+		{
+			printf( "%d\n", WSAGetLastError() );
+			return false;
+		}		
 	}
 	//DONE
 	//flag랑 받은 byte는 따로 기록안해도되나 싶네요. 일단 NULL
+	//↑ 반드시 있어야함..ㅠㅠ
+	//내부에  wsabuf도 반드시 buf를 가리키게 할 것.
+	//wsabuf.len이 0이면 recv할 때 아무것도 못받음 dwTransferred가 0이 됨
 
 	return true;
 }
@@ -111,9 +118,13 @@ bool ClientSession::PostSend(const char* buf, int len) const
 	//TODO: WSASend 사용하여 구현할 것
 	sendContext->mWsaBuf.buf = sendContext->mBuffer;
 	sendContext->mWsaBuf.len = len;
-	if ( !WSASend( mSocket, &sendContext->mWsaBuf, 1, NULL, 0, &(sendContext->mOverlapped), NULL ) )
+	if ( WSASend( mSocket, &sendContext->mWsaBuf, 1, NULL, 0, &(sendContext->mOverlapped), NULL ) )
 	{
-		return false;
+		if ( WSAGetLastError() != WSA_IO_PENDING )
+		{
+			printf( "%d\n", WSAGetLastError() );
+			return false;
+		}
 	}
 	//DONE	
 	//1. overlappedIoContext 구조체는 어디서 해제하는거지ㅠㅠ 

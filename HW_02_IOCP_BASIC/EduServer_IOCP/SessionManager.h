@@ -18,7 +18,7 @@ public:
 	int DecreaseConnectionCount() { return InterlockedDecrement(&mCurrentConnectionCount); }
 
 	// 없어서 만들었음..
-	ClientSession* GetClientFromList(SOCKET sock) { return mClientList[sock]; }
+	//ClientSession* GetClientFromList(SOCKET sock) { return mClientList[sock]; }
 
 
 private:
@@ -27,6 +27,10 @@ private:
 
 	//TODO: mLock; 선언
 	FastSpinlock mLock;
+	//done 
+	//형말대로 스마트포인터같이 객체로 갖다쓰는 함수가 있어서(fastspinlockguard)	
+	//unlock 다 지우고 저걸로 대체하긴 했음..
+	//classTypelock이라는 것도 있는데 그걸 써야하나..
 
 	volatile long mCurrentConnectionCount;
 };

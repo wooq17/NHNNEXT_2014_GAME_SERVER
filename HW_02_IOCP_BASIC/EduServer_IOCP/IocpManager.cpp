@@ -130,7 +130,7 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 	LThreadType = THREAD_IO_WORKER;
 
 	LIoThreadId = reinterpret_cast<int>(lpParam);
-	HANDLE hComletionPort = GIocpManager->GetComletionPort();
+	HANDLE hComletionPort = GIocpManager->GetCompletionPort();
 
 	while (true)
 	{
@@ -140,17 +140,25 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 
 		//TODO
 		//int ret = 0; ///<여기에는 GetQueuedCompletionStatus(hComletionPort, ..., GQCS_TIMEOUT)를 수행한 결과값을 대입
-		DWORD sock;
-		//int ret = GetQueuedCompletionStatus( hComletionPort, &dwTransferred, (LPDWORD)&asCompletionKey, (LPOVERLAPPED*)&context, GQCS_TIMEOUT );
-		int ret = GetQueuedCompletionStatus( hComletionPort, &dwTransferred, &sock, (LPOVERLAPPED*)&context, INFINITE );
-		asCompletionKey = GSessionManager->GetClientFromList( (SOCKET)sock );
-		//DONE
+		//SOCKET sock;
+		//int ret = GetQueuedCompletionStatus( hComletionPort, &dwTransferred, (DWORD*)&sock, (LPOVERLAPPED*)&context, GQCS_TIMEOUT );
+		int ret = GetQueuedCompletionStatus( hComletionPort, &dwTransferred, (LPDWORD)&asCompletionKey, (LPOVERLAPPED*)&context, GQCS_TIMEOUT );		
+		
+		//asCompletionKey = GSessionManager->GetClientFromList( (SOCKET)sock );
+		//asCompletionKey = new ClientSession( sock );
+		
+		//조심해!!
+		//CreateIoCompetionStatus로 첨 만들땐 compeltion key로 socket넣어서 만들었는데
+		//GQCS할때는 socket을 key로 하자니 ClientList에서 socket을 key로 client를 가져와야함.
+		//이상한 건 SessionManager에 list를 get하는 함수가 없다는것
+
+		//그렇다는 건 socket을 가져오는게 아니라는 뜻인데...
+		//애초에 clientsession의 pointer값으로 만들어야하는 것인가?
+		//(변수명도 asCompletionKey이기도 하고..)
 
 		/// check time out first 
 		if ( ret == 0 && GetLastError() == WAIT_TIMEOUT )
 			continue;
-		else
-			printf( "lala" );
 
 		if (ret == 0 || dwTransferred == 0)
 		{
@@ -207,8 +215,8 @@ bool IocpManager::ReceiveCompletion(const ClientSession* client, OverlappedIOCon
 	client->PostSend( context->mWsaBuf.buf, dwTransferred );
 	//DONE
 	//여기서 context->mWsaBuf.len은 비어있을 거임.
-	//받는걸 buf로 받겠다고는 했지만 받겠다고 선언한 시점에 얼마나 받았는지는 모르니
-	//send와 같은 구조체를 사용하지않는 이유는.. 정확히는 모르겠으나 같으면 안된다고함..
+	//받는걸 buf로 받겠다고는 했지만 받겠다고 선언한 시점에 얼마나 받을지는 모르니, dwtransferred를 사용
+	//send와 같은 context 구조체를 사용하지않는 이유는.. 정확히는 모르겠으나 같으면 안된다고함..
 	//(동시에 일어날 경우를 대비해서 그러는 건지..)
 	//http://gpgstudy.com/forum/viewtopic.php?p=124336
 	
