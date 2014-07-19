@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <map>
 #include <WinSock2.h>
 #include "FastSpinlock.h"
@@ -17,20 +17,14 @@ public:
 	int IncreaseConnectionCount() { return InterlockedIncrement(&mCurrentConnectionCount); }
 	int DecreaseConnectionCount() { return InterlockedDecrement(&mCurrentConnectionCount); }
 
-	// ¾ø¾î¼­ ¸¸µé¾úÀ½..
-	//ClientSession* GetClientFromList(SOCKET sock) { return mClientList[sock]; }
-
 
 private:
 	typedef std::map<SOCKET, ClientSession*> ClientList;
 	ClientList	mClientList;
 
-	//TODO: mLock; ¼±¾ð
+	//TODO: mLock; ì„ ì–¸
 	FastSpinlock mLock;
-	//done 
-	//Çü¸»´ë·Î ½º¸¶Æ®Æ÷ÀÎÅÍ°°ÀÌ °´Ã¼·Î °®´Ù¾²´Â ÇÔ¼ö°¡ ÀÖ¾î¼­(fastspinlockguard)	
-	//unlock ´Ù Áö¿ì°í Àú°É·Î ´ëÃ¼ÇÏ±ä ÇßÀ½..
-	//classTypelockÀÌ¶ó´Â °Íµµ ÀÖ´Âµ¥ ±×°É ½á¾ßÇÏ³ª..
+	// DONE
 
 	volatile long mCurrentConnectionCount;
 };

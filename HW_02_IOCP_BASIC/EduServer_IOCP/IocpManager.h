@@ -1,4 +1,4 @@
-#pragma once
+Ôªø#pragma once
 
 class ClientSession;
 struct OverlappedIOContext;
@@ -16,7 +16,6 @@ public:
 	bool StartAcceptLoop();
 
 	HANDLE GetCompletionPort()	{ return mCompletionPort; }
-	//GetComletion¿Ã±Ê∑° p√ﬂ∞°
 	int	GetIoThreadCount()		{ return mIoThreadCount;  }
 
 

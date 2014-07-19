@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "ClientSession.h"
 #include "SessionManager.h"
 
@@ -8,8 +8,9 @@ ClientSession* SessionManager::CreateClientSession(SOCKET sock)
 {
 	ClientSession* client = new ClientSession(sock);
 
-	//TODO: lockÀ¸·Î º¸È£ÇÒ °Í
+	//TODO: lockìœ¼ë¡œ ë³´í˜¸í•  ê²ƒ
 	FastSpinlockGuard lck( mLock );
+	// DONE
 	{
 		mClientList.insert(ClientList::value_type(sock, client));
 	}
@@ -20,8 +21,9 @@ ClientSession* SessionManager::CreateClientSession(SOCKET sock)
 
 void SessionManager::DeleteClientSession(ClientSession* client)
 {
-	//TODO: lockÀ¸·Î º¸È£ÇÒ °Í
+	//TODO: lockìœ¼ë¡œ ë³´í˜¸í•  ê²ƒ
 	FastSpinlockGuard lck( mLock );
+	// DONE
 	{
 		mClientList.erase(client->mSocket);
 	}

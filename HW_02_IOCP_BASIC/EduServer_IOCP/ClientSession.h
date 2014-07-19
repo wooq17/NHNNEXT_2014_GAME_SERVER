@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "FastSpinlock.h"
 
 #define BUFSIZE	4096
@@ -66,8 +66,9 @@ private:
 
 	SOCKADDR_IN		mClientAddr ;
 		
-	//TODO: mLock; ¼±¾ðÇÒ °Í
+	//TODO: mLock; ì„ ì–¸í•  ê²ƒ
 	FastSpinlock mLock;
+	// DONE
 
 	friend class SessionManager;
 } ;

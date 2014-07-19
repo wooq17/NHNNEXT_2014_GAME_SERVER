@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "Exception.h"
 #include "EduServer_IOCP.h"
 #include "ClientSession.h"
@@ -7,8 +7,9 @@
 
 bool ClientSession::OnConnect(SOCKADDR_IN* addr)
 {
-	//TODO: ÀÌ ¿µ¿ª lockÀ¸·Î º¸È£ ÇÒ °Í
+	//TODO: ì´ ì˜ì—­ lockìœ¼ë¡œ ë³´í˜¸ í•  ê²ƒ
 	FastSpinlockGuard lck( mLock );
+	// DONE
 	CRASH_ASSERT(LThreadType == THREAD_MAIN_ACCEPT);
 
 	/// make socket non-blocking
@@ -26,11 +27,9 @@ bool ClientSession::OnConnect(SOCKADDR_IN* addr)
 		return false;
 	}
 	
-	//TODO: ¿©±â¿¡¼­ CreateIoCompletionPort((HANDLE)mSocket, ...);»ç¿ëÇÏ¿© ¿¬°áÇÒ °Í
-	//HANDLE handle = 0; 
-	//HANDLE handle = CreateIoCompletionPort( (HANDLE)mSocket, GIocpManager->GetCompletionPort(), (DWORD)mSocket, 0 );
-	HANDLE handle = CreateIoCompletionPort( (HANDLE)mSocket, GIocpManager->GetCompletionPort(), (DWORD)this, 0 );
-	//DONE
+	//TODO: ì—¬ê¸°ì—ì„œ CreateIoCompletionPort((HANDLE)mSocket, ...);ì‚¬ìš©í•˜ì—¬ ì—°ê²°í•  ê²ƒ
+	HANDLE handle = CreateIoCompletionPort( (HANDLE)mSocket, GIocpManager->GetCompletionPort(), ( DWORD )this, 0 );
+	// DONE
 
 	if (handle != GIocpManager->GetCompletionPort())
 	{
@@ -50,8 +49,9 @@ bool ClientSession::OnConnect(SOCKADDR_IN* addr)
 
 void ClientSession::Disconnect(DisconnectReason dr)
 {
-	//TODO: ÀÌ ¿µ¿ª lockÀ¸·Î º¸È£ÇÒ °Í
+	//TODO: ì´ ì˜ì—­ lockìœ¼ë¡œ ë³´í˜¸í•  ê²ƒ
 	FastSpinlockGuard lck( mLock );
+	// DONE
 	if ( !IsConnected() )
 	{
 		return;
@@ -83,7 +83,7 @@ bool ClientSession::PostRecv() const
 
 	OverlappedIOContext* recvContext = new OverlappedIOContext(this, IO_RECV);
 
-	//TODO: WSARecv »ç¿ëÇÏ¿© ±¸ÇöÇÒ °Í
+	//TODO: WSARecv ì‚¬ìš©í•˜ì—¬ êµ¬í˜„í•  ê²ƒ
 	recvContext->mWsaBuf.buf = recvContext->mBuffer;
 	recvContext->mWsaBuf.len = BUFSIZE;
 	DWORD dwBytes = 0;
@@ -96,12 +96,13 @@ bool ClientSession::PostRecv() const
 			return false;
 		}		
 	}
-	//DONE
-	//flag¶û ¹ÞÀº byte´Â µû·Î ±â·Ï¾ÈÇØµµµÇ³ª ½Í³×¿ä. ÀÏ´Ü NULL
-	//¡è ¹Ýµå½Ã ÀÖ¾î¾ßÇÔ..¤Ð¤Ð
-	//³»ºÎ¿¡  wsabufµµ ¹Ýµå½Ã buf¸¦ °¡¸®Å°°Ô ÇÒ °Í.
-	//wsabuf.lenÀÌ 0ÀÌ¸é recvÇÒ ¶§ ¾Æ¹«°Íµµ ¸ø¹ÞÀ½ dwTransferred°¡ 0ÀÌ µÊ
-	//context¸¦ ÃÊ±âÈ­ÇÒ¶§, bufµµ mBuffer¸¦ ¾Ë¾Æ¼­ °¡¸®Å°µµ·Ï ÇÏ´Â °ÍÀÌ ³ªÀ»µí(lenµµ buffersize¸¸Å­ ÃÊ±âÈ­ÇØ³õ°í..)
+	// DONE
+
+	//flagëž‘ ë°›ì€ byteëŠ” ë”°ë¡œ ê¸°ë¡ì•ˆí•´ë„ë˜ë‚˜ ì‹¶ë„¤ìš”. ì¼ë‹¨ NULL
+	//â†‘ ë°˜ë“œì‹œ ìžˆì–´ì•¼í•¨..ã… ã… 
+	//ë‚´ë¶€ì—  wsabufë„ ë°˜ë“œì‹œ bufë¥¼ ê°€ë¦¬í‚¤ê²Œ í•  ê²ƒ.
+	//wsabuf.lenì´ 0ì´ë©´ recví•  ë•Œ ì•„ë¬´ê²ƒë„ ëª»ë°›ìŒ dwTransferredê°€ 0ì´ ë¨
+	//contextë¥¼ ì´ˆê¸°í™”í• ë•Œ, bufë„ mBufferë¥¼ ì•Œì•„ì„œ ê°€ë¦¬í‚¤ë„ë¡ í•˜ëŠ” ê²ƒì´ ë‚˜ì„ë“¯(lenë„ buffersizeë§Œí¼ ì´ˆê¸°í™”í•´ë†“ê³ ..)
 
 	return true;
 }
@@ -116,7 +117,7 @@ bool ClientSession::PostSend(const char* buf, int len) const
 	/// copy for echoing back..
 	memcpy_s(sendContext->mBuffer, BUFSIZE, buf, len);
 
-	//TODO: WSASend »ç¿ëÇÏ¿© ±¸ÇöÇÒ °Í
+	//TODO: WSASend ì‚¬ìš©í•˜ì—¬ êµ¬í˜„í•  ê²ƒ
 	sendContext->mWsaBuf.buf = sendContext->mBuffer;
 	sendContext->mWsaBuf.len = len;
 	if ( WSASend( mSocket, &sendContext->mWsaBuf, 1, NULL, 0, &(sendContext->mOverlapped), NULL ) )
@@ -127,13 +128,14 @@ bool ClientSession::PostSend(const char* buf, int len) const
 			return false;
 		}
 	}
-	//DONE	
-	//1. overlappedIoContext ±¸Á¶Ã¼´Â ¾îµð¼­ ÇØÁ¦ÇÏ´Â°ÅÁö¤Ð¤Ð 
-	//overlapped±¸Á¶Ã¼´Â io°¡ ³¡³ª±âÀü¿¡ Àý´ë ¸Þ¸ð¸®¿¡¼­ »ç¶óÁö¸é ¾ÈµÈ´Ù°íÇÔ
-	//GQCSÇßÀ»¶§µµ ÀÌ ±¸Á¶Ã¼¸¦ »ç¿ë.. °Å±â¼­ sendCompletionÀ¸·Î sendÈ®ÀÎÇÏ°í Áö¿ò
-	//2. ¿©±â ³Ö¾î¼­ ÇÏ´Â ¿ªÇÒÀº ¹¹Áö!!!
-	//GQCS¿¡¼­ »ç¿ëÇÒ ¼ö ÀÖµµ·Ï ÇÏ´Â°Ô ¿ªÇÒÀÎµí. ³ªÁß¿¡ contextº¯¼ö·Î ¹Þ¾Æ¼­ ¾µ °ÍÀÌ´Ï 
-	//context±¸Á¶Ã¼ ³»ºÎ¿¡ overlapped º¯¼ö°¡ °¡Àå ¸ÕÀú ¼±¾ðµÇ¾îÀÖ¾î¾ßÇÔ
+	// DONE
+
+	//1. overlappedIoContext êµ¬ì¡°ì²´ëŠ” ì–´ë””ì„œ í•´ì œí•˜ëŠ”ê±°ì§€ã… ã…  
+	//overlappedêµ¬ì¡°ì²´ëŠ” ioê°€ ëë‚˜ê¸°ì „ì— ì ˆëŒ€ ë©”ëª¨ë¦¬ì—ì„œ ì‚¬ë¼ì§€ë©´ ì•ˆëœë‹¤ê³ í•¨
+	//GQCSí–ˆì„ë•Œë„ ì´ êµ¬ì¡°ì²´ë¥¼ ì‚¬ìš©.. ê±°ê¸°ì„œ sendCompletionìœ¼ë¡œ sendí™•ì¸í•˜ê³  ì§€ì›€
+	//2. ì—¬ê¸° ë„£ì–´ì„œ í•˜ëŠ” ì—­í• ì€ ë­ì§€!!!
+	//GQCSì—ì„œ ì‚¬ìš©í•  ìˆ˜ ìžˆë„ë¡ í•˜ëŠ”ê²Œ ì—­í• ì¸ë“¯. ë‚˜ì¤‘ì— contextë³€ìˆ˜ë¡œ ë°›ì•„ì„œ ì“¸ ê²ƒì´ë‹ˆ 
+	//contextêµ¬ì¡°ì²´ ë‚´ë¶€ì— overlapped ë³€ìˆ˜ê°€ ê°€ìž¥ ë¨¼ì € ì„ ì–¸ë˜ì–´ìžˆì–´ì•¼í•¨
 
 	return true;
 }
