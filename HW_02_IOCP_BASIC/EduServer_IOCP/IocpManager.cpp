@@ -140,7 +140,7 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 
 		//TODO
 		//int ret = 0; ///<여기에는 GetQueuedCompletionStatus(hComletionPort, ..., GQCS_TIMEOUT)를 수행한 결과값을 대입
-		int ret = GetQueuedCompletionStatus( hCompletionPort, &dwTransferred, (LPDWORD)&asCompletionKey, (LPOVERLAPPED*)&context, GQCS_TIMEOUT );
+		int ret = GetQueuedCompletionStatus( hCompletionPort, &dwTransferred, (PULONG_PTR)&asCompletionKey, (LPOVERLAPPED*)&context, GQCS_TIMEOUT );
 		// DONE
 
 		/// check time out first 
@@ -162,10 +162,9 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 		if ( nullptr == context )
 		{
 			// context가 nullptr인 경우는 타임 아웃이거나 해당 IOCP가 종료되었을 때
-			// 타임 아웃은 위에서 체크했으니까 여기서는 IOCP 종료에 대해서 처리??
-			asCompletionKey->Disconnect( DR_NONE );
-			GSessionManager->DeleteClientSession( asCompletionKey );
-			continue;
+			// 타임 아웃은 위에서 체크했으니까 여기서는 IOCP 종료에 대해서 처리
+			// IOCP 종료되었다는 것은 서버가 종료 == 장비를 정지합니다.
+			break;
 		}
 		// DONE
 
@@ -203,14 +202,6 @@ bool IocpManager::ReceiveCompletion(const ClientSession* client, OverlappedIOCon
 	/// echo back 처리 client->PostSend()사용.
 	client->PostSend( context->mWsaBuf.buf, dwTransferred );
 	// DONE
-
-	//여기서 context->mWsaBuf.len은 비어있을 거임.
-	//받는걸 buf로 받겠다고는 했지만 받겠다고 선언한 시점에 얼마나 받을지는 모르니, dwtransferred를 사용
-	//send와 같은 context 구조체를 사용하지않는 이유는.. 정확히는 모르겠으나 같으면 안된다고함..
-	//(동시에 일어날 경우를 대비해서 그러는 건지..)
-	//http://gpgstudy.com/forum/viewtopic.php?p=124336
-
-	// 입력과 출력이 동시에 일어나므로 같은 context를 사용하면 저장된 데이터가 읽는 작업에 의한 것인지 쓰는 작업에 의해서인지 몰라서 아닐까
 	
 	delete context;
 
