@@ -5,7 +5,7 @@
 #include "SessionManager.h"
 
 #define GQCS_TIMEOUT	20
-#define LISTEN_PORT		"9001"
+//#define LISTEN_PORT		"9001" ///< 재정의됨.
 
 __declspec(thread) int LIoThreadId = 0;
 IocpManager* GIocpManager = nullptr;
@@ -51,7 +51,7 @@ bool IocpManager::Initialize()
 	SOCKADDR_IN serveraddr;
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_addr.s_addr = htonl( INADDR_ANY );
-	serveraddr.sin_port = htons( atoi( LISTEN_PORT ) );
+	serveraddr.sin_port = htons( LISTEN_PORT );
 	
 	if ( SOCKET_ERROR == bind( mListenSocket, (SOCKADDR*)&serveraddr, sizeof( serveraddr ) ) )
 	{
@@ -150,7 +150,7 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 		if (ret == 0 || dwTransferred == 0)
 		{
 			/// connection closing
-			asCompletionKey->Disconnect(DR_RECV_ZERO);
+			asCompletionKey->Disconnect(DR_RECV_ZERO); ///< DR_RECV_ZERO그냥 가져다 썼구만? ㅎㅎ
 			GSessionManager->DeleteClientSession(asCompletionKey);
 			continue;
 		}
@@ -164,6 +164,8 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 			// context가 nullptr인 경우는 타임 아웃이거나 해당 IOCP가 종료되었을 때
 			// 타임 아웃은 위에서 체크했으니까 여기서는 IOCP 종료에 대해서 처리
 			// IOCP 종료되었다는 것은 서버가 종료 == 장비를 정지합니다.
+
+			///<  그래.. 그럼 종료 시켜야지? ㅋㅋ
 			break;
 		}
 		// DONE
@@ -200,7 +202,9 @@ bool IocpManager::ReceiveCompletion(const ClientSession* client, OverlappedIOCon
 {
 	//TODO
 	/// echo back 처리 client->PostSend()사용.
-	client->PostSend( context->mWsaBuf.buf, dwTransferred );
+	client->PostSend( context->mWsaBuf.buf, dwTransferred ); ///< 엄밀히 말하며 mBuffer를 넘겨주는게 맞다.
+	///< 그리고 에러 처리 왜 안함? PostSend에서 false 뱉어내면?
+
 	// DONE
 	
 	delete context;
