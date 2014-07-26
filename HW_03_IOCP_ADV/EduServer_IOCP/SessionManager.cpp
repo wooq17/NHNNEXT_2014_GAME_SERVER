@@ -22,7 +22,10 @@ void SessionManager::PrepareSessions()
 
 	for (int i = 0; i < MAX_CONNECTION; ++i)
 	{
-		ClientSession* client = new ClientSession();
+		ClientSession* client = new ClientSession( );
+		// 조심해!
+		// 새로 만들었으니 만든 소켓 수 늘리기
+		++mCurrentIssueCount;
 			
 		mFreeSessionList.push_back( client );
 
@@ -55,10 +58,7 @@ bool SessionManager::AcceptSessions()
 {
 	FastSpinlockGuard guard(mLock);
 
-	// 조심해!
-	// 현재 등록된 소켓 숫자가 최대보다 적으면 아직 등록안 되어 있으니 새로 등록
-	// while ( mCurrentIssueCount - mCurrentReturnCount < MAX_CONNECTION )
-	while ( mCurrentIssueCount < MAX_CONNECTION )
+	while ( mCurrentIssueCount - mCurrentReturnCount < MAX_CONNECTION )
 	{
 		//TODO mFreeSessionList에서 ClientSession* 꺼내서 PostAccept() 해주기.. (위의 ReturnClientSession와 뭔가 반대로 하면 될 듯?)
 		ClientSession* newClient = mFreeSessionList.front();
@@ -79,9 +79,7 @@ bool SessionManager::AcceptSessions()
 		// 접속을 끊을 때 이 숫자를 하나 감소
 		// 그러면 접속 종료 요청하면서 1 줄여서 0이 되어야 되므로 처음에 1 증가
 		newClient->AddRef();
-
-		// 하나 새로 등록했으니까 mCurrentIssueCount 증가
-		++mCurrentIssueCount;
+		
 		// WIP 
 	}
 

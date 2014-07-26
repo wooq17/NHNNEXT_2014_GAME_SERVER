@@ -51,8 +51,10 @@ bool ClientSession::PostAccept()
 
 	//TODO : AccpetEx를 이용한 구현.
 	DWORD recvbytes = 0;
+	acceptContext->mWsaBuf.len = (ULONG)mBuffer.GetFreeSpaceSize( );
+	acceptContext->mWsaBuf.buf = mBuffer.GetBuffer( );
 
-	BOOL bRetVal = IocpManager::AcceptEx( *GIocpManager->GetListenSocket(), mSocket, &mBuffer,
+	BOOL bRetVal = IocpManager::AcceptEx( *GIocpManager->GetListenSocket( ), mSocket, acceptContext->mWsaBuf.buf,
 		0, sizeof (SOCKADDR_IN)+16, sizeof (SOCKADDR_IN)+16,
 		&recvbytes, (LPWSAOVERLAPPED)acceptContext );
 
@@ -135,6 +137,7 @@ void ClientSession::AcceptCompletion()
 		}
 
 		//TODO: CreateIoCompletionPort를 이용한 소켓 연결
+		/*
 		HANDLE hCompPort = CreateIoCompletionPort( (HANDLE)mSocket, GIocpManager->GetComletionPort(), ( ULONG_PTR )this, 0 );
 		
 		if ( hCompPort != GIocpManager->GetComletionPort() )
@@ -142,7 +145,7 @@ void ClientSession::AcceptCompletion()
 			printf_s( "[DEBUG] CreateIoCompletionPort error: %d\n", GetLastError() );
 			// 연결 실패... 뭘 할까..
 		}
-
+		*/
 		// AcceptEx하면서 이미 등록했는데 또 하나?
 		// why do-while....
 		// WIP
@@ -241,7 +244,7 @@ bool ClientSession::PreRecv()
 		if ( WSAGetLastError() != WSA_IO_PENDING )
 		{
 			DeleteIoContext( recvContext );
-			printf_s( "ClientSession::PostRecv Error : %d\n", GetLastError() );
+			printf_s( "ClientSession::PreRecv Error : %d\n", GetLastError() );
 			return false;
 		}
 
@@ -265,7 +268,9 @@ bool ClientSession::PostRecv()
 
 	DWORD recvbytes = 0;
 	DWORD flags = 0;
-	recvContext->mWsaBuf.len = (ULONG)mBuffer.GetFreeSpaceSize();
+	// 조심해!
+	// mBuffer.GetFreeSpaceSize() 결과가 실제 버퍼 최대 사이즈보다 크게 나옴 (연산 과정에서 언더 플로우나서 엄청 큼)
+	recvContext->mWsaBuf.len = (ULONG)mBuffer.GetFreeSpaceSize( );
 	recvContext->mWsaBuf.buf = mBuffer.GetBuffer();
 	
 
