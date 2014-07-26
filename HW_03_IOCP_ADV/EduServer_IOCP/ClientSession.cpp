@@ -67,7 +67,7 @@ bool ClientSession::PostAccept()
 			// 일단 진행 중이다.
 			break;
 		case WSAECONNRESET:
-			// 접속 생성하려는데 저쪽에서 끊어버렸다.
+			// 원격 호스트가 이상하다. 그런데 여기로 들어올 수 있나...
 			// 소켓을 다시 재활용할 수 있도록 바꿔주자.
 			// refCount 줄이면 0이 돼서 다시 등록되겠지?
 			ReleaseRef();
@@ -86,7 +86,7 @@ bool ClientSession::PostAccept()
 		printf_s( "[DEBUG] CreateIoCompletionPort error: %d\n", GetLastError() );
 		return false;
 	}
-	// WIP
+	// DONE
 
 	return true;
 }
@@ -177,8 +177,9 @@ void ClientSession::DisconnectRequest(DisconnectReason dr)
 	OverlappedDisconnectContext* context = new OverlappedDisconnectContext(this, dr);
 
 	//TODO: DisconnectEx를 이용한 연결 끊기 요청
-	// time_wait 문제를 해결해야 한다...
+	// time_wait 문제를 해결해야 한다...?
 	// shutdown은 아닌 것 같은데....
+	/*
 	if ( shutdown( mSocket, SD_BOTH ) != 0 )
 	{
 		switch ( WSAGetLastError() )
@@ -212,6 +213,7 @@ void ClientSession::DisconnectRequest(DisconnectReason dr)
 			break;
 		}
 	}
+	*/
 
 	IocpManager::DisconnectEx( mSocket, (LPWSAOVERLAPPED)context, TF_REUSE_SOCKET, 0 );
 
@@ -249,7 +251,7 @@ bool ClientSession::PreRecv()
 		}
 
 	}
-	// WIP
+	// DONE
 
 	return true;
 }
@@ -268,8 +270,6 @@ bool ClientSession::PostRecv()
 
 	DWORD recvbytes = 0;
 	DWORD flags = 0;
-	// 조심해!
-	// mBuffer.GetFreeSpaceSize() 결과가 실제 버퍼 최대 사이즈보다 크게 나옴 (연산 과정에서 언더 플로우나서 엄청 큼)
 	recvContext->mWsaBuf.len = (ULONG)mBuffer.GetFreeSpaceSize( );
 	recvContext->mWsaBuf.buf = mBuffer.GetBuffer();
 	

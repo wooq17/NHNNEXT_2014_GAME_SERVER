@@ -13,6 +13,7 @@ IocpManager* GIocpManager = nullptr;
 
 //TODO AcceptEx DisconnectEx 함수 사용할 수 있도록 구현.
 
+// 외부에서 함수 접근하려다 보니 네임스페이스로...
 LPFN_ACCEPTEX lpfnAcceptEx = NULL;
 LPFN_DISCONNECTEX lpfnDisconnectEx = NULL;
 GUID GuidAcceptEx = WSAID_ACCEPTEX;
@@ -26,7 +27,6 @@ BOOL IocpManager::DisconnectEx( SOCKET hSocket, LPOVERLAPPED lpOverlapped, DWORD
 	return lpfnDisconnectEx( hSocket, lpOverlapped, dwFlags, reserved );
 }
 
-// override
 BOOL IocpManager::AcceptEx( SOCKET sListenSocket, SOCKET sAcceptSocket, PVOID lpOutputBuffer, DWORD dwReceiveDataLength,
 	DWORD dwLocalAddressLength, DWORD dwRemoteAddressLength, LPDWORD lpdwBytesReceived, LPOVERLAPPED lpOverlapped)
 {
@@ -117,7 +117,7 @@ bool IocpManager::Initialize()
 		WSACleanup();
 		return false;
 	}
-	// WIP
+	// DONE
 
 	/// make session pool
 	GSessionManager->PrepareSessions();
@@ -194,6 +194,8 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 
 			// 그런데 지금 GQCS_TIMEOUT == INFINITE 인데...
 			// WIP
+
+			// 조심해!
 			// 만약 context가 nullptr인데 에러 코드가 WAIT_TIMEOUT가 아닌 경우 아래의 context->mIoType == IO_RECV에서 nullptr 참조가 발생?
 		
 			if (context->mIoType == IO_RECV || context->mIoType == IO_SEND )
