@@ -52,7 +52,7 @@ bool ClientSession::PostAccept()
 	//TODO : AccpetEx를 이용한 구현.
 	DWORD recvbytes = 0;
 
-	BOOL bRetVal = AcceptEx( *GIocpManager->GetListenSocket(), mSocket, &mBuffer,
+	BOOL bRetVal = IocpManager::AcceptEx( *GIocpManager->GetListenSocket(), mSocket, &mBuffer,
 		0, sizeof (SOCKADDR_IN)+16, sizeof (SOCKADDR_IN)+16,
 		&recvbytes, (LPWSAOVERLAPPED)acceptContext );
 
@@ -135,15 +135,13 @@ void ClientSession::AcceptCompletion()
 		}
 
 		//TODO: CreateIoCompletionPort를 이용한 소켓 연결
-		/*
 		HANDLE hCompPort = CreateIoCompletionPort( (HANDLE)mSocket, GIocpManager->GetComletionPort(), ( ULONG_PTR )this, 0 );
 		
-		if ( hCompPort == GIocpManager->GetComletionPort() )
+		if ( hCompPort != GIocpManager->GetComletionPort() )
 		{
 			printf_s( "[DEBUG] CreateIoCompletionPort error: %d\n", GetLastError() );
 			// 연결 실패... 뭘 할까..
 		}
-		*/
 
 		// AcceptEx하면서 이미 등록했는데 또 하나?
 		// why do-while....
@@ -212,7 +210,7 @@ void ClientSession::DisconnectRequest(DisconnectReason dr)
 		}
 	}
 
-	// DisconnectEx( mSocket, (LPWSAOVERLAPPED)context, TF_REUSE_SOCKET, 0 );
+	IocpManager::DisconnectEx( mSocket, (LPWSAOVERLAPPED)context, TF_REUSE_SOCKET, 0 );
 
 	// WIP
 }
@@ -274,7 +272,8 @@ bool ClientSession::PostRecv()
 	/// start real recv
 	if (SOCKET_ERROR == WSARecv(mSocket, &recvContext->mWsaBuf, 1, &recvbytes, &flags, (LPWSAOVERLAPPED)recvContext, NULL))
 	{
-		if (WSAGetLastError() != WSA_IO_PENDING)
+		int err = WSAGetLastError();
+		if ( err != WSA_IO_PENDING )
 		{
 			DeleteIoContext(recvContext);
 			printf_s("ClientSession::PostRecv Error : %d\n", GetLastError());

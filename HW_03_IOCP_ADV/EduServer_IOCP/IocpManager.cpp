@@ -18,7 +18,7 @@ LPFN_DISCONNECTEX lpfnDisconnectEx = NULL;
 GUID GuidAcceptEx = WSAID_ACCEPTEX;
 GUID GuidDisconnectEx = WSAID_DISCONNECTEX;
 
-BOOL DisconnectEx( SOCKET hSocket, LPOVERLAPPED lpOverlapped, DWORD dwFlags, DWORD reserved )
+BOOL IocpManager::DisconnectEx( SOCKET hSocket, LPOVERLAPPED lpOverlapped, DWORD dwFlags, DWORD reserved )
 {
 	if ( lpfnDisconnectEx == NULL )
 		return FALSE;
@@ -26,7 +26,8 @@ BOOL DisconnectEx( SOCKET hSocket, LPOVERLAPPED lpOverlapped, DWORD dwFlags, DWO
 	return lpfnDisconnectEx( hSocket, lpOverlapped, dwFlags, reserved );
 }
 
-BOOL AcceptEx( SOCKET sListenSocket, SOCKET sAcceptSocket, PVOID lpOutputBuffer, DWORD dwReceiveDataLength,
+// override
+BOOL IocpManager::AcceptEx( SOCKET sListenSocket, SOCKET sAcceptSocket, PVOID lpOutputBuffer, DWORD dwReceiveDataLength,
 	DWORD dwLocalAddressLength, DWORD dwRemoteAddressLength, LPDWORD lpdwBytesReceived, LPOVERLAPPED lpOverlapped)
 {
 	if ( lpfnAcceptEx == NULL )
@@ -255,7 +256,7 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 bool IocpManager::PreReceiveCompletion(ClientSession* client, OverlappedPreRecvContext* context, DWORD dwTransferred)
 {
 	/// real receive...
-	return client->PreRecv();
+	return client->PostRecv();
 }
 
 bool IocpManager::ReceiveCompletion(ClientSession* client, OverlappedRecvContext* context, DWORD dwTransferred)
