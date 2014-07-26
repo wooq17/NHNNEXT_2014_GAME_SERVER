@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "Exception.h"
 #include "IocpManager.h"
 #include "EduServer_IOCP.h"
@@ -11,20 +11,31 @@ __declspec(thread) int LIoThreadId = 0;
 IocpManager* GIocpManager = nullptr;
 
 
-//TODO AcceptEx DisconnectEx ÇÔ¼ö »ç¿ëÇÒ ¼ö ÀÖµµ·Ï ±¸Çö.
+//TODO AcceptEx DisconnectEx í•¨ìˆ˜ ì‚¬ìš©í•  ìˆ˜ ìžˆë„ë¡ êµ¬í˜„.
 
-BOOL DisconnectEx(SOCKET hSocket, LPOVERLAPPED lpOverlapped, DWORD dwFlags, DWORD reserved)
+LPFN_ACCEPTEX lpfnAcceptEx = NULL;
+LPFN_DISCONNECTEX lpfnDisconnectEx = NULL;
+GUID GuidAcceptEx = WSAID_ACCEPTEX;
+GUID GuidDisconnectEx = WSAID_DISCONNECTEX;
+
+BOOL DisconnectEx( SOCKET hSocket, LPOVERLAPPED lpOverlapped, DWORD dwFlags, DWORD reserved )
 {
-	//return ...
-	return 0;
+	if ( lpfnDisconnectEx == NULL )
+		return FALSE;
+
+	return lpfnDisconnectEx( hSocket, lpOverlapped, dwFlags, reserved );
 }
 
-BOOL AcceptEx(SOCKET sListenSocket, SOCKET sAcceptSocket, PVOID lpOutputBuffer, DWORD dwReceiveDataLength,
+BOOL AcceptEx( SOCKET sListenSocket, SOCKET sAcceptSocket, PVOID lpOutputBuffer, DWORD dwReceiveDataLength,
 	DWORD dwLocalAddressLength, DWORD dwRemoteAddressLength, LPDWORD lpdwBytesReceived, LPOVERLAPPED lpOverlapped)
 {
-	//return ...
-	return 0;
+	if ( lpfnAcceptEx == NULL )
+		return FALSE;
+
+	return lpfnAcceptEx( sListenSocket, sAcceptSocket, lpOutputBuffer, dwReceiveDataLength,
+		dwLocalAddressLength, dwRemoteAddressLength, lpdwBytesReceived, lpOverlapped );
 }
+// WIP
 
 IocpManager::IocpManager() : mCompletionPort(NULL), mIoThreadCount(2), mListenSocket(NULL)
 {	
@@ -77,12 +88,35 @@ bool IocpManager::Initialize()
 	if (SOCKET_ERROR == bind(mListenSocket, (SOCKADDR*)&serveraddr, sizeof(serveraddr)))
 		return false;
 
-	//TODO : WSAIoctlÀ» ÀÌ¿ëÇÏ¿© AcceptEx, DisconnectEx ÇÔ¼ö »ç¿ë°¡´ÉÇÏµµ·Ï ÇÏ´Â ÀÛ¾÷..
+	//TODO : WSAIoctlì„ ì´ìš©í•˜ì—¬ AcceptEx, DisconnectEx í•¨ìˆ˜ ì‚¬ìš©ê°€ëŠ¥í•˜ë„ë¡ í•˜ëŠ” ìž‘ì—…..
+	DWORD dwBytes;
 
+	int iResult = WSAIoctl( mListenSocket, SIO_GET_EXTENSION_FUNCTION_POINTER,
+		&GuidAcceptEx, sizeof ( GuidAcceptEx ),
+		&lpfnAcceptEx, sizeof ( lpfnAcceptEx ),
+		&dwBytes, NULL, NULL );
 
+	if ( iResult == SOCKET_ERROR ) 
+	{
+		printf_s( "[DEBUG] WSAIoctl failed with error: %u\n", WSAGetLastError() );
+		closesocket( mListenSocket );
+		WSACleanup();
+		return false;
+	}
 
+	iResult = WSAIoctl( mListenSocket, SIO_GET_EXTENSION_FUNCTION_POINTER,
+		&GuidDisconnectEx, sizeof ( GuidDisconnectEx ),
+		&lpfnDisconnectEx, sizeof ( lpfnDisconnectEx ),
+		&dwBytes, NULL, NULL );
 
-
+	if ( iResult == SOCKET_ERROR )
+	{
+		printf_s( "[DEBUG] WSAIoctl failed with error: %u\n", WSAGetLastError() );
+		closesocket( mListenSocket );
+		WSACleanup();
+		return false;
+	}
+	// WIP
 
 	/// make session pool
 	GSessionManager->PrepareSessions();
@@ -153,8 +187,13 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 		{
 			int gle = GetLastError();
 
-			//TODO: check time out first ... GQCS Å¸ÀÓ ¾Æ¿ôÀÇ °æ¿ì´Â ¾î¶»°Ô?
-			
+			//TODO: check time out first ... GQCS íƒ€ìž„ ì•„ì›ƒì˜ ê²½ìš°ëŠ” ì–´ë–»ê²Œ?
+			if ( gle == WAIT_TIMEOUT )
+				continue;
+
+			// ê·¸ëŸ°ë° ì§€ê¸ˆ GQCS_TIMEOUT == INFINITE ì¸ë°...
+			// WIP
+			// ë§Œì•½ contextê°€ nullptrì¸ë° ì—ëŸ¬ ì½”ë“œê°€ WAIT_TIMEOUTê°€ ì•„ë‹Œ ê²½ìš° ì•„ëž˜ì˜ context->mIoType == IO_RECVì—ì„œ nullptr ì°¸ì¡°ê°€ ë°œìƒ?
 		
 			if (context->mIoType == IO_RECV || context->mIoType == IO_SEND )
 			{
