@@ -64,7 +64,7 @@ bool SessionManager::AcceptSessions()
 		ClientSession* newClient = mFreeSessionList.front();
 		mFreeSessionList.pop_front();
 
-		CRASH_ASSERT( newClient );
+		CRASH_ASSERT( newClient != nullptr );
 
 		// 반환 된 것에서 하나 꺼냈으니까 mCurrentReturnCount 감소
 		--mCurrentReturnCount;
@@ -80,7 +80,7 @@ bool SessionManager::AcceptSessions()
 		// 그러면 접속 종료 요청하면서 1 줄여서 0이 되어야 되므로 처음에 1 증가
 		newClient->AddRef();
 		
-		// WIP 
+		// DONE 
 	}
 
 

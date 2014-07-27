@@ -197,6 +197,8 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 
 			// 조심해!
 			// 만약 context가 nullptr인데 에러 코드가 WAIT_TIMEOUT가 아닌 경우 아래의 context->mIoType == IO_RECV에서 nullptr 참조가 발생?
+			// 하드웨어 문제로 서버가 죽으면 nullptr 에러 발생하니까 theClient의 nullptr 체크 필요하지 않을까요?
+			CRASH_ASSERT( nullptr != theClient );
 		
 			if (context->mIoType == IO_RECV || context->mIoType == IO_SEND )
 			{
@@ -210,7 +212,7 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 			}
 		}
 
-		CRASH_ASSERT(nullptr != theClient);
+		CRASH_ASSERT( nullptr != theClient );
 	
 		bool completionOk = false;
 		switch (context->mIoType)
@@ -258,6 +260,8 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 bool IocpManager::PreReceiveCompletion(ClientSession* client, OverlappedPreRecvContext* context, DWORD dwTransferred)
 {
 	/// real receive...
+	// 조심해!
+	// 데이터 온 거 일단 확인했으니까 PostRecv()로 레알 수신 시작
 	return client->PostRecv();
 }
 

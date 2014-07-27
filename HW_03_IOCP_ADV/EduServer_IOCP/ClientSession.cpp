@@ -94,6 +94,10 @@ bool ClientSession::PostAccept()
 void ClientSession::AcceptCompletion()
 {
 	CRASH_ASSERT(LThreadType == THREAD_IO_WORKER);
+
+	// 조심해!
+	// 밑에서 버퍼 초기화 하니까 락 잡고 시작
+	FastSpinlockGuard criticalSection( mBufferLock );
 	
 	if (1 == InterlockedExchange(&mConnected, 1))
 	{
@@ -146,7 +150,8 @@ void ClientSession::AcceptCompletion()
 			// 연결 실패... 뭘 할까..
 		}
 		*/
-		// AcceptEx하면서 이미 등록했는데 또 하나?
+		// AcceptEx하면서 이미 등록했는데 또 하나요?
+		
 		// why do-while....
 		// WIP
 
@@ -158,6 +163,11 @@ void ClientSession::AcceptCompletion()
 		DisconnectRequest(DR_ONCONNECT_ERROR);
 		return;
 	}
+
+	// 조심해!
+	// acceptEx()하면서 mBuffer에 데이터(로컬 및 리모트 주소)는 썼는데
+	// 이건 이제 안 쓰는 데이터니까 버퍼를 다시 초기화 해줘야 될 것 같은데...
+	mBuffer.BufferReset();
 
 	printf_s("[DEBUG] Client Connected: IP=%s, PORT=%d\n", inet_ntoa(mClientAddr.sin_addr), ntohs(mClientAddr.sin_port));
 
@@ -177,44 +187,9 @@ void ClientSession::DisconnectRequest(DisconnectReason dr)
 	OverlappedDisconnectContext* context = new OverlappedDisconnectContext(this, dr);
 
 	//TODO: DisconnectEx를 이용한 연결 끊기 요청
+	
 	// time_wait 문제를 해결해야 한다...?
-	// shutdown은 아닌 것 같은데....
-	/*
-	if ( shutdown( mSocket, SD_BOTH ) != 0 )
-	{
-		switch ( WSAGetLastError() )
-		{
-		case WSAECONNABORTED:
-			// The virtual circuit was terminated due to a time-out or other failure. The application should close the socket as it is no longer usable.
-			// This error applies only to a connection - oriented socket.
-			break;
-		case WSAECONNRESET:
-			// The virtual circuit was reset by the remote side executing a hard or abortive close.The application should close the socket as it is no longer usable.
-			break;
-		case WSAEINPROGRESS:
-			// A blocking Windows Sockets 1.1 call is in progress, or the service provider is still processing a callback function.
-			break;
-		case WSAEINVAL:
-			// The how parameter is not valid, or is not consistent with the socket type.For example, SD_SEND is used with a UNI_RECV socket type.
-			break;
-		case WSAENETDOWN:
-			// The network subsystem has failed.
-			break;
-		case WSAENOTCONN:
-			// The socket is not connected. This error applies only to a connection-oriented socket.
-			break;
-		case WSAENOTSOCK:
-			// The descriptor is not a socket.
-			break;
-		case WSANOTINITIALISED:
-			// A successful WSAStartup call must occur before using this function.
-			break;
-		default:
-			break;
-		}
-	}
-	*/
-
+	// 이미 LINGER 설정으로 TIME_OUT 안 되지 않나...
 	IocpManager::DisconnectEx( mSocket, (LPWSAOVERLAPPED)context, TF_REUSE_SOCKET, 0 );
 
 	// WIP
