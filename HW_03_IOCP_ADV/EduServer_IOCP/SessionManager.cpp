@@ -25,6 +25,7 @@ void SessionManager::PrepareSessions()
 		ClientSession* client = new ClientSession( );
 		// 조심해!
 		// 새로 만들었으니 만든 소켓 수 늘리기
+		client->SessionReset();
 		++mCurrentIssueCount;
 			
 		mFreeSessionList.push_back( client );
