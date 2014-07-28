@@ -67,8 +67,8 @@ bool SessionManager::AcceptSessions()
 
 		CRASH_ASSERT( newClient != nullptr );
 
-		// 반환 된 것에서 하나 꺼냈으니까 mCurrentReturnCount 감소
-		--mCurrentReturnCount;
+		// 반환 된 것에서 하나 꺼냈으니까 mCurrentReturnCount 감소 . 
+		--mCurrentReturnCount;///# 이게 아니라 issue카운트 늘려줘야지.
 
 		// 실패시 false
 		if (false == newClient->PostAccept())

@@ -189,7 +189,7 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 			int gle = GetLastError();
 
 			//TODO: check time out first ... GQCS 타임 아웃의 경우는 어떻게?
-			if ( gle == WAIT_TIMEOUT )
+			if ( gle == WAIT_TIMEOUT ) ///# timeout이라고 무조건 continue시키면 안된다, timeout인데 ret==true이고 context에 데이터가 넘어오는 경우는 어떻게?
 				continue;
 
 			// 그런데 지금 GQCS_TIMEOUT == INFINITE 인데...
@@ -198,7 +198,7 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 			// 조심해!
 			// 만약 context가 nullptr인데 에러 코드가 WAIT_TIMEOUT가 아닌 경우 아래의 context->mIoType == IO_RECV에서 nullptr 참조가 발생?
 			// 하드웨어 문제로 서버가 죽으면 nullptr 에러 발생하니까 theClient의 nullptr 체크 필요하지 않을까요?
-			CRASH_ASSERT( nullptr != theClient );
+			CRASH_ASSERT( nullptr != theClient ); ///# 이건 crash가 아니라 continue시켜야 함. 
 		
 			if (context->mIoType == IO_RECV || context->mIoType == IO_SEND )
 			{

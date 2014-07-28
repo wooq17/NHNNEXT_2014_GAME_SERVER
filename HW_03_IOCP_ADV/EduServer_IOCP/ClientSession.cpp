@@ -51,10 +51,10 @@ bool ClientSession::PostAccept()
 
 	//TODO : AccpetEx를 이용한 구현.
 	DWORD recvbytes = 0;
-	acceptContext->mWsaBuf.len = (ULONG)mBuffer.GetFreeSpaceSize( );
-	acceptContext->mWsaBuf.buf = mBuffer.GetBuffer( );
+	acceptContext->mWsaBuf.len = (ULONG)mBuffer.GetFreeSpaceSize( ); ///# 0으로
+	acceptContext->mWsaBuf.buf = mBuffer.GetBuffer( );  ///# nullptr
 
-	BOOL bRetVal = IocpManager::AcceptEx( *GIocpManager->GetListenSocket( ), mSocket, acceptContext->mWsaBuf.buf,
+	BOOL bRetVal = IocpManager::AcceptEx( *GIocpManager->GetListenSocket( ), mSocket, acceptContext->mWsaBuf.buf, ///# accept용 임시 buf하나 만들어서 사용.
 		0, sizeof (SOCKADDR_IN)+16, sizeof (SOCKADDR_IN)+16,
 		&recvbytes, (LPWSAOVERLAPPED)acceptContext );
 
@@ -79,6 +79,8 @@ bool ClientSession::PostAccept()
 	}
 
 	// 소켓을 IOCP에 등록 - 안 하면 접속했는지 계속 확인해야 되잖아?
+	///# 이건 여기서 하는것이 아니다 -.-;
+
 	HANDLE hCompPort = CreateIoCompletionPort( (HANDLE)mSocket, GIocpManager->GetComletionPort(), ( ULONG_PTR )this, 0 );
 	
 	if ( hCompPort != GIocpManager->GetComletionPort() )
@@ -140,6 +142,8 @@ void ClientSession::AcceptCompletion()
 			break;
 		}
 
+		///# 여기에 IOCP와 소켓 연결을 애야 한다. 연결이 성사 되었을 때, 해당 소켓을 감시하겠다고 IOCP여 연결 요청하는 개념.
+
 		//TODO: CreateIoCompletionPort를 이용한 소켓 연결
 		/*
 		HANDLE hCompPort = CreateIoCompletionPort( (HANDLE)mSocket, GIocpManager->GetComletionPort(), ( ULONG_PTR )this, 0 );
@@ -167,6 +171,8 @@ void ClientSession::AcceptCompletion()
 	// 조심해!
 	// acceptEx()하면서 mBuffer에 데이터(로컬 및 리모트 주소)는 썼는데
 	// 이건 이제 안 쓰는 데이터니까 버퍼를 다시 초기화 해줘야 될 것 같은데...
+	
+	///# 그러니까 acceptex용 전용 버퍼 하나 만들어 놓으면 됨. 
 	mBuffer.BufferReset();
 
 	printf_s("[DEBUG] Client Connected: IP=%s, PORT=%d\n", inet_ntoa(mClientAddr.sin_addr), ntohs(mClientAddr.sin_port));
@@ -190,6 +196,8 @@ void ClientSession::DisconnectRequest(DisconnectReason dr)
 	
 	// time_wait 문제를 해결해야 한다...?
 	// 이미 LINGER 설정으로 TIME_OUT 안 되지 않나...
+
+	///# 에러처리 안하는가?
 	IocpManager::DisconnectEx( mSocket, (LPWSAOVERLAPPED)context, TF_REUSE_SOCKET, 0 );
 
 	// WIP
