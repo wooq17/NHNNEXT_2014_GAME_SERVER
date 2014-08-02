@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "MemoryPool.h"
 #include <list>
 #include <vector>
@@ -45,17 +45,17 @@ public:
 
 	T* allocate(size_t n)
 	{
-		//TODO: ¸Ş¸ğ¸®Ç®¿¡¼­ ÇÒ´çÇØ¼­ ¸®ÅÏ
+		//TODO: ë©”ëª¨ë¦¬í’€ì—ì„œ í• ë‹¹í•´ì„œ ë¦¬í„´
 		return static_cast<T*>( GMemoryPool->Allocate( n * sizeof( T ) ) );
 		// WIP
 	}
 
 	void deallocate(T* ptr, size_t n)
 	{
-		//TODO: ¸Ş¸ğ¸®Ç®¿¡ ¹İ³³
-		// ÇöÀç ¸Ş¸ğ¸® Ç®¿¡¼­ allocate¸¦ ÅëÇØ¼­ n°³¸¦ ÇÒ´çÇØµµ n°³¸¦ Æ÷ÇÔÇÏ´Â ÇÏ³ªÀÇ ¸Ş¸ğ¸® ºí·°À» ÇÒ´ç
-		// ÇØÁ¦´Â ÇØ´ç ºí·°¸¸ ÇØÁ¦ÇÏ¸é µÇ¹Ç·Î ÇØ´ç ºí·°ÀÇ ÁÖ¼Ò¸¸ ÀÖÀ¸¸é µÈ´Ù.
-		// nÀº extraInfo·Î »ç¿ë?
+		//TODO: ë©”ëª¨ë¦¬í’€ì— ë°˜ë‚©
+		// í˜„ì¬ ë©”ëª¨ë¦¬ í’€ì—ì„œ allocateë¥¼ í†µí•´ì„œ nê°œë¥¼ í• ë‹¹í•´ë„ nê°œë¥¼ í¬í•¨í•˜ëŠ” í•˜ë‚˜ì˜ ë©”ëª¨ë¦¬ ë¸”ëŸ­ì„ í• ë‹¹
+		// í•´ì œëŠ” í•´ë‹¹ ë¸”ëŸ­ë§Œ í•´ì œí•˜ë©´ ë˜ë¯€ë¡œ í•´ë‹¹ ë¸”ëŸ­ì˜ ì£¼ì†Œë§Œ ìˆìœ¼ë©´ ëœë‹¤.
+		// nì€ extraInfoë¡œ ì‚¬ìš©?
 		GMemoryPool->Deallocate( ptr, n );
 		// WIP
 	}
@@ -71,7 +71,7 @@ struct xvector
 template <class T>
 struct xdeque
 {
-	//TODO: STL ÇÒ´çÀÚ¸¦ »ç¿ëÇÏ´Â deque¸¦ typeÀ¸·Î ¼±¾ğ
+	//TODO: STL í• ë‹¹ìë¥¼ ì‚¬ìš©í•˜ëŠ” dequeë¥¼ typeìœ¼ë¡œ ì„ ì–¸
 	typedef std::deque<T, STLAllocator<T>> type;
 	// WIP
 };
@@ -79,7 +79,7 @@ struct xdeque
 template <class T>
 struct xlist
 {
-	//TODO: STL ÇÒ´çÀÚ »ç¿ë
+	//TODO: STL í• ë‹¹ì ì‚¬ìš©
 	typedef std::list<T, STLAllocator<T>> type;
 	// WIP
 };
@@ -87,7 +87,7 @@ struct xlist
 template <class K, class T, class C = std::less<K> >
 struct xmap
 {
-	//TODO: STL ÇÒ´çÀÚ »ç¿ëÇÏ´Â mapÀ»  typeÀ¸·Î ¼±¾ğ
+	//TODO: STL í• ë‹¹ì ì‚¬ìš©í•˜ëŠ” mapì„  typeìœ¼ë¡œ ì„ ì–¸
 	typedef std::map<K, T, C, STLAllocator<std::pair<K, T>>> type;
 	// WIP
 };
@@ -95,7 +95,7 @@ struct xmap
 template <class T, class C = std::less<T> >
 struct xset
 {
-	//TODO: STL ÇÒ´çÀÚ »ç¿ëÇÏ´Â setÀ»  typeÀ¸·Î ¼±¾ğ
+	//TODO: STL í• ë‹¹ì ì‚¬ìš©í•˜ëŠ” setì„  typeìœ¼ë¡œ ì„ ì–¸
 	typedef std::set<T, C, STLAllocator<T>> type;
 	// WIP
 };
@@ -115,7 +115,7 @@ struct xhash_set
 template <class T, class C = std::less<std::vector<T>::value_type> >
 struct xpriority_queue
 {
-	//TODO: STL ÇÒ´çÀÚ »ç¿ëÇÏ´Â priority_queueÀ»  typeÀ¸·Î ¼±¾ğ
+	//TODO: STL í• ë‹¹ì ì‚¬ìš©í•˜ëŠ” priority_queueì„  typeìœ¼ë¡œ ì„ ì–¸
 	typedef std::priority_queue<T, xvector<T>, C> type;
 	// WIP
 };

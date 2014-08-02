@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "Exception.h"
 #include "MemoryPool.h"
 
@@ -13,14 +13,14 @@ SmallSizeMemoryPool::SmallSizeMemoryPool(DWORD allocSize) : mAllocSize(allocSize
 
 MemAllocInfo* SmallSizeMemoryPool::Pop()
 {
-	//TODO: InterlockedPopEntrySList¸¦ ÀÌ¿ëÇÏ¿© mFreeList¿¡¼­ popÀ¸·Î ¸Þ¸ð¸®¸¦ °¡Á®¿Ã ¼ö ÀÖ´ÂÁö È®ÀÎ. 
-	// ºñ¾î ÀÖÀ¸¸é NULL ¹ÝÈ¯
+	//TODO: InterlockedPopEntrySListë¥¼ ì´ìš©í•˜ì—¬ mFreeListì—ì„œ popìœ¼ë¡œ ë©”ëª¨ë¦¬ë¥¼ ê°€ì ¸ì˜¬ ìˆ˜ ìžˆëŠ”ì§€ í™•ì¸. 
+	// ë¹„ì–´ ìžˆìœ¼ë©´ NULL ë°˜í™˜
 	MemAllocInfo* mem = static_cast<MemAllocInfo*>( InterlockedPopEntrySList( &mFreeList ) );
 	// WIP
 
 	if (NULL == mem)
 	{
-		// ÇÒ´ç ºÒ°¡´ÉÇÏ¸é Á÷Á¢ ÇÒ´ç.
+		// í• ë‹¹ ë¶ˆê°€ëŠ¥í•˜ë©´ ì§ì ‘ í• ë‹¹.
 		mem = reinterpret_cast<MemAllocInfo*>(_aligned_malloc(mAllocSize, MEMORY_ALLOCATION_ALIGNMENT));
 	}
 	else
@@ -34,18 +34,18 @@ MemAllocInfo* SmallSizeMemoryPool::Pop()
 
 void SmallSizeMemoryPool::Push(MemAllocInfo* ptr)
 {
-	//TODO: InterlockedPushEntrySList¸¦ ÀÌ¿ëÇÏ¿© ¸Þ¸ð¸®Ç®¿¡ (Àç»ç¿ëÀ» À§ÇØ) ¹Ý³³.
-	// ÇÒ´ç ºÒ°¡´ÉÇØ¼­ Ç® ³»¿¡¼­ ÇÒ´çÇÏÁö ¾Ê°í Á÷Á¢ ÇÒ´çÇÑ °æ¿ì ¹Ý³³µÇ´Â ÇØ´ç ºí·°Àº Ç®¿¡ Æ÷ÇÔ ½ÃÄÑ¼­ °è¼Ó È°¿ë
-	// ÀÌ¹Ì Á÷Á¢ ÇÒ´çÇß´Ù´Â °ÍÀº Ç®¿¡ ¸¸µé¾î ³õÀº ºí·°µéº¸´Ù »ç¿ë·®ÀÌ ´õ ¸¹´Ù´Â ÀÇ¹Ì
-	// ¸¸¾à ¿©±â¼­ ÇØÁ¦ÇÏ¸é Áö¼ÓÀûÀ¸·Î Á÷Á¢ÇÒ ÇÒ´çÇÒ È®·üÀÌ ³ôÀ½
+	//TODO: InterlockedPushEntrySListë¥¼ ì´ìš©í•˜ì—¬ ë©”ëª¨ë¦¬í’€ì— (ìž¬ì‚¬ìš©ì„ ìœ„í•´) ë°˜ë‚©.
+	// í• ë‹¹ ë¶ˆê°€ëŠ¥í•´ì„œ í’€ ë‚´ì—ì„œ í• ë‹¹í•˜ì§€ ì•Šê³  ì§ì ‘ í• ë‹¹í•œ ê²½ìš° ë°˜ë‚©ë˜ëŠ” í•´ë‹¹ ë¸”ëŸ­ì€ í’€ì— í¬í•¨ ì‹œì¼œì„œ ê³„ì† í™œìš©
+	// ì´ë¯¸ ì§ì ‘ í• ë‹¹í–ˆë‹¤ëŠ” ê²ƒì€ í’€ì— ë§Œë“¤ì–´ ë†“ì€ ë¸”ëŸ­ë“¤ë³´ë‹¤ ì‚¬ìš©ëŸ‰ì´ ë” ë§Žë‹¤ëŠ” ì˜ë¯¸
+	// ë§Œì•½ ì—¬ê¸°ì„œ í•´ì œí•˜ë©´ ì§€ì†ì ìœ¼ë¡œ ì§ì ‘í•  í• ë‹¹í•  í™•ë¥ ì´ ë†’ìŒ
 
-	// ¾ÖÃÊ¿¡ Ç®À» ¸¸µé ¶§ ÇÑ ¹ø¿¡ ¸Þ¸ð¸®¸¦ ÇÒ´ç¹Þ´Â °ÍÀÌ ¾Æ´Ï¶ó ºÎÁ·ÇÑ ºí·°À» Á÷Á¢ ÇÒ´çÇÏ°í ÀçÈ°¿ëÇÏ´Â ¹æ½ÄÀ¸·Î ÀÛµ¿ Áß
+	// ì• ì´ˆì— í’€ì„ ë§Œë“¤ ë•Œ í•œ ë²ˆì— ë©”ëª¨ë¦¬ë¥¼ í• ë‹¹ë°›ëŠ” ê²ƒì´ ì•„ë‹ˆë¼ ë¶€ì¡±í•œ ë¸”ëŸ­ì„ ì§ì ‘ í• ë‹¹í•˜ê³  ìž¬í™œìš©í•˜ëŠ” ë°©ì‹ìœ¼ë¡œ ìž‘ë™ ì¤‘
 	
 	MemAllocInfo* prevEntry = static_cast<MemAllocInfo*>( InterlockedPushEntrySList( &mFreeList, ptr ) );
 	if ( NULL == prevEntry )
 	{
-		// ¸¸¾à ºñ¾îÀÖ´Â »óÅÂ¿´´Ù¸é ¹ÝÈ¯ °ªÀº NULL
-		// ¸Ç Ã³À½ ¹ÝÈ¯ µÇ¸é ¿©±â·Î ¿ÃÅÙµ¥... ¹» ÇØ¾ß ÇÏ³ª?
+		// ë§Œì•½ ë¹„ì–´ìžˆëŠ” ìƒíƒœì˜€ë‹¤ë©´ ë°˜í™˜ ê°’ì€ NULL
+		// ë§¨ ì²˜ìŒ ë°˜í™˜ ë˜ë©´ ì—¬ê¸°ë¡œ ì˜¬í…ë°... ë­˜ í•´ì•¼ í•˜ë‚˜?
 	}
 
 	// WIP
@@ -81,11 +81,11 @@ MemoryPool::MemoryPool()
 		recent = i;
 	}
 
-	//TODO: [2048, 4096] ¹üÀ§ ³»¿¡¼­ 256¹ÙÀÌÆ® ´ÜÀ§·Î SmallSizeMemoryPoolÀ» ÇÒ´çÇÏ°í 
-	//TODO: mSmallSizeMemoryPoolTable¿¡ O(1) access°¡ °¡´ÉÇÏµµ·Ï SmallSizeMemoryPoolÀÇ ÁÖ¼Ò ±â·Ï
+	//TODO: [2048, 4096] ë²”ìœ„ ë‚´ì—ì„œ 256ë°”ì´íŠ¸ ë‹¨ìœ„ë¡œ SmallSizeMemoryPoolì„ í• ë‹¹í•˜ê³  
+	//TODO: mSmallSizeMemoryPoolTableì— O(1) accessê°€ ê°€ëŠ¥í•˜ë„ë¡ SmallSizeMemoryPoolì˜ ì£¼ì†Œ ê¸°ë¡
 	for ( int i = 2048; i < MAX_ALLOC_SIZE; i += 256 )
 	{
-		// recentº¸´Ù Å©°í i ÀÌÇÏÀÎ ¿äÃ» »çÀÌÁî´Â i »çÀÌÁî Ç®¿¡¼­ Ã³¸®
+		// recentë³´ë‹¤ í¬ê³  i ì´í•˜ì¸ ìš”ì²­ ì‚¬ì´ì¦ˆëŠ” i ì‚¬ì´ì¦ˆ í’€ì—ì„œ ì²˜ë¦¬
 		SmallSizeMemoryPool* pool = new SmallSizeMemoryPool( i );
 		for ( int j = recent + 1; j <= i; ++j )
 		{
@@ -107,12 +107,12 @@ void* MemoryPool::Allocate(int size)
 	}
 	else
 	{
-		//TODO: SmallSizeMemoryPool¿¡¼­ ÇÒ´ç
+		//TODO: SmallSizeMemoryPoolì—ì„œ í• ë‹¹
 		//header = ...; 
-		// size°¡ 0ÀÎ °æ¿ì¿¡´Â ±×³É nullptr ¹ÝÈ¯ÇÏ¸é µÇ·Á³ª
-		// ¾È ±×·¯¸é ±×³É Çì´õ¸¸ ¸¸µé¾î¼­ ÀúÀåÇÏ´Â ºí·° ÇÏ³ª »ç¿ëÇÏ°Ô µÇ´Âµ¥...
-		// Ã£¾Æº¸´Ï±î c++¿¡¼­ 0 size new()ÀÇ °æ¿ì valid pointer¸¦ ¹ÝÈ¯ÇÑ´Ù°í ÇÔ
-		// ±×·¯´Ï±î ±×³É µÎ°í ÃÖ¼Ò ºí·° Å©±â ÇÒ´ç ÈÄ ¹ÝÈ¯
+		// sizeê°€ 0ì¸ ê²½ìš°ì—ëŠ” ê·¸ëƒ¥ nullptr ë°˜í™˜í•˜ë©´ ë˜ë ¤ë‚˜
+		// ì•ˆ ê·¸ëŸ¬ë©´ ê·¸ëƒ¥ í—¤ë”ë§Œ ë§Œë“¤ì–´ì„œ ì €ìž¥í•˜ëŠ” ë¸”ëŸ­ í•˜ë‚˜ ì‚¬ìš©í•˜ê²Œ ë˜ëŠ”ë°...
+		// ì°¾ì•„ë³´ë‹ˆê¹Œ c++ì—ì„œ 0 size new()ì˜ ê²½ìš° valid pointerë¥¼ ë°˜í™˜í•œë‹¤ê³  í•¨
+		// ê·¸ëŸ¬ë‹ˆê¹Œ ê·¸ëƒ¥ ë‘ê³  ìµœì†Œ ë¸”ëŸ­ í¬ê¸° í• ë‹¹ í›„ ë°˜í™˜
 		header = mSmallSizeMemoryPoolTable[realAllocSize]->Pop( );
 		// WIP
 	}
@@ -123,9 +123,9 @@ void* MemoryPool::Allocate(int size)
 void MemoryPool::Deallocate(void* ptr, long extraInfo)
 {
 	MemAllocInfo* header = DetachMemAllocInfo(ptr);
-	header->mExtraInfo = extraInfo; ///< ÃÖ±Ù ÇÒ´ç¿¡ °ü·ÃµÈ Á¤º¸ ÈùÆ®
+	header->mExtraInfo = extraInfo; ///< ìµœê·¼ í• ë‹¹ì— ê´€ë ¨ëœ ì •ë³´ ížŒíŠ¸
 	
-	long realAllocSize = InterlockedExchange(&header->mAllocSize, 0); ///< µÎ¹ø ÇØÁ¦ Ã¼Å© À§ÇØ
+	long realAllocSize = InterlockedExchange(&header->mAllocSize, 0); ///< ë‘ë²ˆ í•´ì œ ì²´í¬ ìœ„í•´
 	
 	CRASH_ASSERT(realAllocSize > 0);
 
@@ -135,7 +135,7 @@ void MemoryPool::Deallocate(void* ptr, long extraInfo)
 	}
 	else
 	{
-		//TODO: SmallSizeMemoryPool¿¡ (Àç»ç¿ëÀ» À§ÇØ) push..
+		//TODO: SmallSizeMemoryPoolì— (ìž¬ì‚¬ìš©ì„ ìœ„í•´) push..
 		mSmallSizeMemoryPoolTable[realAllocSize]->Push( header );
 		// WIP
 	}

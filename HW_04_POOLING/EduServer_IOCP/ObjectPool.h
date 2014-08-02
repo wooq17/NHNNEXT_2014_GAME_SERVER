@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 
 #include "Exception.h"
@@ -12,7 +12,7 @@ public:
 
 	static void* operator new(size_t objSize)
 	{
-		//TODO: TOBJECT Å¸ÀÔ ´ÜÀ§·Î lock Àá±Ý
+		//TODO: TOBJECT íƒ€ìž… ë‹¨ìœ„ë¡œ lock ìž ê¸ˆ
 
 		if (!mFreeList)
 		{
@@ -41,7 +41,7 @@ public:
 
 	static void	operator delete(void* obj)
 	{
-		//TODO: TOBJECT Å¸ÀÔ ´ÜÀ§·Î lock Àá±Ý
+		//TODO: TOBJECT íƒ€ìž… ë‹¨ìœ„ë¡œ lock ìž ê¸ˆ
 
 		CRASH_ASSERT(mCurrentUseCount > 0);
 
