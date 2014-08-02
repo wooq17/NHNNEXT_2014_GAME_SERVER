@@ -46,13 +46,18 @@ public:
 	T* allocate(size_t n)
 	{
 		//TODO: 메모리풀에서 할당해서 리턴
-		return static_cast<T*>(malloc(n*sizeof(T)));
+		return static_cast<T*>( GMemoryPool->Allocate( n * sizeof( T ) ) );
+		// WIP
 	}
 
 	void deallocate(T* ptr, size_t n)
 	{
 		//TODO: 메모리풀에 반납
-		free(ptr);
+		// 현재 메모리 풀에서 allocate를 통해서 n개를 할당해도 n개를 포함하는 하나의 메모리 블럭을 할당
+		// 해제는 해당 블럭만 해제하면 되므로 해당 블럭의 주소만 있으면 된다.
+		// n은 extraInfo로 사용?
+		GMemoryPool->Deallocate( ptr, n );
+		// WIP
 	}
 };
 
@@ -67,28 +72,32 @@ template <class T>
 struct xdeque
 {
 	//TODO: STL 할당자를 사용하는 deque를 type으로 선언
-	//typedef ... type;
+	typedef std::deque<T, STLAllocator<T>> type;
+	// WIP
 };
 
 template <class T>
 struct xlist
 {
 	//TODO: STL 할당자 사용
-	typedef std::list<T> type;
+	typedef std::list<T, STLAllocator<T>> type;
+	// WIP
 };
 
 template <class K, class T, class C = std::less<K> >
 struct xmap
 {
 	//TODO: STL 할당자 사용하는 map을  type으로 선언
-	//typedef ... type;
+	typedef std::map<K, T, C, STLAllocator<std::pair<K, T>>> type;
+	// WIP
 };
 
 template <class T, class C = std::less<T> >
 struct xset
 {
 	//TODO: STL 할당자 사용하는 set을  type으로 선언
-	//typedef ... type;
+	typedef std::set<T, C, STLAllocator<T>> type;
+	// WIP
 };
 
 template <class K, class T, class C = std::hash_compare<K, std::less<K>> >
@@ -107,7 +116,8 @@ template <class T, class C = std::less<std::vector<T>::value_type> >
 struct xpriority_queue
 {
 	//TODO: STL 할당자 사용하는 priority_queue을  type으로 선언
-	//typedef ... type;
+	typedef std::priority_queue<T, xvector<T>, C> type;
+	// WIP
 };
 
 typedef std::basic_string<wchar_t, std::char_traits<wchar_t>, STLAllocator<wchar_t>> xstring;

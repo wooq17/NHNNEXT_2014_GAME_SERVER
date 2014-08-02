@@ -17,7 +17,12 @@ struct MemAllocInfo : SLIST_ENTRY
 inline void* AttachMemAllocInfo(MemAllocInfo* header, int size)
 {
 	//TODO: header에 MemAllocInfo를 펼친 다음에 실제 앱에서 사용할 메모리 주소를 void*로 리턴... 실제 사용되는 예 및 DetachMemAllocInfo 참고.
-	return 0;
+	// 실제 헤더를 포함해서 할당한 메모리 크기를 저장
+	header->mAllocSize = size;
+	++header;
+
+	return header;
+	// WIP
 }
 
 inline MemAllocInfo* DetachMemAllocInfo(void* ptr)
