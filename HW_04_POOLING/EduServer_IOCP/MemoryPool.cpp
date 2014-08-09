@@ -45,7 +45,7 @@ void SmallSizeMemoryPool::Push(MemAllocInfo* ptr)
 	if ( NULL == prevEntry )
 	{
 		// 만약 비어있는 상태였다면 반환 값은 NULL
-		// 맨 처음 반환 되면 여기로 올텐데... 뭘 해야 하나?
+		// 맨 처음 반환 되면 여기로 올텐데... 뭘 해야 하나? ///# 가만히 있으라.. ㅋㅋ 
 	}
 
 	// WIP
@@ -83,7 +83,7 @@ MemoryPool::MemoryPool()
 
 	//TODO: [2048, 4096] 범위 내에서 256바이트 단위로 SmallSizeMemoryPool을 할당하고 
 	//TODO: mSmallSizeMemoryPoolTable에 O(1) access가 가능하도록 SmallSizeMemoryPool의 주소 기록
-	for ( int i = 2048; i < MAX_ALLOC_SIZE; i += 256 )
+	for ( int i = 2048; i < MAX_ALLOC_SIZE; i += 256 ) ///# 이건 [2048, 4096)
 	{
 		// recent보다 크고 i 이하인 요청 사이즈는 i 사이즈 풀에서 처리
 		SmallSizeMemoryPool* pool = new SmallSizeMemoryPool( i );

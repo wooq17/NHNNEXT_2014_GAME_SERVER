@@ -46,7 +46,7 @@ public:
 	T* allocate(size_t n)
 	{
 		//TODO: 메모리풀에서 할당해서 리턴
-		return static_cast<T*>( GMemoryPool->Allocate( n * sizeof( T ) ) );
+		return static_cast<T*>( GMemoryPool->Allocate( n * sizeof( T ) ) ); ///# 컴파일 경고 제거
 		// WIP
 	}
 
@@ -56,7 +56,7 @@ public:
 		// 현재 메모리 풀에서 allocate를 통해서 n개를 할당해도 n개를 포함하는 하나의 메모리 블럭을 할당
 		// 해제는 해당 블럭만 해제하면 되므로 해당 블럭의 주소만 있으면 된다.
 		// n은 extraInfo로 사용?
-		GMemoryPool->Deallocate( ptr, n );
+		GMemoryPool->Deallocate( ptr, n ); ///# n은 왜 넣나?
 		// WIP
 	}
 };
@@ -116,7 +116,7 @@ template <class T, class C = std::less<std::vector<T>::value_type> >
 struct xpriority_queue
 {
 	//TODO: STL 할당자 사용하는 priority_queue을  type으로 선언
-	typedef std::priority_queue<T, xvector<T>, C> type;
+	typedef std::priority_queue<T, xvector<T>, C> type; ///#이렇게 해도 되지만, 다 풀어 쓰는게 좋다 (std::vector<T, STLAllocator<T>>)
 	// WIP
 };
 
