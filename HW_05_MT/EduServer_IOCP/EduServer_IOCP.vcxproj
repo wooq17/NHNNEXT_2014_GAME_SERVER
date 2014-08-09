@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Text Include="memo.txt" />
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
