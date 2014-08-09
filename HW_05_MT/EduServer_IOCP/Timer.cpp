@@ -1,4 +1,4 @@
-#include "stdafx.h"
+Ôªø#include "stdafx.h"
 #include "ThreadLocal.h"
 #include "Exception.h"
 #include "SyncExecutable.h"
@@ -16,8 +16,9 @@ void Timer::PushTimerJob(SyncExecutablePtr owner, const TimerTask& task, uint32_
 {
 	CRASH_ASSERT(LThreadType == THREAD_IO_WORKER);
 
-	//TODO: mTimerJobQueueø° TimerJobElement∏¶ push..
-	
+	// WIP: mTimerJobQueueÏóê TimerJobElementÎ•º push..
+	LTickCount = GetTickCount64();
+	mTimerJobQueue.push( TimerJobElement( owner, task, LTickCount + after ) );
 }
 
 

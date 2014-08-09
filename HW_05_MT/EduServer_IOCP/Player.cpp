@@ -58,13 +58,14 @@ void Player::OnTick()
 	}
 
 
-	//TODO: AllPlayerBuffDecay::CheckBuffTimeout를 GrandCentralExecuter를 통해 실행
+	// WIP: AllPlayerBuffDecay::CheckBuffTimeout를 GrandCentralExecuter를 통해 실행
+	auto buffTimeoutEvent = std::make_shared<AllPlayerBuffDecay>();
+	GCEDispatch( buffTimeoutEvent, &AllPlayerBuffDecay::CheckBuffTimeout );
+	
 
-	
-	
 	if (mHeartBeat > 0)
 		DoSyncAfter(mHeartBeat, GetSharedFromThis<Player>(), &Player::OnTick);
-		
+
 }
 
 void Player::AddBuff(int fromPlayerId, int buffId, int duration)

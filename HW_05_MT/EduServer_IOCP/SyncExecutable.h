@@ -17,8 +17,8 @@ public:
 	{
 		static_assert(true == std::is_convertible<T, SyncExecutable>::value, "T should be derived from SyncExecutable");
 
-		//TODO: mLock으로 보호한 상태에서, memfunc를 실행하고 결과값 R을 리턴
-	
+		// WIP: mLock으로 보호한 상태에서, memfunc를 실행하고 결과값 R을 리턴
+		// return memfunc( args... );
 	}
 	
 
@@ -48,7 +48,8 @@ void DoSyncAfter(uint32_t after, T instance, F memfunc, Args&&... args)
 	static_assert(true == is_shared_ptr<T>::value, "T should be shared_ptr");
 	static_assert(true == std::is_convertible<T, std::shared_ptr<SyncExecutable>>::value, "T should be shared_ptr SyncExecutable");
 
-	//TODO: instance의 memfunc를 bind로 묶어서 LTimer->PushTimerJob() 수행
+	// WIP: instance의 memfunc를 bind로 묶어서 LTimer->PushTimerJob() 수행
+	// 두 번째 인자는 TimerTask이고, 이것은 인자가 없는 void return
+	LTimer->PushTimerJob( instance, std::bind( memfunc, instance, args... ), after ); 
 
-	
 }

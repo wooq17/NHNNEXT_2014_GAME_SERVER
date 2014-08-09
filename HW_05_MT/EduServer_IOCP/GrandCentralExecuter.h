@@ -59,8 +59,7 @@ void GCEDispatch(T instance, F memfunc, Args&&... args)
 	/// shared_ptr이 아닌 녀석은 받으면 안된다. 작업큐에 들어있는중에 없어질 수 있으니..
 	static_assert(true == is_shared_ptr<T>::value, "T should be shared_ptr");
 
-	//TODO: intance의 memfunc를 std::bind로 묶어서 전달
-	
-
-	//GGrandCentralExecuter->DoDispatch(bind);
+	// WIP: intance의 memfunc를 std::bind로 묶어서 전달
+	auto bind = std::bind( memfunc, instance, args... );
+	GGrandCentralExecuter->DoDispatch( bind );
 }
