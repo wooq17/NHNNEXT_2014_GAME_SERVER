@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "Player.h"
 #include "PlayerManager.h"
 
@@ -28,10 +28,14 @@ void PlayerManager::UnregisterPlayer(int playerId)
 
 int PlayerManager::GetCurrentPlayers(PlayerList& outList)
 {
-	//TODO: mLockÀ» read¸ğµå·Î Á¢±ÙÇØ¼­ outList¿¡ ÇöÀç ÇÃ·¹ÀÌ¾îµéÀÇ Á¤º¸¸¦ ´ã°í total¿¡´Â ÇöÀç ÇÃ·¹ÀÌ¾îÀÇ ÃÑ ¼ö¸¦ ¹İÈ¯.
+	// TODO: mLockì„ readëª¨ë“œë¡œ ì ‘ê·¼í•´ì„œ outListì— í˜„ì¬ í”Œë ˆì´ì–´ë“¤ì˜ ì •ë³´ë¥¼ ë‹´ê³  totalì—ëŠ” í˜„ì¬ í”Œë ˆì´ì–´ì˜ ì´ ìˆ˜ë¥¼ ë°˜í™˜.
+	FastSpinlockGuard share( mLock, false );
 
-	int total = 0;
+	for ( auto it : mPlayerMap )
+		outList.push_back( it.second );
 
+	int total = outList.size();
+	// WIP
 
 	return total;
 }
