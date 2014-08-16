@@ -55,7 +55,8 @@ bool ClientSession::PostAccept()
 
 	OverlappedAcceptContext* acceptContext = new OverlappedAcceptContext(this);
 	DWORD bytes = 0;
-	DWORD flags = 0;
+	// 조심해!
+	// DWORD flags = 0; // 사용 안 함
 	acceptContext->mWsaBuf.len = 0;
 	acceptContext->mWsaBuf.buf = nullptr;
 
