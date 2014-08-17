@@ -257,7 +257,7 @@ void IocpManager::IncreaseReadBytes( DWORD readBytes )
 
 void IocpManager::IncreaseWriteBytes( DWORD writtenBytes )
 {
-	//FastSpinlockGuard criticalSection( mByteCounterLock );
+	FastSpinlockGuard criticalSection( mByteCounterLock );
 	mTotalByteWritten += writtenBytes;
 }
 
