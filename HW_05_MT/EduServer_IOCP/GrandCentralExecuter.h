@@ -65,7 +65,10 @@ void GCEDispatch(T instance, F memfunc, Args&&... args)
 	static_assert(true == is_shared_ptr<T>::value, "T should be shared_ptr");
 
 	// TODO: intance의 memfunc를 std::bind로 묶어서 전달
-	auto bind = std::bind( memfunc, instance, args... );
+	//auto bind = std::bind( memfunc, instance, args... );
+
+	auto bind = std::bind(memfunc, instance, std::forward<Args>(args)...);
+
 	GGrandCentralExecuter->DoDispatch( bind );
 	// WIP
 }

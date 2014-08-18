@@ -17,8 +17,13 @@ void Timer::PushTimerJob(SyncExecutablePtr owner, const TimerTask& task, uint32_
 	CRASH_ASSERT(LThreadType == THREAD_IO_WORKER);
 
 	// TODO: mTimerJobQueue에 TimerJobElement를 push..
-	LTickCount = GetTickCount64();
-	mTimerJobQueue.push( TimerJobElement( owner, task, LTickCount + after ) );
+	//LTickCount = GetTickCount64();
+	//mTimerJobQueue.push( TimerJobElement( owner, task, LTickCount + after ) );
+
+	///# 이게 의도..
+	int64_t dueTimeTick = after + LTickCount;
+	mTimerJobQueue.push(TimerJobElement(owner, task, dueTimeTick));
+
 	// WIP
 }
 

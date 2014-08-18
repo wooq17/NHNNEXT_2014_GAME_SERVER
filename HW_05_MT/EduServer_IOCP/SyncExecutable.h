@@ -20,7 +20,9 @@ public:
 		// TODO: mLock으로 보호한 상태에서, memfunc를 실행하고 결과값 R을 리턴
 		FastSpinlockGuard exclusive( mLock );
 
-		return std::bind( memfunc, static_cast<T*>( this ), args... )();
+		//return std::bind( memfunc, static_cast<T*>( this ), args... )();
+		///# 바로 실행할건데 굳이 바인드로 묶을 이유 없다.
+		return (static_cast<T*>(this)->*memfunc)(args...);
 		// WIP
 	}
 	
@@ -53,6 +55,9 @@ void DoSyncAfter(uint32_t after, T instance, F memfunc, Args&&... args)
 	static_assert(true == std::is_convertible<T, std::shared_ptr<SyncExecutable>>::value, "T should be shared_ptr SyncExecutable");
 
 	// TODO: instance의 memfunc를 bind로 묶어서 LTimer->PushTimerJob() 수행
+	///# std::forward<Args>(args)...사용하면 약간 더 효율적
 	LTimer->PushTimerJob( instance, std::bind( memfunc, instance, args... ), after ); 
+
+	///# 이게 정석: LTimer->PushTimerJob(std::static_pointer_cast<SyncExecutable>(instance), bind, after);
 	// WIP
 }
