@@ -8,8 +8,8 @@
 #define CONNECT_SERVER_PORT 9001
 
 //todo: SQL 연결 스트링 여러분의 상황에 맞게 수정
-#define SQL_SERVER_CONN_STR	L"Driver={SQL Server};Server=127.0.0.1\\SQL4GAMESERVER;Database=GameDB;UID=sa;PWD=...."
-
+#define SQL_SERVER_CONN_STR	L"Driver={SQL Server}; Server=127.0.0.1\\GLADOS; Database=GameDB; Uid=2014_game_server; Pwd=server2014"
+// WIP
 #define GQCS_TIMEOUT	10 //INFINITE
 
 enum THREAD_TYPE

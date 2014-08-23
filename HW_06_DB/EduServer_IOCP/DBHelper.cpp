@@ -52,7 +52,7 @@ DbHelper::~DbHelper()
 bool DbHelper::Initialize(const wchar_t* connInfoStr, int workerThreadCount)
 {
 	//todo: mSqlConnPool, mDbWorkerThreadCount를 워커스레스 수에 맞추어 초기화
-	mSqlConnPool = new SQL_CONN[workerThreadCount]; // 나중에 해제해줘야 한다 ( Finalize() )
+	mSqlConnPool = new SQL_CONN[workerThreadCount];
 	CRASH_ASSERT( mSqlConnPool != nullptr );
 
 	mDbWorkerThreadCount = workerThreadCount;
@@ -75,7 +75,7 @@ bool DbHelper::Initialize(const wchar_t* connInfoStr, int workerThreadCount)
 	for (int i = 0; i < mDbWorkerThreadCount; ++i)
 	{
 		//todo: SQLAllocHandle을 이용하여 SQL_CONN의 mSqlHdbc 핸들 사용가능하도록 처리
-		if ( SQL_SUCCESS != SQLAllocHandle( SQL_HANDLE_DBC, SQL_NULL_HANDLE, &mSqlConnPool[i].mSqlHdbc ) )
+		if ( SQL_SUCCESS != SQLAllocHandle( SQL_HANDLE_DBC, mSqlHenv, &mSqlConnPool[i].mSqlHdbc ) )
 		{
 			printf_s( "DbHelper Initialize SQLAllocHandle failed\n" );
 			return false;

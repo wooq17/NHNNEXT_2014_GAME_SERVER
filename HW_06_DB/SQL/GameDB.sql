@@ -38,7 +38,7 @@ CREATE PROCEDURE [dbo].[spCreatePlayer]
 AS
 BEGIN
     --todo: 해당 이름의 플레이어를 생성하고 플레이어의 identity를 리턴, [createTime]는 현재 생성 날짜로 설정
-	INSERT INTO PlayerTable( playerName, createTime ) VALUES ( @name, GETDATE() );
+	INSERT INTO PlayerTable( playerName, createTime, isValid ) VALUES ( @name, GETDATE(), 1 );
 	SELECT SCOPE_IDENTITY();
 	-- WIP
 END
@@ -70,7 +70,7 @@ CREATE PROCEDURE [dbo].[spUpdatePlayerPosition]
 AS
 BEGIN
     -- todo: 해당 플레이어의 정보(x,y,z) 업데이트 
-	UPDATE PlayerTable SET currentPosX = @posX, currentPosY = @posY, currentPosZ = @posZ WHERE PlayerID = @playerUID;
+	UPDATE PlayerTable SET currentPosX = @posX, currentPosY = @posY, currentPosZ = @posZ WHERE playerUID = @playerUID;
 	-- WIP
 END
 GO
@@ -120,11 +120,6 @@ BEGIN
 END		   
 GO		   
 
-
-
-
---저장 프로시저 테스트
-
 EXEC spCreatePlayer '테스트플레이어'
 GO
 
@@ -139,5 +134,3 @@ GO
 
 EXEC spDeletePlayer 100
 GO
-
-	

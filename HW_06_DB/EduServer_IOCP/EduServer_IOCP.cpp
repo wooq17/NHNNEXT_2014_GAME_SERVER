@@ -10,7 +10,6 @@
 #include "IocpManager.h"
 #include "DBHelper.h"
 
-
 __declspec(thread) int LThreadType = -1;
 
 int _tmain(int argc, _TCHAR* argv[])
@@ -35,7 +34,6 @@ int _tmain(int argc, _TCHAR* argv[])
 		return -1;
 
 	printf_s("Start Server\n");
-
  	
 	GIocpManager->StartAccept(); ///< block here...
 
