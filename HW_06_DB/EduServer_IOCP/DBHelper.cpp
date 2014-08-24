@@ -151,6 +151,7 @@ bool DbHelper::FetchRow()
 {
 	//todo: mCurrentSqlHstmt가 들고 있는 내용 fetch
 	SQLRETURN ret = SQLFetch( mCurrentSqlHstmt );
+	SQLCloseCursor( mCurrentSqlHstmt );
 	// WIP
 
 	if (SQL_SUCCESS != ret && SQL_SUCCESS_WITH_INFO != ret)

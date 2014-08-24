@@ -8,7 +8,7 @@
 void DbTestFunc()
 {
 	// uid는 생성할 때 부여 받은 걸 사용해야 되지 않을까
-	// int uid = 100;
+	int uid = 100;
 	
 	{
 		DbHelper dbHelper;
@@ -16,7 +16,7 @@ void DbTestFunc()
 		dbHelper.BindParamText( L"DbTestPlayer" );
 
 		// 결과로 받은 uid 저장
-		// dbHelper.BindResultColumnInt( &uid );
+		dbHelper.BindResultColumnInt( &uid );
 
 		if (dbHelper.Execute(SQL_CreatePlayer))
 		{
@@ -30,7 +30,7 @@ void DbTestFunc()
 	{
 		DbHelper dbHelper;
 
-		int uid = 100;
+		// int uid = 100;
 		float x = 2301.34f;
 		float y = 56000.78f;
 		float z = 990002.32f;
@@ -52,7 +52,7 @@ void DbTestFunc()
 	{
 		DbHelper dbHelper;
 
-		int uid = 100;
+		// int uid = 100;
 		dbHelper.BindParamInt(&uid);
 		dbHelper.BindParamText(L"Update된 코멘트..입니다.");
 		if (dbHelper.Execute(SQL_UpdatePlayerComment))
@@ -67,7 +67,7 @@ void DbTestFunc()
 	{
 		DbHelper dbHelper;
 
-		int uid = 100;
+		// int uid = 100;
 		bool v = true;
 		dbHelper.BindParamInt(&uid);
 		dbHelper.BindParamBool(&v);
@@ -83,7 +83,7 @@ void DbTestFunc()
 	{
 		DbHelper dbHelper;
 
-		int uid = 100;
+		// int uid = 100;
 		dbHelper.BindParamInt(&uid);
 
 		wchar_t name[32];
@@ -104,15 +104,15 @@ void DbTestFunc()
 		{
 			if (dbHelper.FetchRow())
 			{
-				printf("\n%ls %f %f %f %d %ls\n", name, x, y, z, valid, comment);
+				printf("\n%ls %f %f %f %d %ls \n", name, x, y, z, valid, comment);
 			}
 		}
 	}
-/*
+
 	{
 		DbHelper dbHelper;
 
-		int uid = 100;
+		// int uid = 100;
 		dbHelper.BindParamInt(&uid);
 		if (dbHelper.Execute(SQL_DeletePlayer))
 		{
@@ -122,6 +122,6 @@ void DbTestFunc()
 			}
 		}
 	}
-	*/
+	
 }
 

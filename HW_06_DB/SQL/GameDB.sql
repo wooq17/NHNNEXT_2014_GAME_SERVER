@@ -38,6 +38,7 @@ CREATE PROCEDURE [dbo].[spCreatePlayer]
 AS
 BEGIN
     --todo: 해당 이름의 플레이어를 생성하고 플레이어의 identity를 리턴, [createTime]는 현재 생성 날짜로 설정
+	SET NOCOUNT ON
 	INSERT INTO PlayerTable( playerName, createTime, isValid ) VALUES ( @name, GETDATE(), 1 );
 	SELECT SCOPE_IDENTITY();
 	-- WIP
@@ -53,7 +54,9 @@ CREATE PROCEDURE [dbo].[spDeletePlayer]
 AS
 BEGIN
 	--todo: 해당 플레이어 삭제
+	SET NOCOUNT ON
 	DELETE FROM PlayerTable WHERE playerUID = @playerUID;
+	SELECT @@ROWCOUNT
 	-- WIP
 END
 GO
@@ -70,7 +73,9 @@ CREATE PROCEDURE [dbo].[spUpdatePlayerPosition]
 AS
 BEGIN
     -- todo: 해당 플레이어의 정보(x,y,z) 업데이트 
+	SET NOCOUNT ON
 	UPDATE PlayerTable SET currentPosX = @posX, currentPosY = @posY, currentPosZ = @posZ WHERE playerUID = @playerUID;
+	SELECT @@ROWCOUNT
 	-- WIP
 END
 GO
