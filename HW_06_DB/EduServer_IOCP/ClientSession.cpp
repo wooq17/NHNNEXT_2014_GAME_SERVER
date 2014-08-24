@@ -5,6 +5,7 @@
 #include "ClientSession.h"
 #include "IocpManager.h"
 #include "ClientSessionManager.h"
+#include "SQLTest.h"
 
 #define CLIENT_BUFSIZE	65536
 
@@ -41,6 +42,9 @@ void ClientSession::SessionReset()
 	closesocket(mSocket);
 
 	mSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+
+	// Á¶½ÉÇØ!
+	DbTestFunc();
 }
 
 bool ClientSession::PostAccept()

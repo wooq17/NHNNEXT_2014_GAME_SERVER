@@ -85,7 +85,7 @@ bool DbHelper::Initialize(const wchar_t* connInfoStr, int workerThreadCount)
 		SQLSMALLINT resultLen = 0;
 		
 		//todo: SQLDriverConnect를 이용하여 SQL서버에 연결하고 그 핸들을 SQL_CONN의 mSqlHdbc에 할당
-		SQLRETURN ret = SQLDriverConnect( mSqlConnPool[i].mSqlHdbc, NULL, (SQLTCHAR*)connInfoStr, SQL_NTS, NULL, resultLen, NULL, SQL_DRIVER_COMPLETE );
+		SQLRETURN ret = SQLDriverConnect( mSqlConnPool[i].mSqlHdbc, NULL, (SQLTCHAR*)connInfoStr, SQL_NTS, NULL, resultLen, NULL, SQL_DRIVER_NOPROMPT );
 		// WIP
 
 		if (SQL_SUCCESS != ret && SQL_SUCCESS_WITH_INFO != ret)
@@ -219,7 +219,7 @@ bool DbHelper::BindParamText(const wchar_t* text)
 
 	//todo: 유니코드 문자열 바인딩
 	SQLRETURN ret = SQLBindParameter( mCurrentSqlHstmt, mCurrentBindParam++, SQL_PARAM_INPUT,
-		SQL_C_WCHAR, SQL_WVARCHAR, sizeof( text ), 0, (SQLPOINTER)text, 0, NULL );
+		SQL_C_WCHAR, SQL_WVARCHAR, _tcslen( text ), 0, (SQLPOINTER)text, 0, NULL );
 	// WIP
 
 	if (SQL_SUCCESS != ret && SQL_SUCCESS_WITH_INFO != ret)

@@ -1,24 +1,32 @@
 #include "stdafx.h"
 #include "SQLStatement.h"
 #include "DBHelper.h"
+#include "SQLTest.h"
 
 //todo: 아래의 DbTestFunc 로직이 잘 수행되는지 테스트! (아래의 함수를 ClientSession내의 적절한 곳에서 여러번 호출시켜볼 것)
 
 void DbTestFunc()
 {
+	// uid는 생성할 때 부여 받은 걸 사용해야 되지 않을까
+	// int uid = 100;
+	
 	{
 		DbHelper dbHelper;
 
-		dbHelper.BindParamText(L"DbTestPlayer");
+		dbHelper.BindParamText( L"DbTestPlayer" );
+
+		// 결과로 받은 uid 저장
+		// dbHelper.BindResultColumnInt( &uid );
+
 		if (dbHelper.Execute(SQL_CreatePlayer))
 		{
 			if (dbHelper.FetchRow())
 			{
-				printf("ok");
+				printf("create ok\n");
 			}
 		}
 	}
-
+	
 	{
 		DbHelper dbHelper;
 
@@ -36,7 +44,7 @@ void DbTestFunc()
 		{
 			if (dbHelper.FetchRow())
 			{
-				printf("ok");
+				printf("update position ok\n");
 			}
 		}
 	}
@@ -45,14 +53,13 @@ void DbTestFunc()
 		DbHelper dbHelper;
 
 		int uid = 100;
-
 		dbHelper.BindParamInt(&uid);
 		dbHelper.BindParamText(L"Update된 코멘트..입니다.");
 		if (dbHelper.Execute(SQL_UpdatePlayerComment))
 		{
 			if (dbHelper.FetchRow())
 			{
-				printf("ok");
+				printf("update comment ok\n");
 			}
 		}
 	}
@@ -68,7 +75,7 @@ void DbTestFunc()
 		{
 			if (dbHelper.FetchRow())
 			{
-				printf("ok");
+				printf("update valid ok\n");
 			}
 		}
 	}
@@ -101,21 +108,20 @@ void DbTestFunc()
 			}
 		}
 	}
-
+/*
 	{
 		DbHelper dbHelper;
 
 		int uid = 100;
-
 		dbHelper.BindParamInt(&uid);
 		if (dbHelper.Execute(SQL_DeletePlayer))
 		{
 			if (dbHelper.FetchRow())
 			{
-				printf("ok");
+				printf("delete ok\n");
 			}
 		}
 	}
-
+	*/
 }
 
