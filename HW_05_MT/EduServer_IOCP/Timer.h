@@ -29,7 +29,7 @@ struct TimerJobComparator
 };
 
 
-typedef std::priority_queue<TimerJobElement, std::vector<TimerJobElement, STLAllocator<TimerJobElement> >, TimerJobComparator> TimerJobPriorityQueue;
+typedef std::priority_queue<TimerJobElement, std::deque<TimerJobElement, STLAllocator<TimerJobElement> >, TimerJobComparator> TimerJobPriorityQueue;
 
 class Timer
 {
