@@ -40,7 +40,7 @@ BEGIN
     --todo: 해당 이름의 플레이어를 생성하고 플레이어의 identity를 리턴, [createTime]는 현재 생성 날짜로 설정
 	SET NOCOUNT ON
 	INSERT INTO PlayerTable( playerName, createTime, isValid ) VALUES ( @name, GETDATE(), 1 );
-	SELECT SCOPE_IDENTITY();
+	SELECT SCOPE_IDENTITY(); -- @@IDENTITY
 	-- WIP
 END
 GO
