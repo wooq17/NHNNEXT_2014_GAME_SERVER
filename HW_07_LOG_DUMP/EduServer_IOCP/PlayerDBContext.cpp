@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "SQLStatement.h"
 #include "Log.h"
 #include "PlayerDBContext.h"
@@ -6,11 +6,64 @@
 #include "ClientSession.h"
 
 
-//todo: CreatePlayerDataContext ±¸Çö
+//todo: CreatePlayerDataContext êµ¬í˜„
+bool CreatePlayerDataContext::OnSQLExecute()
+{
+	DBHelper dbHelper;
 
-//todo: DeletePlayerDataContext ±¸Çö
 
+	dbHelper.BindParamText( mPlayerName );
+	dbHelper.BindParamText( mComment );
 
+	dbHelper.BindResultColumnInt( &mPlayerId );
+
+	if ( dbHelper.Execute( SQL_CreatePlayer ) )
+	{
+		if ( dbHelper.FetchRow() )
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void CreatePlayerDataContext::OnSuccess()
+{
+	// ë­í• ê¹Œ
+	// id update í•´ì¤˜ì•¼ ë˜ëŠ”ë°
+	// í•¨ìˆ˜ê°€ ì—†ë„¤
+}
+
+void CreatePlayerDataContext::OnFail()
+{
+	EVENT_LOG( "CreatePlayerDataContext fail", mPlayerId );
+}
+// WIP
+
+//todo: DeletePlayerDataContext êµ¬í˜„
+bool DeletePlayerDataContext::OnSQLExecute()
+{
+	DBHelper dbHelper;
+
+	dbHelper.BindParamInt( &mPlayerId );
+
+	if ( dbHelper.Execute( SQL_DeletePlayer ) )
+	{
+		if ( dbHelper.FetchRow() )
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void DeletePlayerDataContext::OnFail()
+{
+	EVENT_LOG( "DeletePlayerDataContext fail", mPlayerId );
+}
+// WIP
 
 bool LoadPlayerDataContext::OnSQLExecute()
 {
@@ -38,8 +91,8 @@ bool LoadPlayerDataContext::OnSQLExecute()
 
 void LoadPlayerDataContext::OnSuccess()
 {
-	//todo: ÇÃ·¹ÀÌ¾î ·Îµå ¼º°ø½Ã Ã³¸®ÇÏ±â
-	
+	//todo: í”Œë ˆì´ì–´ ë¡œë“œ ì„±ê³µì‹œ ì²˜ë¦¬í•˜ê¸°
+	mSessionObject->mPlayer.ResponseLoad( mPlayerId, mPosX, mPosY, mPosZ, mIsValid, mPlayerName, mComment );
 }
 
 void LoadPlayerDataContext::OnFail()

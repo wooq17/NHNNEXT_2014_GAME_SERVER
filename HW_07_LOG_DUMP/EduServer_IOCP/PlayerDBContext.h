@@ -1,21 +1,42 @@
-#pragma once
+ï»¿#pragma once
 #include "ContentsConfig.h"
 #include "DBContext.h"
 
-//todo: Player »ı¼º ÀÛ¾÷ DB context¸¸µé±â
-//struct CreatePlayerDataContext
-//{
-//	 ... ...
-//};
+//todo: Player ìƒì„± ì‘ì—… DB contextë§Œë“¤ê¸°
+struct CreatePlayerDataContext : public DatabaseJobContext, public ObjectPool<CreatePlayerDataContext>
+{
+	CreatePlayerDataContext( ClientSession* owner, int pid ) : DatabaseJobContext( owner )
+	{
+		memset( mPlayerName, 0, sizeof( mPlayerName ) );
+		memset( mComment, 0, sizeof( mComment ) );
+	}
 
-//todo: Player »èÁ¦ ÀÛ¾÷ DB context ¸¸µé±â
+	virtual bool OnSQLExecute();
+	virtual void OnSuccess();
+	virtual void OnFail();
 
-//struct DeletePlayerDataContext
-//{
-//};
+	int		mPlayerId = -1;				// ì„±ê³µí•˜ë©´ ì—¬ê¸°ì— ì €ì¥
+	wchar_t	mPlayerName[MAX_NAME_LEN];
+	wchar_t	mComment[MAX_COMMENT_LEN];
+};
+// WIP
 
+//todo: Player ì‚­ì œ ì‘ì—… DB context ë§Œë“¤ê¸°
+struct DeletePlayerDataContext : public DatabaseJobContext, public ObjectPool<DeletePlayerDataContext>
+{
+	DeletePlayerDataContext( ClientSession* owner, int pid ) : DatabaseJobContext( owner ), mPlayerId( pid )
+	{
+	}
 
-/// player load ÀÛ¾÷
+	virtual bool OnSQLExecute();
+	virtual void OnSuccess();
+	virtual void OnFail();
+
+	int		mPlayerId = -1;
+};
+// WIP
+
+/// player load ì‘ì—…
 struct LoadPlayerDataContext : public DatabaseJobContext, public ObjectPool<LoadPlayerDataContext>
 {
 	LoadPlayerDataContext(ClientSession* owner, int pid) : DatabaseJobContext(owner)
@@ -42,7 +63,7 @@ struct LoadPlayerDataContext : public DatabaseJobContext, public ObjectPool<Load
 
 
 
-/// Player ¾÷µ¥ÀÌÆ® ÀÛ¾÷
+/// Player ì—…ë°ì´íŠ¸ ì‘ì—…
 
 struct UpdatePlayerPositionContext : public DatabaseJobContext, public ObjectPool<UpdatePlayerPositionContext>
 {
