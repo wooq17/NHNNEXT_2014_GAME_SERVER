@@ -53,5 +53,5 @@ void DBThread::DoDatabaseJob()
 
 		CRASH_ASSERT( false );
 	}
-	// WIP
+	// DONE
 }

@@ -57,7 +57,7 @@ void Player::RequestUpdatePosition(float x, float y, float z)
 	context->mPosZ = z;
 
 	GDatabaseManager->PostDatabsaseRequest( context );
-	// WIP
+	// DONE
 }
 
 void Player::ResponseUpdatePosition(float x, float y, float z)
@@ -101,7 +101,7 @@ void Player::TestCreatePlayerData(const wchar_t* newName)
 	CreatePlayerDataContext* context = new CreatePlayerDataContext( mSession );
 	wcscpy_s( context->mPlayerName, newName );
 	GDatabaseManager->PostDatabsaseRequest( context );
-	// WIP
+	// DONE
 }
 
 void Player::TestDeletePlayerData(int playerId)
@@ -109,6 +109,6 @@ void Player::TestDeletePlayerData(int playerId)
 	//todo: DB스레드풀에 playerId에 해당하는 플레이어 생성 삭제 작업을 수행시켜보기
 	DeletePlayerDataContext* context = new DeletePlayerDataContext( mSession, playerId );
 	GDatabaseManager->PostDatabsaseRequest( context );
-	// WIP
+	// DONE
 }
 

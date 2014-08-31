@@ -30,6 +30,7 @@ private:
 	//TODO: 아래 2개 테스트 함수가 성공적으로 동작하는지 확인하기
 	void TestCreatePlayerData(const wchar_t* newName);
 	void TestDeletePlayerData(int playerId);
+	// DONE
 
 private:
 

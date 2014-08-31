@@ -40,7 +40,7 @@ private:
 	{	\
 		/*todo: 스레드로컬에 함수 호출(__FUNCSIG__) 기록남기기*/ \
 		LThreadCallHistory->Append( __FUNCSIG__ ); \
-		/* WIP */ \
+		/* DONE */ \
 	}	
 	
 
@@ -59,7 +59,7 @@ public:
 		//todo: mElapsedFuncSig, mElapsedTime에 정보(funcsig, elapsed) 남기기
 		mElapsedFuncSig[mCounter % MAX_ELAPSED_RECORD] = funcsig;
 		mElapsedTime[mCounter++ % MAX_ELAPSED_RECORD] = elapsed;
-		// WIP
+		// DONE
 	}
 
 	void DumpOut(std::ostream& ost = std::cout);
@@ -94,7 +94,7 @@ public:
 		{
 			//todo: LThreadCallElapsedRecord에 함수 수행 시간 남기기
 			LThreadCallElapsedRecord->Append( mFuncSig, GetTickCount64( ) - mStartTick );
-			// WIP
+			// DONE
 		}
 	}
 
@@ -131,7 +131,7 @@ namespace LoggerUtil
 		gLogEvents[index].mThreadId = LWorkerThreadId;
 		gLogEvents[index].mMessage = msg;
 		gLogEvents[index].mAdditionalInfo = info;
-		// WIP
+		// DONE
 	}
 
 	void EventLogDumpOut(std::ostream& ost = std::cout);

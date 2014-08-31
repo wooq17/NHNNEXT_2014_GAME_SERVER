@@ -42,7 +42,7 @@ void MakeDump(EXCEPTION_POINTERS* e)
 
 	MiniDumpWriteDump( GetCurrentProcess(), GetCurrentProcessId(),
 		hFile, mdt, ( e != 0 ) ? &exceptionInfo : 0, 0, NULL );
-	// WIP
+	// DONE
 	
 	if (hFile)
 	{
@@ -91,7 +91,7 @@ LONG WINAPI ExceptionFilter(EXCEPTION_POINTERS* exceptionInfo)
 						CloseHandle( currentThread );
 					}
 				}
-				// WIP
+				// DONE
 
 			} while (Thread32Next(hThreadSnap, &te32));
 
@@ -130,7 +130,7 @@ LONG WINAPI ExceptionFilter(EXCEPTION_POINTERS* exceptionInfo)
 	StackWalker stackWalker;
 	stackWalker.SetOutputStream( &historyOut );
 	stackWalker.ShowCallstack();
-	// WIP
+	// DONE
 	
 	/// 이벤트 로그 남기고
 	LoggerUtil::EventLogDumpOut(historyOut);

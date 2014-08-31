@@ -17,7 +17,7 @@ struct CreatePlayerDataContext : public DatabaseJobContext, public ObjectPool<Cr
 	int		mPlayerId = -1;				// 성공하면 여기에 저장
 	wchar_t	mPlayerName[MAX_NAME_LEN];
 };
-// WIP
+// DONE
 
 //todo: Player 삭제 작업 DB context 만들기
 struct DeletePlayerDataContext : public DatabaseJobContext, public ObjectPool<DeletePlayerDataContext>
@@ -32,7 +32,7 @@ struct DeletePlayerDataContext : public DatabaseJobContext, public ObjectPool<De
 
 	int		mPlayerId = -1;
 };
-// WIP
+// DONE
 
 /// player load 작업
 struct LoadPlayerDataContext : public DatabaseJobContext, public ObjectPool<LoadPlayerDataContext>

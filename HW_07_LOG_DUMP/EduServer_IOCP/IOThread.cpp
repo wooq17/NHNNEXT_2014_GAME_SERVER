@@ -51,7 +51,7 @@ void IOThread::DoIocpJob()
 		delete dbContext;
 
 		return;
-		// WIP
+		// DONE
 	}
 
 	/// 아래로는 일반적인 I/O 처리

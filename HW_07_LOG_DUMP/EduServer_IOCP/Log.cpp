@@ -15,7 +15,7 @@ void ThreadCallHistory::DumpOut(std::ostream& ost)
 		ost << "  FUNC:" << mHistory[( mCounter - i ) % MAX_HISTORY] << std::endl;
 	}
 	ost << "===== End of Call History" << std::endl << std::endl;
-	// WIP
+	// DONE
 }
 	
 
@@ -55,6 +55,6 @@ namespace LoggerUtil
 				<< "  INFO :" << gLogEvents[( gCurrentLogIndex - i ) % MAX_LOG_SIZE].mAdditionalInfo << std::endl;
 		}
 		ost << "===== End of Event History" << std::endl << std::endl;
-		// WIP
+		// DONE
 	}
 }

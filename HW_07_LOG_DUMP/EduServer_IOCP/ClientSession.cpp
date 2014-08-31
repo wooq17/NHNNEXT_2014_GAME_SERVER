@@ -153,7 +153,7 @@ void ClientSession::AcceptCompletion()
 	mPlayer.TestCreatePlayerData( L"testName" );
 	mPlayer.RequestLoad( id++ );
 	mPlayer.TestDeletePlayerData( id );
-	// WIP
+	// DONE
 }
 
 

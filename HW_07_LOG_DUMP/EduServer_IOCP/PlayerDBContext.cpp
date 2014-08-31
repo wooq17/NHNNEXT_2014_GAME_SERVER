@@ -39,7 +39,7 @@ void CreatePlayerDataContext::OnFail()
 {
 	EVENT_LOG( "CreatePlayerDataContext fail", mPlayerId );
 }
-// WIP
+// DONE
 
 //todo: DeletePlayerDataContext 구현
 bool DeletePlayerDataContext::OnSQLExecute()
@@ -63,7 +63,7 @@ void DeletePlayerDataContext::OnFail()
 {
 	EVENT_LOG( "DeletePlayerDataContext fail", mPlayerId );
 }
-// WIP
+// DONE
 
 bool LoadPlayerDataContext::OnSQLExecute()
 {
@@ -93,6 +93,7 @@ void LoadPlayerDataContext::OnSuccess()
 {
 	//todo: 플레이어 로드 성공시 처리하기
 	mSessionObject->mPlayer.ResponseLoad( mPlayerId, mPosX, mPosY, mPosZ, mIsValid, mPlayerName, mComment );
+	// DONE
 }
 
 void LoadPlayerDataContext::OnFail()
