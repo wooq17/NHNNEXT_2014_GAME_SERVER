@@ -76,6 +76,8 @@ bool ClientSession::PostAccept()
 
 void ClientSession::AcceptCompletion()
 {
+	// for test
+	// TRACE_PERF;
 	TRACE_THIS;
 
 	CRASH_ASSERT(LThreadType == THREAD_IO_WORKER);
