@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "Exception.h"
 #include "ThreadLocal.h"
 #include "EduServer_IOCP.h"
@@ -44,12 +44,17 @@ void IOThread::DoIocpJob()
 
 	if (CK_DB_RESULT == completionKey)
 	{
-		//todo: DB Ã³¸® °á°ú°¡ ´ã°Ü¿À´Â °æ¿ì Ã³¸®
+		//todo: DB ì²˜ë¦¬ ê²°ê³¼ê°€ ë‹´ê²¨ì˜¤ëŠ” ê²½ìš° ì²˜ë¦¬
 		DatabaseJobContext* dbContext = reinterpret_cast<DatabaseJobContext*>(overlapped);
+		dbContext->OnResult();
 
+		delete dbContext;
+
+		return;
+		// WIP
 	}
 
-	/// ¾Æ·¡·Î´Â ÀÏ¹İÀûÀÎ I/O Ã³¸®
+	/// ì•„ë˜ë¡œëŠ” ì¼ë°˜ì ì¸ I/O ì²˜ë¦¬
 
 	OverlappedIOContext* context = reinterpret_cast<OverlappedIOContext*>(overlapped);
 	
@@ -145,7 +150,7 @@ void IOThread::DoSendJob()
 	
 		if (session->FlushSend())
 		{
-			/// true ¸®ÅÏ µÇ¸é »©¹ö¸°´Ù.
+			/// true ë¦¬í„´ ë˜ë©´ ë¹¼ë²„ë¦°ë‹¤.
 			LSendRequestSessionList->pop_front();
 		}
 	}

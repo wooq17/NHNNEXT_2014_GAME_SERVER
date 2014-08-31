@@ -1,4 +1,4 @@
-#pragma once
+Ôªø#pragma once
 
 #include <iostream>
 #include "Exception.h"
@@ -38,7 +38,9 @@ private:
 	}	\
 	if (LThreadType != THREAD_MAIN)	\
 	{	\
-		/*todo: Ω∫∑πµÂ∑Œƒ√ø° «‘ºˆ »£√‚(__FUNCSIG__) ±‚∑œ≥≤±‚±‚*/ \
+		/*todo: Ïä§Î†àÎìúÎ°úÏª¨Ïóê Ìï®Ïàò Ìò∏Ï∂ú(__FUNCSIG__) Í∏∞Î°ùÎÇ®Í∏∞Í∏∞*/ \
+		LThreadCallHistory->Append( __FUNCSIG__ ); \
+		/* WIP */ \
 	}	
 	
 
@@ -54,7 +56,10 @@ public:
 
 	inline void Append(const char* funcsig, int64_t elapsed)
 	{
-		//todo: mElapsedFuncSig, mElapsedTimeø° ¡§∫∏(funcsig, elapsed) ≥≤±‚±‚
+		//todo: mElapsedFuncSig, mElapsedTimeÏóê Ï†ïÎ≥¥(funcsig, elapsed) ÎÇ®Í∏∞Í∏∞
+		mElapsedFuncSig[mCounter % MAX_ELAPSED_RECORD] = funcsig;
+		mElapsedTime[mCounter++ % MAX_ELAPSED_RECORD] = elapsed;
+		// WIP
 	}
 
 	void DumpOut(std::ostream& ost = std::cout);
@@ -77,8 +82,8 @@ public:
 	ScopeElapsedCheck(const char* funcsig) : mFuncSig(funcsig)
 	{
 		/* FYI
-		 * 10~16 ms «ÿªÛµµ∑Œ √º≈©«œ∑¡∏È GetTickCount ªÁøÎ
-		 * 1 us «ÿªÛµµ∑Œ √º≈©«œ∑¡∏È  QueryPerformanceCounter ªÁøÎ
+		 * 10~16 ms Ìï¥ÏÉÅÎèÑÎ°ú Ï≤¥ÌÅ¨ÌïòÎ†§Î©¥ GetTickCount ÏÇ¨Ïö©
+		 * 1 us Ìï¥ÏÉÅÎèÑÎ°ú Ï≤¥ÌÅ¨ÌïòÎ†§Î©¥  QueryPerformanceCounter ÏÇ¨Ïö©
 		*/ 
 		mStartTick = GetTickCount64();
 	}
@@ -87,7 +92,9 @@ public:
 	{
 		if (LThreadType != THREAD_MAIN)
 		{
-			//todo: LThreadCallElapsedRecordø° «‘ºˆ ºˆ«‡ Ω√∞£ ≥≤±‚±‚
+			//todo: LThreadCallElapsedRecordÏóê Ìï®Ïàò ÏàòÌñâ ÏãúÍ∞Ñ ÎÇ®Í∏∞Í∏∞
+			LThreadCallElapsedRecord->Append( mFuncSig, GetTickCount64( ) - mStartTick );
+			// WIP
 		}
 	}
 
@@ -120,7 +127,11 @@ namespace LoggerUtil
 	{
 		__int64 index = _InterlockedIncrement64(&gCurrentLogIndex) - 1;
 		
-		//todo: gLogEventsø° LogEvent¡§∫∏ ≥≤±‚±‚
+		//todo: gLogEventsÏóê LogEventÏ†ïÎ≥¥ ÎÇ®Í∏∞Í∏∞
+		gLogEvents[index].mThreadId = LWorkerThreadId;
+		gLogEvents[index].mMessage = msg;
+		gLogEvents[index].mAdditionalInfo = info;
+		// WIP
 	}
 
 	void EventLogDumpOut(std::ostream& ost = std::cout);

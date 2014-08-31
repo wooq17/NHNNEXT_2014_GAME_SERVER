@@ -11,9 +11,7 @@ bool CreatePlayerDataContext::OnSQLExecute()
 {
 	DBHelper dbHelper;
 
-
 	dbHelper.BindParamText( mPlayerName );
-	dbHelper.BindParamText( mComment );
 
 	dbHelper.BindResultColumnInt( &mPlayerId );
 

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "Exception.h"
 #include "Log.h"
 #include "EduServer_IOCP.h"
@@ -146,11 +146,12 @@ void ClientSession::AcceptCompletion()
 	}
 
 
-	//TEST: ¿ä³ðÀÇ À§Ä¡´Â ¿ø·¡ C_LOGIN ÇÚµé¸µ ÇÒ ¶§ ÇØ¾ßÇÏ´Â°ÅÁö¸¸ Áö±ÝÀº Á¢¼Ó ¿Ï·á ½ÃÁ¡¿¡¼­ Å×½ºÆ® ¤¡¤¡
+	//TEST: ìš”ë†ˆì˜ ìœ„ì¹˜ëŠ” ì›ëž˜ C_LOGIN í•¸ë“¤ë§ í•  ë•Œ í•´ì•¼í•˜ëŠ”ê±°ì§€ë§Œ ì§€ê¸ˆì€ ì ‘ì† ì™„ë£Œ ì‹œì ì—ì„œ í…ŒìŠ¤íŠ¸ ã„±ã„±
 
-	//todo: ÇÃ·¹ÀÌ¾î id´Â ¿©·¯ºÐÀÇ ÇÃ·¹ÀÌ¾î Å×ÀÌºí »óÈ²¿¡ ¸Â°Ô ÀûÀýÈ÷ °íÃÄ¼­ ·ÎµùÇÏµµ·Ï 
+	//todo: í”Œë ˆì´ì–´ idëŠ” ì—¬ëŸ¬ë¶„ì˜ í”Œë ˆì´ì–´ í…Œì´ë¸” ìƒí™©ì— ë§žê²Œ ì ì ˆížˆ ê³ ì³ì„œ ë¡œë”©í•˜ë„ë¡ 
 	static int id = 101;
  	mPlayer.RequestLoad(id++);
+	// WIP
 }
 
 

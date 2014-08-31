@@ -1,12 +1,21 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "Log.h"
 
 #include <iostream>
 
 void ThreadCallHistory::DumpOut(std::ostream& ost)
 {
-	//todo: ÇöÀç ½º·¹µåÀÇ call history¸¦ ost ½ºÆ®¸²¿¡ ¾²±â
-	
+	//todo: í˜„ì¬ ìŠ¤ë ˆë“œì˜ call historyë¥¼ ost ìŠ¤íŠ¸ë¦¼ì— ì“°ê¸°
+	uint64_t count = mCounter < MAX_HISTORY ? mCounter : MAX_HISTORY;
+
+	ost << "===== Call History [Thread:" << mThreadId << "]" << std::endl;
+
+	for ( int i = 1; i <= count; ++i )
+	{
+		ost << "  FUNC:" << mHistory[( mCounter - i ) % MAX_HISTORY] << std::endl;
+	}
+	ost << "===== End of Call History" << std::endl << std::endl;
+	// WIP
 }
 	
 
@@ -33,8 +42,19 @@ namespace LoggerUtil
 
 	void EventLogDumpOut(std::ostream& ost)
 	{
-		//todo: gLogEvents³»¿ë ost ½ºÆ®¸²¿¡ ¾²±â
+		//todo: gLogEventsë‚´ìš© ost ìŠ¤íŠ¸ë¦¼ì— ì“°ê¸°
+		// lock ì•ˆ ì¡ì•„ë„ ë˜ë‚˜
+		uint64_t count = gCurrentLogIndex < MAX_LOG_SIZE ? gCurrentLogIndex : MAX_LOG_SIZE;
 
-		
+		ost << "===== Event History" << std::endl;
+
+		for ( int i = 1; i <= count; ++i )
+		{
+			ost << "[Thread:" << gLogEvents[( gCurrentLogIndex - i ) % MAX_LOG_SIZE].mThreadId << "]"
+				<< "  MESSAGE :" << gLogEvents[( gCurrentLogIndex - i ) % MAX_LOG_SIZE].mMessage
+				<< "  INFO :" << gLogEvents[( gCurrentLogIndex - i ) % MAX_LOG_SIZE].mAdditionalInfo << std::endl;
+		}
+		ost << "===== End of Event History" << std::endl << std::endl;
+		// WIP
 	}
 }

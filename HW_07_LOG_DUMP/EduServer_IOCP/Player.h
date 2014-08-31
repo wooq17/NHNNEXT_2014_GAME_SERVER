@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "ContentsConfig.h"
 
 class ClientSession;
@@ -27,7 +27,7 @@ private:
 
 	void PlayerReset();
 
-	//TODO: ¾Æ·¡ 2°³ Å×½ºÆ® ÇÔ¼ö°¡ ¼º°øÀûÀ¸·Î µ¿ÀÛÇÏ´ÂÁö È®ÀÎÇÏ±â
+	//TODO: ì•„ë˜ 2ê°œ í…ŒìŠ¤íŠ¸ í•¨ìˆ˜ê°€ ì„±ê³µì ìœ¼ë¡œ ë™ì‘í•˜ëŠ”ì§€ í™•ì¸í•˜ê¸°
 	void TestCreatePlayerData(const wchar_t* newName);
 	void TestDeletePlayerData(int playerId);
 

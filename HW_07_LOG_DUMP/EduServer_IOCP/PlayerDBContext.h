@@ -5,10 +5,9 @@
 //todo: Player 생성 작업 DB context만들기
 struct CreatePlayerDataContext : public DatabaseJobContext, public ObjectPool<CreatePlayerDataContext>
 {
-	CreatePlayerDataContext( ClientSession* owner, int pid ) : DatabaseJobContext( owner )
+	CreatePlayerDataContext( ClientSession* owner ) : DatabaseJobContext( owner )
 	{
 		memset( mPlayerName, 0, sizeof( mPlayerName ) );
-		memset( mComment, 0, sizeof( mComment ) );
 	}
 
 	virtual bool OnSQLExecute();
@@ -17,7 +16,6 @@ struct CreatePlayerDataContext : public DatabaseJobContext, public ObjectPool<Cr
 
 	int		mPlayerId = -1;				// 성공하면 여기에 저장
 	wchar_t	mPlayerName[MAX_NAME_LEN];
-	wchar_t	mComment[MAX_COMMENT_LEN];
 };
 // WIP
 
@@ -29,7 +27,7 @@ struct DeletePlayerDataContext : public DatabaseJobContext, public ObjectPool<De
 	}
 
 	virtual bool OnSQLExecute();
-	virtual void OnSuccess();
+	virtual void OnSuccess() {}
 	virtual void OnFail();
 
 	int		mPlayerId = -1;

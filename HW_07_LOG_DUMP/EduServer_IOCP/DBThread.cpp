@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "ThreadLocal.h"
 #include "Exception.h"
 #include "DBContext.h"
@@ -40,7 +40,19 @@ void DBThread::DoDatabaseJob()
 
 	
 	DatabaseJobContext* dbContext = reinterpret_cast<DatabaseJobContext*>(overlapped);
-	//todo: dbContextÀÇ SQLÀ» ½ÇÇàÇÏ°í ±× °á°ú¸¦ IO threadÇ®·Î º¸³»±â
 
+	//todo: dbContextì˜ SQLì„ ì‹¤í–‰í•˜ê³  ê·¸ ê²°ê³¼ë¥¼ IO threadí’€ë¡œ ë³´ë‚´ê¸°
+	dbContext->mSuccess = dbContext->SQLExecute();
+	ret = PostQueuedCompletionStatus( GIocpManager->GetComletionPort( ), sizeof( DatabaseJobContext* ), CK_DB_RESULT, reinterpret_cast<LPOVERLAPPED>( &dbContext ) );
+
+	if ( !ret )
+	{
+		printf( "DoDatabaseJob failed : %d\n", GetLastError( ) );
+
+		delete dbContext;
+
+		CRASH_ASSERT( false );
+	}
+	// WIP
 }
 

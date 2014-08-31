@@ -84,5 +84,15 @@ unsigned int WINAPI DBManager::DbWorkerThread(LPVOID lpParam)
 void DBManager::PostDatabsaseRequest(DatabaseJobContext* dbContext)
 {
 	//todo: PQCS를 이용하여 dbContext를 mDbCompletionPort에 보내기
+	int ret = PostQueuedCompletionStatus( mDbCompletionPort, sizeof( DatabaseJobContext* ), CK_DB_REQUEST, reinterpret_cast<LPOVERLAPPED>( &dbContext ) );
 
+	if ( !ret )
+	{
+		printf( "PostDatabsaseRequest failed : %d\n", GetLastError( ) );
+
+		delete dbContext;
+
+		CRASH_ASSERT( false );
+	}
+	// WIP
 }

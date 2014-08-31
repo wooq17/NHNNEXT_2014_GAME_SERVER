@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "ClientSession.h"
 #include "Player.h"
 #include "PlayerDBContext.h"
@@ -48,7 +48,16 @@ void Player::ResponseLoad(int pid, float x, float y, float z, bool valid, wchar_
 
 void Player::RequestUpdatePosition(float x, float y, float z)
 {
-	//todo: DB¿¡ ÇÃ·¹ÀÌ¾î À§Ä¡¸¦ x,y,z·Î ¾÷µ¥ÀÌÆ® ¿äÃ»ÇÏ±â
+	//todo: DBì— í”Œë ˆì´ì–´ ìœ„ì¹˜ë¥¼ x,y,zë¡œ ì—…ë°ì´íŠ¸ ìš”ì²­í•˜ê¸°
+	UpdatePlayerPositionContext* context = new UpdatePlayerPositionContext( mSession, mPlayerId );
+	
+	// í•¨ìˆ˜ í•˜ë‚˜ ë§Œë“¤ì–´ì„œ ì“¸ê¹Œ
+	context->mPosX = x;
+	context->mPosY = y;
+	context->mPosZ = z;
+
+	GDatabaseManager->PostDatabsaseRequest( context );
+	// WIP
 }
 
 void Player::ResponseUpdatePosition(float x, float y, float z)
@@ -88,12 +97,18 @@ void Player::ResponseUpdateValidation(bool isValid)
 
 void Player::TestCreatePlayerData(const wchar_t* newName)
 {
-	//todo: DB½º·¹µåÇ®¿¡ newName¿¡ ÇØ´çÇÏ´Â ÇÃ·¹ÀÌ¾î »ý¼º ÀÛ¾÷À» ¼öÇà½ÃÄÑº¸±â
-
+	//todo: DBìŠ¤ë ˆë“œí’€ì— newNameì— í•´ë‹¹í•˜ëŠ” í”Œë ˆì´ì–´ ìƒì„± ìž‘ì—…ì„ ìˆ˜í–‰ì‹œì¼œë³´ê¸°
+	CreatePlayerDataContext* context = new CreatePlayerDataContext( mSession );
+	wcscpy_s( context->mPlayerName, newName );
+	GDatabaseManager->PostDatabsaseRequest( context );
+	// WIP
 }
 
 void Player::TestDeletePlayerData(int playerId)
 {
-	//todo: DB½º·¹µåÇ®¿¡ playerId¿¡ ÇØ´çÇÏ´Â ÇÃ·¹ÀÌ¾î »ý¼º »èÁ¦ ÀÛ¾÷À» ¼öÇà½ÃÄÑº¸±â
+	//todo: DBìŠ¤ë ˆë“œí’€ì— playerIdì— í•´ë‹¹í•˜ëŠ” í”Œë ˆì´ì–´ ìƒì„± ì‚­ì œ ìž‘ì—…ì„ ìˆ˜í–‰ì‹œì¼œë³´ê¸°
+	DeletePlayerDataContext* context = new DeletePlayerDataContext( mSession, playerId );
+	GDatabaseManager->PostDatabsaseRequest( context );
+	// WIP
 }
 
