@@ -31,6 +31,8 @@ void CreatePlayerDataContext::OnSuccess()
 	// 뭐할까
 	// id update 해줘야 되는데
 	// 함수가 없네
+	// db 작업 되는지만 확인하면 되니까 그냥 static 변수값 사용
+	printf("create player\n");
 }
 
 void CreatePlayerDataContext::OnFail()

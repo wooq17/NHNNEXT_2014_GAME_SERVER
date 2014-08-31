@@ -43,7 +43,7 @@ void DBThread::DoDatabaseJob()
 
 	//todo: dbContext의 SQL을 실행하고 그 결과를 IO thread풀로 보내기
 	dbContext->mSuccess = dbContext->SQLExecute();
-	ret = PostQueuedCompletionStatus( GIocpManager->GetComletionPort( ), sizeof( DatabaseJobContext* ), CK_DB_RESULT, reinterpret_cast<LPOVERLAPPED>( &dbContext ) );
+	ret = PostQueuedCompletionStatus( GIocpManager->GetComletionPort(), 0, (ULONG_PTR)CK_DB_RESULT, (LPOVERLAPPED)dbContext );
 
 	if ( !ret )
 	{
@@ -55,4 +55,3 @@ void DBThread::DoDatabaseJob()
 	}
 	// WIP
 }
-

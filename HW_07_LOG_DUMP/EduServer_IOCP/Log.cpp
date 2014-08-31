@@ -43,7 +43,7 @@ namespace LoggerUtil
 	void EventLogDumpOut(std::ostream& ost)
 	{
 		//todo: gLogEvents내용 ost 스트림에 쓰기
-		// lock 안 잡아도 되나
+		// lock 안 잡아도 되나 - 다른 스레드들은 정지합니다?
 		uint64_t count = gCurrentLogIndex < MAX_LOG_SIZE ? gCurrentLogIndex : MAX_LOG_SIZE;
 
 		ost << "===== Event History" << std::endl;

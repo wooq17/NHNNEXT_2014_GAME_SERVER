@@ -150,7 +150,9 @@ void ClientSession::AcceptCompletion()
 
 	//todo: 플레이어 id는 여러분의 플레이어 테이블 상황에 맞게 적절히 고쳐서 로딩하도록 
 	static int id = 101;
- 	mPlayer.RequestLoad(id++);
+	mPlayer.TestCreatePlayerData( L"testName" );
+	mPlayer.RequestLoad( id++ );
+	mPlayer.TestDeletePlayerData( id );
 	// WIP
 }
 
@@ -162,6 +164,8 @@ void ClientSession::OnDisconnect(DisconnectReason dr)
 	TRACE_THIS;
 
 	printf_s("[DEBUG] Client Disconnected: Reason=%d IP=%s, PORT=%d \n", dr, inet_ntoa(mClientAddr.sin_addr), ntohs(mClientAddr.sin_port));
+	// log and dump test
+	// CRASH_ASSERT( false );
 }
 
 void ClientSession::OnRelease()
