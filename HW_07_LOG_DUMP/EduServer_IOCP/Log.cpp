@@ -43,7 +43,7 @@ namespace LoggerUtil
 	void EventLogDumpOut(std::ostream& ost)
 	{
 		//todo: gLogEvents내용 ost 스트림에 쓰기
-		// lock 안 잡아도 되나 - 다른 스레드들은 정지합니다?
+		// lock 안 잡아도 되나 - 다른 스레드들은 정지합니다? ///# 위에서 suspend 했지롱.
 		uint64_t count = gCurrentLogIndex < MAX_LOG_SIZE ? gCurrentLogIndex : MAX_LOG_SIZE;
 
 		ost << "===== Event History" << std::endl;
@@ -53,6 +53,10 @@ namespace LoggerUtil
 			ost << "[Thread:" << gLogEvents[( gCurrentLogIndex - i ) % MAX_LOG_SIZE].mThreadId << "]"
 				<< "  MESSAGE :" << gLogEvents[( gCurrentLogIndex - i ) % MAX_LOG_SIZE].mMessage
 				<< "  INFO :" << gLogEvents[( gCurrentLogIndex - i ) % MAX_LOG_SIZE].mAdditionalInfo << std::endl;
+
+			///# 좀 깔끔하게... 이런식으로도 가능.
+			// const LogEvent& log = gLogEvents[(gCurrentLogIndex - i) % MAX_LOG_SIZE];
+			// ost << "TID[" << log.mThreadId << "] MSG[ " << log.mMessage << " ] INFO [" << log.mAdditionalInfo << "]" << std::endl;
 		}
 		ost << "===== End of Event History" << std::endl << std::endl;
 		// DONE

@@ -54,4 +54,8 @@ void DBThread::DoDatabaseJob()
 		CRASH_ASSERT( false );
 	}
 	// DONE
+
+
+	///# 이거 왜 안씀? 코드를 필요한 부분만 보지말고 전체적으로 보는 습관을
+	/// GIocpManager->PostDatabaseResult(dbContext);
 }

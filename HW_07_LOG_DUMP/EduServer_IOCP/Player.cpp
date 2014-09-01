@@ -99,7 +99,7 @@ void Player::TestCreatePlayerData(const wchar_t* newName)
 {
 	//todo: DB스레드풀에 newName에 해당하는 플레이어 생성 작업을 수행시켜보기
 	CreatePlayerDataContext* context = new CreatePlayerDataContext( mSession );
-	wcscpy_s( context->mPlayerName, newName );
+	wcscpy_s( context->mPlayerName, newName ); ///# 이런거는 accessor 하나 만들어서 깔끔하게..
 	GDatabaseManager->PostDatabsaseRequest( context );
 	// DONE
 }

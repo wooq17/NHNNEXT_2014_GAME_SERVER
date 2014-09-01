@@ -128,6 +128,8 @@ namespace LoggerUtil
 		__int64 index = _InterlockedIncrement64(&gCurrentLogIndex) - 1;
 		
 		//todo: gLogEvents에 LogEvent정보 남기기
+
+		///# 이렇게 하면 배열 인덱스 넘어 죽는다.
 		gLogEvents[index].mThreadId = LWorkerThreadId;
 		gLogEvents[index].mMessage = msg;
 		gLogEvents[index].mAdditionalInfo = info;
