@@ -27,7 +27,7 @@ struct DeletePlayerDataContext : public DatabaseJobContext, public ObjectPool<De
 	}
 
 	virtual bool OnSQLExecute();
-	virtual void OnSuccess() {}
+	virtual void OnSuccess();
 	virtual void OnFail();
 
 	int		mPlayerId = -1;

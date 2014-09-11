@@ -191,22 +191,35 @@ void ClientSession::PacketHandling()
 	{
 	case PKT_CS_LOGIN:
 		// db에 로그인하고 
-	{
-
-	}
+		{
+			LoginRequest* clientPacket = reinterpret_cast<LoginRequest*>( recvPacket );
+			mPlayer->RequestRegisterPlayer( clientPacket->mName );
+			// 응답 보내기는 나중에 비동기로 수행
+		}
 		break;
 	case PKT_CS_LOGOUT:
 		// db에 로그아웃하고 
+		{
+			LogoutRequest* clientPacket = reinterpret_cast<LogoutRequest*>( recvPacket );
+			if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
+				break;
+
+			mPlayer->RequestDeregisterPlayer( clientPacket->mPlayerId );
+		}
 		break;
 	case PKT_CS_CHAT:
 		{
 			ChatBroadcastRequest* clientPacket = reinterpret_cast<ChatBroadcastRequest*>( recvPacket );
+			if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
+				break;
+
 			ChatBroadcastResponse* packet = new ChatBroadcastResponse();
 
 			packet->mPlayerId = clientPacket->mPlayerId;
 			memcpy( packet->mName, mPlayer->GetName(), sizeof( packet->mName ) );
 			memcpy( packet->mChat, clientPacket->mChat, sizeof( packet->mName ) );
 
+			// 블럭이네...
 			GClientSessionManager->Broadcast( reinterpret_cast<char*>( packet ), packet->mSize );
 
 			delete packet;
@@ -215,22 +228,15 @@ void ClientSession::PacketHandling()
 	case PKT_CS_MOVE:
 		{
 			MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
+			if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
+				break;
 
-			mPlayer->Move( Float3D( clientPacket->mX, clientPacket->mY, clientPacket->mZ ) );
-
-			MoveResponse* packet = new MoveResponse();
-			packet->mPlayerId = clientPacket->mPlayerId;
-			packet->mX = clientPacket->mX;
-			packet->mY = clientPacket->mY;
-			packet->mZ = clientPacket->mZ;
-
-			// 일단 전체 방송
-			GClientSessionManager->Broadcast( reinterpret_cast<char*>( packet ), packet->mSize );
-
-			delete packet;
+			mPlayer->RequestUpdatePosition( clientPacket->mX, clientPacket->mY, clientPacket->mZ );
 		}
 		break;
 	default:
+		if ( false == PostSend( mRecvBuffer.GetBufferStart(), len ) )
+			return;
 		break;
 	}
 

@@ -52,9 +52,3 @@ void PlayerManager::BroadcastChatting( const char* message, int len, int from )
 		it.second->GetSession()->PostSend( message, len );
 	}
 }
-
-void PlayerManager::BroadcastMoving( Float3D currentPos, int from )
-{
-	// from의 zone 체크해서 근처 플레이어에게만 전송
-	
-}

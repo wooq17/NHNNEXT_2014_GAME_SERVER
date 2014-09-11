@@ -39,15 +39,18 @@ public:
 	/// 주기적으로 버프 시간 업데이트하는 함수
 	void DecayTickBuff();
 
-	void Move( Float3D newPos );
+	void RequestRegisterPlayer( const wchar_t* newName );
+	void ResponseRegisterPlayer( int id );
+
+	void RequestDeregisterPlayer( int playerId );
+	void ResponseDeregisterPlayer( int playerId );
+
 	wchar_t* GetName() { return mPlayerName; }
 
 	ClientSession* GetSession() { return mSession; }
 
 private:
 
-	void TestCreatePlayerData( const wchar_t* newName );
-	void TestDeletePlayerData( int playerId );
 
 	FastSpinlock mPlayerLock;
 	int		mPlayerId;

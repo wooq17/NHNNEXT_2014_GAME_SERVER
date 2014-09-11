@@ -20,7 +20,6 @@ public:
 	int GetCurrentPlayers(PlayerList& outList);
 
 	void BroadcastChatting( const char* message, int len, int from );
-	void BroadcastMoving( Float3D currentPos, int from );
 	
 private:
 	FastSpinlock mLock;
