@@ -129,6 +129,9 @@
     <ClInclude Include="SQLStatement.h">
       <Filter>Contents</Filter>
     </ClInclude>
+    <ClInclude Include="Packet.h">
+      <Filter>Contents</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

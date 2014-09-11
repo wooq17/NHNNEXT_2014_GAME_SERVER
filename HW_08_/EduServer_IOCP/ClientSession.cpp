@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "Exception.h"
 #include "Log.h"
 #include "ThreadLocal.h"
@@ -9,6 +9,7 @@
 #include "IocpManager.h"
 #include "ClientSessionManager.h"
 #include "LockOrderChecker.h"
+#include "Packet.h"
 
 #define CLIENT_BUFSIZE	65536
 
@@ -45,7 +46,7 @@ void ClientSession::SessionReset()
 
 	mSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 
-	/// ÇÃ·¹ÀÌ¾î ¸®¼Â
+	/// í”Œë ˆì´ì–´ ë¦¬ì…‹
 	mPlayer->DoSync(&Player::PlayerReset);
 }
 
@@ -55,8 +56,8 @@ bool ClientSession::PostAccept()
 
 	OverlappedAcceptContext* acceptContext = new OverlappedAcceptContext(this);
 	DWORD bytes = 0;
-	// Á¶½ÉÇØ!
-	// DWORD flags = 0; // »ç¿ë ¾È ÇÔ
+	// ì¡°ì‹¬í•´!
+	// DWORD flags = 0; // ì‚¬ìš© ì•ˆ í•¨
 	acceptContext->mWsaBuf.len = 0;
 	acceptContext->mWsaBuf.buf = nullptr;
 
@@ -146,10 +147,10 @@ void ClientSession::AcceptCompletion()
 		printf_s("[DEBUG] PreRecv error: %d\n", GetLastError());
 	}
 
-	/// Å¸ÀÌ¸Ó Å×½ºÆ®¸¦ À§ÇØ 10ms ÈÄ¿¡ player °¡µ¿ ¤¡¤¡
+	/// íƒ€ì´ë¨¸ í…ŒìŠ¤íŠ¸ë¥¼ ìœ„í•´ 10ms í›„ì— player ê°€ë™ ã„±ã„±
 	DoSyncAfter(10, mPlayer, &Player::Start, 1000);
 
-	// ¿ä³ğÀÇ À§Ä¡´Â ¿ø·¡ C_LOGIN ÇÚµé¸µ ÇÒ ¶§ ÇØ¾ßÇÏ´Â°ÅÁö¸¸ Áö±İÀº Á¢¼Ó ¿Ï·á ½ÃÁ¡¿¡¼­ Å×½ºÆ® ¤¡¤¡
+	// ìš”ë†ˆì˜ ìœ„ì¹˜ëŠ” ì›ë˜ C_LOGIN í•¸ë“¤ë§ í•  ë•Œ í•´ì•¼í•˜ëŠ”ê±°ì§€ë§Œ ì§€ê¸ˆì€ ì ‘ì† ì™„ë£Œ ì‹œì ì—ì„œ í…ŒìŠ¤íŠ¸ ã„±ã„±
 	// static int id = 101;
 	// mPlayer.TestCreatePlayerData( L"testName" );
 	// mPlayer.RequestLoad( id++ );
@@ -171,4 +172,67 @@ void ClientSession::OnRelease()
 	TRACE_THIS;
 
 	GClientSessionManager->ReturnClientSession( this );
+}
+
+void ClientSession::PacketHandling()
+{
+	TRACE_THIS;
+
+	size_t len = mRecvBuffer.GetContiguiousBytes();
+
+	if ( len == 0 )
+		return;
+
+	PacketHeader* recvPacket = reinterpret_cast<PacketHeader*>( mRecvBuffer.GetBufferStart() );
+
+	// ë§™ì†Œì‚¬ ã…‹ã…‹ã…‹
+	// ì¼ë‹¨ switch-caseë¡œ ã…‹ã…‹ã…‹
+	switch ( recvPacket->mType )
+	{
+	case PKT_CS_LOGIN:
+		// dbì— ë¡œê·¸ì¸í•˜ê³  
+	{
+
+	}
+		break;
+	case PKT_CS_LOGOUT:
+		// dbì— ë¡œê·¸ì•„ì›ƒí•˜ê³  
+		break;
+	case PKT_CS_CHAT:
+		{
+			ChatBroadcastRequest* clientPacket = reinterpret_cast<ChatBroadcastRequest*>( recvPacket );
+			ChatBroadcastResponse* packet = new ChatBroadcastResponse();
+
+			packet->mPlayerId = clientPacket->mPlayerId;
+			memcpy( packet->mName, mPlayer->GetName(), sizeof( packet->mName ) );
+			memcpy( packet->mChat, clientPacket->mChat, sizeof( packet->mName ) );
+
+			GClientSessionManager->Broadcast( reinterpret_cast<char*>( packet ), packet->mSize );
+
+			delete packet;
+		}
+		break;
+	case PKT_CS_MOVE:
+		{
+			MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
+
+			mPlayer->Move( Float3D( clientPacket->mX, clientPacket->mY, clientPacket->mZ ) );
+
+			MoveResponse* packet = new MoveResponse();
+			packet->mPlayerId = clientPacket->mPlayerId;
+			packet->mX = clientPacket->mX;
+			packet->mY = clientPacket->mY;
+			packet->mZ = clientPacket->mZ;
+
+			// ì¼ë‹¨ ì „ì²´ ë°©ì†¡
+			GClientSessionManager->Broadcast( reinterpret_cast<char*>( packet ), packet->mSize );
+
+			delete packet;
+		}
+		break;
+	default:
+		break;
+	}
+
+	mRecvBuffer.Remove( len );
 }

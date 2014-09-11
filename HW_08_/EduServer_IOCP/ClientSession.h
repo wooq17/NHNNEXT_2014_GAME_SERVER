@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "ObjectPool.h"
 #include "MemoryPool.h"
 #include "CircularBuffer.h"
@@ -21,6 +21,8 @@ public:
 
 	void	SetSocket(SOCKET sock) { mSocket = sock; }
 	SOCKET	GetSocket() const { return mSocket;  }
+
+	void	PacketHandling();
 
 	virtual void OnDisconnect( DisconnectReason dr );
 	virtual void OnRelease();

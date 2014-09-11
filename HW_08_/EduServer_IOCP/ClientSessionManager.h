@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <WinSock2.h>
 #include "XTL.h"
 #include "FastSpinlock.h"
@@ -18,11 +18,16 @@ public:
 
 	void ReturnClientSession(ClientSession* client);
 
-	
+	void RegisterLogedinSession( ClientSession* client );
+	void DeregisterLogedinSession( ClientSession* client );
+	void Broadcast( const char* message, int len );
 
 private:
 	typedef xlist<ClientSession*>::type ClientList;
 	ClientList	mFreeSessionList;
+
+	typedef xmap<SOCKET, ClientSession*>::type ClientMap;
+	ClientMap	mLogedinSessionList;
 
 	FastSpinlock mLock;
 

@@ -18,11 +18,17 @@ public:
 	void UnregisterPlayer(int playerId);
 
 	int GetCurrentPlayers(PlayerList& outList);
+
+	void BroadcastChatting( const char* message, int len, int from );
+	void BroadcastMoving( Float3D currentPos, int from );
 	
 private:
 	FastSpinlock mLock;
 	int mCurrentIssueId;
 	xmap<int, std::shared_ptr<Player>>::type mPlayerMap;
+
+	// 플레이어들을 zone 별로 관리
+	// 
 };
 
 extern PlayerManager* GPlayerManager;

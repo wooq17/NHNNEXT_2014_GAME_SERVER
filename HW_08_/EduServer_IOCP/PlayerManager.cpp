@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "Player.h"
 #include "PlayerManager.h"
+#include "ClientSession.h"
 
 PlayerManager* GPlayerManager = nullptr;
 
@@ -38,4 +39,22 @@ int PlayerManager::GetCurrentPlayers(PlayerList& outList)
 	// WIP
 
 	return total;
+}
+
+void PlayerManager::BroadcastChatting( const char* message, int len, int from )
+{
+	// clientSessionManager에게 방송 요청 
+	// PlayerWideEvent로 구현? 그러면 메시지는 복사하고 사용?
+	for ( auto it : mPlayerMap )
+	{
+		// 조심해!
+		// 보낸 사람 표시할 것
+		it.second->GetSession()->PostSend( message, len );
+	}
+}
+
+void PlayerManager::BroadcastMoving( Float3D currentPos, int from )
+{
+	// from의 zone 체크해서 근처 플레이어에게만 전송
+	
 }

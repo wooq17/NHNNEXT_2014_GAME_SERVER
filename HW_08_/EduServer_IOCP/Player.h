@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "ContentsConfig.h"
 #include "SyncExecutable.h"
@@ -29,15 +29,20 @@ public:
 	bool IsAlive() { return mIsAlive;  }
 	void Start(int heartbeat);
 
-	void OnTick(); ///< ·Î±×ÀÎÈÄ 1ÃÊ¸¶´Ù ºÒ¸®´Â ±â´É
+	void OnTick(); ///< ë¡œê·¸ì¸í›„ 1ì´ˆë§ˆë‹¤ ë¶ˆë¦¬ëŠ” ê¸°ëŠ¥
 
 	void PlayerReset();
 
-	/// ÇÃ·¹ÀÌ¾î¿¡°Ô ¹öÇÁ¸¦ °É¾îÁÖ´Â ÇÔ¼ö¶ó°í Ä¡ÀÚ.
+	/// í”Œë ˆì´ì–´ì—ê²Œ ë²„í”„ë¥¼ ê±¸ì–´ì£¼ëŠ” í•¨ìˆ˜ë¼ê³  ì¹˜ìž.
 	void AddBuff(int fromPlayerId, int buffId, int duration);
 
-	/// ÁÖ±âÀûÀ¸·Î ¹öÇÁ ½Ã°£ ¾÷µ¥ÀÌÆ®ÇÏ´Â ÇÔ¼ö
+	/// ì£¼ê¸°ì ìœ¼ë¡œ ë²„í”„ ì‹œê°„ ì—…ë°ì´íŠ¸í•˜ëŠ” í•¨ìˆ˜
 	void DecayTickBuff();
+
+	void Move( Float3D newPos );
+	wchar_t* GetName() { return mPlayerName; }
+
+	ClientSession* GetSession() { return mSession; }
 
 private:
 
@@ -46,16 +51,17 @@ private:
 
 	FastSpinlock mPlayerLock;
 	int		mPlayerId;
-	float	mPosX;
-	float	mPosY;
-	float	mPosZ;
+	// float	mPosX;
+	// float	mPosY;
+	// float	mPosZ;
+	Float3D		mPos;
 	bool	mIsValid;
 	wchar_t	mPlayerName[MAX_NAME_LEN];
 	wchar_t	mComment[MAX_COMMENT_LEN];
 	int		mHeartBeat;
 	bool	mIsAlive;
 
-	/// ¹öÇÁ ¸®½ºÆ®´Â lock¾øÀÌ GCE·Î ÇØº¸±â
+	/// ë²„í”„ ë¦¬ìŠ¤íŠ¸ëŠ” lockì—†ì´ GCEë¡œ í•´ë³´ê¸°
 	std::map<int, int> mBuffList; ///< (id, time)
 
 	ClientSession* const mSession;

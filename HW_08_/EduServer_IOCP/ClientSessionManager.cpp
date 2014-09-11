@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "FastSpinlock.h"
 #include "EduServer_IOCP.h"
 #include "ClientSession.h"
@@ -15,6 +15,12 @@ ClientSessionManager::~ClientSessionManager()
 	{
 		xdelete( it );
 	}
+
+	for ( auto it : mLogedinSessionList )
+	{
+		xdelete( it.second );
+	}
+	mLogedinSessionList.clear();
 }
 
 void ClientSessionManager::PrepareClientSessions()
@@ -28,6 +34,8 @@ void ClientSessionManager::PrepareClientSessions()
 			
 		mFreeSessionList.push_back(client);
 	}
+
+	// mLogedinSessionList.clear();
 }
 
 
@@ -39,6 +47,9 @@ void ClientSessionManager::ReturnClientSession(ClientSession* client)
 	FastSpinlockGuard guard(mLock);
 
 	CRASH_ASSERT(client->mConnected == 0 && client->mRefCount == 0);
+
+	// 활성화 된 리스트에서 제거하고 초기화
+	DeregisterLogedinSession( client );
 
 	client->SessionReset();
 
@@ -66,4 +77,34 @@ bool ClientSessionManager::AcceptClientSessions()
 
 
 	return true;
+}
+
+void ClientSessionManager::RegisterLogedinSession( ClientSession* client )
+{
+	FastSpinlockGuard guard( mLock );
+
+	auto it = mLogedinSessionList.find( client->GetSocket() );
+	CRASH_ASSERT( it == mLogedinSessionList.end() ); // 같은 게 이미 있으면 이상하다
+
+	mLogedinSessionList.insert( xmap<SOCKET, ClientSession*>::type::value_type( client->GetSocket(), client ) );
+}
+
+void ClientSessionManager::DeregisterLogedinSession( ClientSession* client )
+{
+	FastSpinlockGuard guard( mLock );
+
+	auto it = mLogedinSessionList.find( client->GetSocket() );
+	CRASH_ASSERT( it != mLogedinSessionList.end() );
+	mLogedinSessionList.erase( it );
+}
+
+void ClientSessionManager::Broadcast( const char* message, int len )
+{
+	// 잠궈야되나...
+	FastSpinlockGuard guard( mLock );
+
+	for ( auto it : mLogedinSessionList )
+	{
+		it.second->PostSend( message, len );
+	}
 }
