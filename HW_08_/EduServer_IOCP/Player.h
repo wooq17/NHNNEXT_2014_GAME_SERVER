@@ -27,7 +27,7 @@ public:
 
 	int GetPlayerId() { return mPlayerId; }
 	bool IsAlive() { return mIsAlive;  }
-	void Start(int heartbeat);
+	void Start(int id);
 
 	void OnTick(); ///< 로그인후 1초마다 불리는 기능
 
@@ -48,6 +48,8 @@ public:
 	wchar_t* GetName() { return mPlayerName; }
 
 	ClientSession* GetSession() { return mSession; }
+	int GetZoneIdx() { return mZoneIdx; }
+	void UpdateZoneIdx();
 
 private:
 
@@ -63,6 +65,7 @@ private:
 	wchar_t	mComment[MAX_COMMENT_LEN];
 	int		mHeartBeat;
 	bool	mIsAlive;
+	int		mZoneIdx;
 
 	/// 버프 리스트는 lock없이 GCE로 해보기
 	std::map<int, int> mBuffList; ///< (id, time)

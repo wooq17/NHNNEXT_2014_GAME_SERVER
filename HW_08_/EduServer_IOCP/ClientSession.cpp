@@ -148,7 +148,8 @@ void ClientSession::AcceptCompletion()
 	}
 
 	/// 타이머 테스트를 위해 10ms 후에 player 가동 ㄱㄱ
-	DoSyncAfter(10, mPlayer, &Player::Start, 1000);
+	// 로그인 성공하면 수행하도록 변경 
+	// DoSyncAfter(10, mPlayer, &Player::Start, 1000);
 
 	// 요놈의 위치는 원래 C_LOGIN 핸들링 할 때 해야하는거지만 지금은 접속 완료 시점에서 테스트 ㄱㄱ
 	// static int id = 101;
@@ -213,16 +214,13 @@ void ClientSession::PacketHandling()
 			if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
 				break;
 
-			ChatBroadcastResponse* packet = new ChatBroadcastResponse();
+			ChatBroadcastResponse packet;
 
-			packet->mPlayerId = clientPacket->mPlayerId;
-			memcpy( packet->mName, mPlayer->GetName(), sizeof( packet->mName ) );
-			memcpy( packet->mChat, clientPacket->mChat, sizeof( packet->mName ) );
+			packet.mPlayerId = clientPacket->mPlayerId;
+			memcpy( packet.mName, mPlayer->GetName(), sizeof( packet.mName ) );
+			memcpy( packet.mChat, clientPacket->mChat, sizeof( packet.mChat ) );
 
-			// 블럭이네...
-			GClientSessionManager->Broadcast( reinterpret_cast<char*>( packet ), packet->mSize );
-
-			delete packet;
+			GClientSessionManager->NearbyBroadcast( reinterpret_cast<char*>( &packet ), packet.mSize, mPlayer->GetZoneIdx() );
 		}
 		break;
 	case PKT_CS_MOVE:

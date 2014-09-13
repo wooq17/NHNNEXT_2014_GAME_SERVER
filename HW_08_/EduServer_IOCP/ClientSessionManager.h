@@ -20,7 +20,7 @@ public:
 
 	void RegisterLogedinSession( ClientSession* client );
 	void DeregisterLogedinSession( ClientSession* client );
-	void Broadcast( const char* message, int len );
+	void NearbyBroadcast( const char* message, int len, int from );
 
 private:
 	typedef xlist<ClientSession*>::type ClientList;

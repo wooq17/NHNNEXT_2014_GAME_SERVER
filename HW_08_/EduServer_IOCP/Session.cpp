@@ -242,4 +242,3 @@ void Session::EchoBack()
 	mRecvBuffer.Remove(len);
 
 }
-

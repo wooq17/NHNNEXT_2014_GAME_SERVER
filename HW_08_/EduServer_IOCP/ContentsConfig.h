@@ -3,6 +3,10 @@
 #define MAX_NAME_LEN	32
 #define MAX_COMMENT_LEN	256
 
+#define ZONE_NUMBER_EACH_AXIS	10
+#define ZONE_NUMBER				100
+#define ZONE_RANGE				100
+
 struct Float3D
 {
 	Float3D()

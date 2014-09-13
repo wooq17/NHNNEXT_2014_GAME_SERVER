@@ -3,6 +3,7 @@
 #include "EduServer_IOCP.h"
 #include "ClientSession.h"
 #include "ClientSessionManager.h"
+#include "PlayerManager.h"
 #include "IocpManager.h"
 #include "MemoryPool.h"
 
@@ -98,13 +99,16 @@ void ClientSessionManager::DeregisterLogedinSession( ClientSession* client )
 	mLogedinSessionList.erase( it );
 }
 
-void ClientSessionManager::Broadcast( const char* message, int len )
+void ClientSessionManager::NearbyBroadcast( const char* message, int len, int from )
 {
-	// 잠궈야되나...
-	FastSpinlockGuard guard( mLock );
+	PlayerList targetList;
+	
+	// 방송할 애들을 playerManager로부터 뽑아와서
+	int targetNumber = GPlayerManager->GetClosePlayers( targetList, from );
 
-	for ( auto it : mLogedinSessionList )
+	// 순회하면서 방송
+	for ( auto it : targetList )
 	{
-		it.second->PostSend( message, len );
+		it->GetSession()->PostSend( message, len );
 	}
 }
