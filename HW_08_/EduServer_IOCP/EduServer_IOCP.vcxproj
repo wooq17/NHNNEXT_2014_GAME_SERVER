@@ -173,7 +173,7 @@
     <ClInclude Include="PlayerManager.h" />
     <ClInclude Include="PlayerWideEvent.h" />
     <ClInclude Include="RSA.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="ServerSession.h" />
     <ClInclude Include="Session.h" />

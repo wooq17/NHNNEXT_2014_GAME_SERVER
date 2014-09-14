@@ -5,7 +5,6 @@
 #include "SyncExecutable.h"
 #include "Session.h"
 #include "Player.h"
-// #include "RSA.h"
 #include "Crypt.h"
 
 class ClientSessionManager;

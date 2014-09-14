@@ -10,6 +10,7 @@
 #include "ClientSessionManager.h"
 #include "LockOrderChecker.h"
 #include "Packet.h"
+#include "RSA.h"
 
 #define CLIENT_BUFSIZE	65536
 
