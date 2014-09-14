@@ -151,6 +151,7 @@
     <ClInclude Include="ClientSession.h" />
     <ClInclude Include="ClientSessionManager.h" />
     <ClInclude Include="ContentsConfig.h" />
+    <ClInclude Include="Crypt.h" />
     <ClInclude Include="DBContext.h" />
     <ClInclude Include="DBHelper.h" />
     <ClInclude Include="DBManager.h" />
@@ -171,6 +172,9 @@
     <ClInclude Include="PlayerDBContext.h" />
     <ClInclude Include="PlayerManager.h" />
     <ClInclude Include="PlayerWideEvent.h" />
+    <ClInclude Include="RSA.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="ServerSession.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="SQLStatement.h" />
@@ -187,6 +191,7 @@
     <ClCompile Include="CircularBuffer.cpp" />
     <ClCompile Include="ClientSession.cpp" />
     <ClCompile Include="ClientSessionManager.cpp" />
+    <ClCompile Include="Crypt.cpp" />
     <ClCompile Include="DBContext.cpp" />
     <ClCompile Include="DBHelper.cpp" />
     <ClCompile Include="DBManager.cpp" />

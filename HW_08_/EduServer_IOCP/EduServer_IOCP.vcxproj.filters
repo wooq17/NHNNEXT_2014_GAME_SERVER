@@ -132,6 +132,12 @@
     <ClInclude Include="Packet.h">
       <Filter>Contents</Filter>
     </ClInclude>
+    <ClInclude Include="Crypt.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="RSA.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -214,6 +220,9 @@
     </ClCompile>
     <ClCompile Include="PlayerDBContext.cpp">
       <Filter>Contents</Filter>
+    </ClCompile>
+    <ClCompile Include="Crypt.cpp">
+      <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

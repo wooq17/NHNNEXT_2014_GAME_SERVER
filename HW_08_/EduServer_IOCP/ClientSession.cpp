@@ -48,6 +48,7 @@ void ClientSession::SessionReset()
 
 	/// 플레이어 리셋
 	mPlayer->DoSync(&Player::PlayerReset);
+	mCrypt.ReleaseResources();
 }
 
 bool ClientSession::PostAccept()
@@ -157,6 +158,8 @@ void ClientSession::AcceptCompletion()
 	// mPlayer.RequestLoad( id++ );
 	// mPlayer.TestDeletePlayerData( id );
 	//
+
+
 }
 
 void ClientSession::OnDisconnect( DisconnectReason dr )
