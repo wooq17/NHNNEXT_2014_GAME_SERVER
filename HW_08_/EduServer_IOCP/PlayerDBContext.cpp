@@ -25,17 +25,15 @@ bool CreatePlayerDataContext::OnSQLExecute()
 	}
 	*/
 
-	int result = 0;
-
 	dbHelper.BindParamText(mPlayerName);
-	dbHelper.BindResultColumnInt(&result);
+	dbHelper.BindResultColumnInt( &mPlayerId );
 
 	if (dbHelper.Execute(SQL_CreatePlayer))
 	{
 		if (dbHelper.FetchRow())
 		{
 			/// 적용받은 행이 하나도 없다면, 실패라고 간주하자
-			return result != 0;
+			return mPlayerId != -1;
 		}
 	}
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#define LISTEN_PORT		9990
+#define LISTEN_PORT		9002
 #define MAX_CONNECTION	10000
 
 #define CONNECT_SERVER_ADDR	"127.0.0.1"
