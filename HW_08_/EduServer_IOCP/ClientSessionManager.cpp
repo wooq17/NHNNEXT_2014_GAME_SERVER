@@ -50,7 +50,8 @@ void ClientSessionManager::ReturnClientSession(ClientSession* client)
 	CRASH_ASSERT(client->mConnected == 0 && client->mRefCount == 0);
 
 	// 활성화 된 리스트에서 제거하고 초기화
-	DeregisterLogedinSession( client );
+	// 디비에서 로그아웃 처리 완료되면 거기서 바로 진행
+	// DeregisterLogedinSession( client );
 
 	client->SessionReset();
 
