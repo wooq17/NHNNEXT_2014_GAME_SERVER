@@ -119,7 +119,7 @@ void ClientSession::ConnectCompletion()
 		return;
 	}
 
-	if ( false == PostRecv() )
+	if ( false == PreRecv() )
 	{
 		printf_s( "[DEBUG] PreRecv error: %d\n", GetLastError() );
 	}
@@ -217,9 +217,10 @@ void ClientSession::RecvCompletion(DWORD transferred)
 	// 버퍼에 받은 길이만큼 저장
  	mRecvBuffer.Commit(transferred);
 
-	while ( !PacketHandler() )
-	{
-	}
+	PacketHandler();
+// 	while ( !PacketHandler() )
+// 	{
+// 	}
 }
 
 
@@ -297,14 +298,17 @@ bool ClientSession::PacketHandler()
 		{
 			LoginResponse* clientPacket = reinterpret_cast<LoginResponse*>( recvPacket );
 			mPlayer->Start( clientPacket->mPlayerId );
-			wprintf_s( L"[LOG] %s Recv login packet \n", mPlayer->GetName() );
+			wprintf_s( L"[LOG] %s <<<< login packet \n", mPlayer->GetName() );
+
+			// move (0,0,0) to random position
+			GSessionManager->CreateMovePacket( this );
 		}
 			break;
 		case PKT_SC_LOGOUT:
 		{
 			LogoutResponse* clientPacket = reinterpret_cast<LogoutResponse*>( recvPacket );
 			mPlayer->PlayerReset();
-			wprintf_s( L"[LOG] %s Recv logout packet\n", mPlayer->GetName() );
+			wprintf_s( L"[LOG] %s <<<< logout packet\n", mPlayer->GetName() );
 			DisconnectRequest( DR_NONE );
 		}
 			break;
@@ -316,7 +320,6 @@ bool ClientSession::PacketHandler()
 				break;
 			}
 				
-
 			ChatBroadcastResponse* clientPacket = reinterpret_cast<ChatBroadcastResponse*>( recvPacket );
 			if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
 				break;
@@ -329,7 +332,7 @@ bool ClientSession::PacketHandler()
 				wprintf_s( L"[LOG] %s player dead\n", mPlayer->GetName() );
 				if ( mPlayer->SendLogout() )
 				{
-					wprintf_s( L"[LOG] %s Send logout packet\n", mPlayer->GetName() );
+					wprintf_s( L"[LOG] %s >>>> logout packet\n", mPlayer->GetName() );
 				}
 			}
 		}
@@ -347,7 +350,7 @@ bool ClientSession::PacketHandler()
 				break;
 
 			mPlayer->SetPosition( clientPacket->mX, clientPacket->mY, clientPacket->mZ );
-			wprintf_s( L"[LOG] %s Recv move packet ( %f , %f , %f )\n", mPlayer->GetName(), clientPacket->mX, clientPacket->mY, clientPacket->mZ );
+			wprintf_s( L"[LOG] %s <<<< move packet ( %f , %f , %f )\n", mPlayer->GetName(), clientPacket->mX, clientPacket->mY, clientPacket->mZ );
 		}
 			break;
 		default:

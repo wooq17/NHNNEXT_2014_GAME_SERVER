@@ -238,11 +238,11 @@ bool ClientSession::PacketHandling()
 		break;
 	default:
 		// echo
-		if ( false == PostSend( mRecvBuffer.GetBufferStart(), len ) )
-			return false;
+		//if ( false == PostSend( mRecvBuffer.GetBufferStart(), len ) )
+		//	return false;
 
-		mRecvBuffer.Remove( len );
-		break;
+		//mRecvBuffer.Remove( len );
+		return true;
 	}
 
 	// CRASH_ASSERT( len == recvPacket->mSize );
@@ -251,5 +251,11 @@ bool ClientSession::PacketHandling()
 
 	DWORD retVal = recvPacket->mSize;
 	mRecvBuffer.Remove( recvPacket->mSize );
+
+	if (len > retVal)
+	{
+		printf("\n\n[DEBUG] recv buffer left %d byte more\n\n", len - retVal);
+	}
+
 	return len == retVal;
 }

@@ -19,6 +19,10 @@ public:
 	void PrepareSessions();
 	bool ConnectSessions();
 
+	void CreateMovePacket(ClientSession* client);
+	void CreateLoginPacket(ClientSession* client);
+	void CreateMessagePacket(ClientSession* client);
+
 	void ReturnClientSession(ClientSession* client);
 		
 	void SetMaxConnection( int val ) { mMaxConnection = val; }	
