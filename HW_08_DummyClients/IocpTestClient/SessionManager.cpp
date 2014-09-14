@@ -27,7 +27,7 @@ void SessionManager::PrepareSessions()
 {
 	CRASH_ASSERT(LThreadType == THREAD_MAIN);
 
-	srand( (int)time(NULL) );
+	//srand( (int)time(NULL) );
 	for (int i = 0; i < mMaxConnection; ++i)
 	{
 		ClientSession* client = xnew<ClientSession>();
@@ -99,19 +99,7 @@ void SessionManager::DoPeriodJob()
 		// player login		
 		if ( !client->mPlayer->IsLoaded() )
 		{
-			wchar_t name[6];
-			name[0] = static_cast<wchar_t>( rand() % 26 + 65 );
-			name[1] = static_cast<wchar_t>( rand() % 26 + 65 );
-			name[2] = static_cast<wchar_t>( rand() % 26 + 65 );
-			name[3] = static_cast<wchar_t>( rand() % 26 + 65 );
-			name[4] = static_cast<wchar_t>( rand() % 26 + 65 );
-			name[5] = '\0';
-
-			if ( client->mPlayer->SendLogin( name ) )
-			{
-				wprintf_s( L"[LOG] %s send login packet\n", name );				
-				client->mPlayer->SetName( name );
-			}
+			CreateLoginPacket( client );
 			continue;
 		}
 		
@@ -121,43 +109,69 @@ void SessionManager::DoPeriodJob()
 // 		}
 
 		// 1 / 5ÀÇ È®·ü·Î send message
-		if ( 0 == rand() % 5 )
+		if ( 0 == rand() % 10 )
 		{
-			wchar_t chatMessage[11];
-			chatMessage[0] = static_cast<wchar_t>( rand() % 26 + 97 );
-			chatMessage[1] = static_cast<wchar_t>( rand() % 26 + 97 );
-			chatMessage[2] = static_cast<wchar_t>( rand() % 26 + 97 );
-			chatMessage[3] = static_cast<wchar_t>( rand() % 26 + 97 );
-			chatMessage[4] = static_cast<wchar_t>( rand() % 26 + 97 );
-			chatMessage[5] = static_cast<wchar_t>( rand() % 26 + 97 );
-			chatMessage[6] = static_cast<wchar_t>( rand() % 26 + 97 );
-			chatMessage[7] = static_cast<wchar_t>( rand() % 26 + 97 );
-			chatMessage[8] = static_cast<wchar_t>( rand() % 26 + 97 );
-			chatMessage[9] = static_cast<wchar_t>( rand() % 26 + 97 );
-			chatMessage[10] = '\0';
-			
-			if ( client->mPlayer->SendChat( chatMessage ) )
-			{
-				wprintf_s( L"[LOG] %s send chat Message : %s\n", client->mPlayer->GetName(), chatMessage );
-			}
-			
+			CreateMessagePacket( client );
+			continue;
 		}
 
 		// 1 / 3ÀÇ È®·ü·Î move
- 		if ( 0 == rand() % 3 )
+ 		if ( 0 == rand() % 5 )
  		{
- 			Float3D pos{ 
- 				static_cast<float>( rand() % 2000 - 1000 ),
- 				static_cast<float>( rand() % 2000 - 1000 ),
- 				static_cast<float>( rand() % 2000 - 1000 )
- 			};
- 
- 			if ( client->mPlayer->SendMove( pos ) )
- 			{
- 				wprintf_s( L"[LOG] %s Send move to ( %f , %f , %f )\n", client->mPlayer->GetName(), pos.m_X, pos.m_Y, pos.m_Z );
- 			}
+			CreateMovePacket( client );
  		}
 
 	}
 
+}
+
+void SessionManager::CreateLoginPacket( ClientSession* client )
+{
+	wchar_t name[6];
+	name[0] = static_cast<wchar_t>( rand() % 26 + 65 );
+	name[1] = static_cast<wchar_t>( rand() % 26 + 65 );
+	name[2] = static_cast<wchar_t>( rand() % 26 + 65 );
+	name[3] = static_cast<wchar_t>( rand() % 26 + 65 );
+	name[4] = static_cast<wchar_t>( rand() % 26 + 65 );
+	name[5] = '\0';
+
+	if ( client->mPlayer->SendLogin( name ) )
+	{
+		wprintf_s( L"[LOG] %s >>>> login packet\n", name );
+		client->mPlayer->SetName( name );
+	}
+}
+
+void SessionManager::CreateMessagePacket( ClientSession* client )
+{
+	wchar_t chatMessage[11];
+	chatMessage[0] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[1] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[2] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[3] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[4] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[5] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[6] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[7] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[8] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[9] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[10] = '\0';
+
+	if ( client->mPlayer->SendChat( chatMessage ) )
+	{
+		wprintf_s( L"[LOG] %s >>>> chat Message : %s\n", client->mPlayer->GetName(), chatMessage );
+	}
+}
+
+void SessionManager::CreateMovePacket( ClientSession* client )
+{
+	float x = static_cast<float>( rand() % 2000 - 1000 );
+	float y = static_cast<float>( rand() % 2000 - 1000 );
+	float z = static_cast<float>( rand() % 2000 - 1000 );
+	Float3D pos{ x, y, z };
+
+	if ( client->mPlayer->SendMove( pos ) )
+	{
+		wprintf_s( L"[LOG] %s >>>> move to ( %f , %f , %f )\n", client->mPlayer->GetName(), pos.m_X, pos.m_Y, pos.m_Z );
+	}
 }
