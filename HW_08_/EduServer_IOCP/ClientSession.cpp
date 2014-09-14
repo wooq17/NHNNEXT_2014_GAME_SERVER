@@ -48,8 +48,10 @@ void ClientSession::SessionReset()
 	mSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 
 	/// 플레이어 리셋
-	mPlayer->DoSync(&Player::PlayerReset);
+	mPlayer->DoSync( &Player::PlayerReset );
+
 	mCrypt.ReleaseResources();
+	mIsKeyShared = false;
 }
 
 bool ClientSession::PostAccept()
@@ -161,6 +163,51 @@ void ClientSession::AcceptCompletion()
 	//
 
 
+	// 여기서 첫 암호화 한 베이스 코드를 보낸다
+	DWORD headerLen = 0;
+	PBYTE header = nullptr;
+	header = RSA::GetHeader( headerLen );
+
+	mCrypt.GenerateBaseKey();
+	DATA_BLOB g = mCrypt.GetG();
+	DATA_BLOB p = mCrypt.GetP();
+
+	unsigned short pktLen = sizeof( PacketHeader ) + headerLen + P_LENGTH + G_LENGTH;
+	PBYTE pkt = (PBYTE)malloc( pktLen );
+	PBYTE currentPos = pkt;
+
+	( (PacketHeader*)currentPos )->mSize = pktLen;
+	( (PacketHeader*)currentPos )->mType = PKT_SC_BASE_PUBLIC_KEY;
+	currentPos += sizeof( PacketHeader );
+
+	memcpy( currentPos, header, headerLen );
+	currentPos += headerLen;
+
+	memcpy( currentPos, &g.cbData, 4 );
+	currentPos += 4;
+
+	memcpy( currentPos, g.pbData, 64 );
+	currentPos += 64;
+
+	memcpy( currentPos, &p.cbData, 4 );
+	currentPos += 4;
+
+	memcpy( currentPos, p.pbData, 64 );
+	currentPos += 64;
+
+	if ( !RSA::Encrypt( ( pkt + headerLen ), P_LENGTH + G_LENGTH ) )
+	{
+		printf( "[RSA] Encrypt fail %d\n", GetLastError() );
+		DisconnectRequest( DR_ONCONNECT_ERROR );
+	}
+
+	if ( !PostSend( (char*)pkt, pktLen ) )
+	{
+		printf( "[RSA] post key fail %d\n", GetLastError() );
+		DisconnectRequest( DR_ONCONNECT_ERROR );
+	}
+
+	delete pkt;
 }
 
 void ClientSession::OnDisconnect( DisconnectReason dr )
@@ -190,10 +237,56 @@ bool ClientSession::PacketHandling()
 
 	PacketHeader* recvPacket = reinterpret_cast<PacketHeader*>( mRecvBuffer.GetBufferStart() );
 
+	if ( mIsKeyShared )
+	{
+		if ( !mCrypt.Decrypt( (PBYTE)recvPacket + sizeof( PacketHeader ), recvPacket->mSize ) )
+			printf( "[DH] Decrypt failed\n" );
+	}
+
 	// 맙소사 ㅋㅋㅋ
 	// 일단 switch-case로 ㅋㅋㅋ
 	switch ( recvPacket->mType )
 	{
+	case PKT_CS_EXPORT_PUBLIC_KEY:
+	{
+		// mSize / mType / len / data
+		DWORD exportedLen = 0;
+		memcpy( &exportedLen, recvPacket + sizeof( PacketHeader ), sizeof( DWORD ) );
+		PBYTE exportedData = PBYTE( recvPacket + sizeof( PacketHeader ) + sizeof( DWORD ) );
+
+		if ( !mCrypt.GenerateSessionKey( exportedData, exportedLen ) )
+			break;
+
+		// send server public key
+		if ( !mCrypt.GeneratePrivateKey() )
+			break;
+
+		mIsKeyShared = true;
+
+		exportedData = mCrypt.ExportPublicKey( &exportedLen );
+
+		unsigned short pktLen = sizeof( PacketHeader ) + sizeof( DWORD ) + exportedLen;
+		PBYTE pkt = (PBYTE)malloc( pktLen );
+		PBYTE currentPos = pkt;
+
+		( (PacketHeader*)currentPos )->mSize = pktLen;
+		( (PacketHeader*)currentPos )->mType = PKT_SC_EXPORT_PUBLIC_KEY;
+		currentPos += sizeof( PacketHeader );
+
+		memcpy( currentPos, &exportedLen, sizeof( DWORD ) );
+		currentPos += sizeof( DWORD );
+
+		memcpy( currentPos, exportedData, exportedLen );
+
+		if ( !PostSend( (char*)pkt, pktLen ) )
+		{
+			printf( "[RSA] post key fail %d\n", GetLastError() );
+			DisconnectRequest( DR_ONCONNECT_ERROR );
+		}
+
+		delete pkt;
+	}
+		break;
 	case PKT_CS_LOGIN:
 		// db에 로그인하고 
 		{

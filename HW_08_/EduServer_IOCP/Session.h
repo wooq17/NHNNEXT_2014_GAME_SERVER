@@ -2,6 +2,7 @@
 #include "CircularBuffer.h"
 #include "OverlappedIOContext.h"
 #include "XTL.h"
+#include "Crypt.h"
 
 class Session
 {
@@ -46,6 +47,8 @@ protected:
 	volatile long	mRefCount;
 	volatile long	mConnected;
 
+	Crypt			mCrypt;
+	bool			mIsKeyShared;
 };
 
 

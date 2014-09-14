@@ -6,11 +6,12 @@
 #include "OverlappedIOContext.h"
 #include "Session.h"
 #include "IocpManager.h"
+#include "Packet.h"
 
 __declspec( thread ) xdeque<Session*>::type* LSendRequestSessionList = nullptr;
 
 Session::Session(size_t sendBufSize, size_t recvBufSize) 
-: mSendBuffer( sendBufSize ), mRecvBuffer( recvBufSize ), mConnected( 0 ), mRefCount( 0 ), mSendPendingCount( 0 ), mSendBufferLock( LO_LUGGAGE_CLASS )
+: mSendBuffer( sendBufSize ), mRecvBuffer( recvBufSize ), mConnected( 0 ), mRefCount( 0 ), mSendPendingCount( 0 ), mSendBufferLock( LO_LUGGAGE_CLASS ), mIsKeyShared( false )
 {
 	mSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 }
@@ -35,7 +36,6 @@ void Session::DisconnectRequest(DisconnectReason dr)
 			printf_s("Session::DisconnectRequest Error : %d\n", GetLastError());
 		}
 	}
-
 }
 
 
@@ -122,6 +122,12 @@ bool Session::PostSend(const char* data, size_t len)
 	CRASH_ASSERT( *size != 65278 );
 
 	memcpy(destData, data, len);
+
+	if ( mIsKeyShared )
+	{
+		if ( !mCrypt.Encrypt( (PBYTE)destData + sizeof( PacketHeader ), ( (PacketHeader*)destData )->mSize ) )
+			printf( "[DH] Decrypt failed\n" );
+	}
 
 	mSendBuffer.Commit(len);
 

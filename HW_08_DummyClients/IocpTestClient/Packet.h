@@ -1,9 +1,8 @@
 ﻿/* 테스트용 임시 사용 */
 
 #pragma once
-#include "stdafx.h"
 
-#define MAX_CHAT_LEN	1024
+#define MAX_CHAT_LEN	128
 #define MAX_NAME_LEN	32
 
 enum PacketTypes
@@ -21,6 +20,12 @@ enum PacketTypes
 
 	PKT_CS_MOVE = 20,
 	PKT_SC_MOVE = 21,
+
+	// 암호화 과정
+	PKT_SC_BASE_PUBLIC_KEY = 100,	// 비대칭키로 암호화 ( 복호화는 공개키로 하고, 암호화는 서버만 가진 비밀 키로 )
+
+	PKT_CS_EXPORT_PUBLIC_KEY = 110,
+	PKT_SC_EXPORT_PUBLIC_KEY = 111,	// 여기까지 주고 받으면 서로 공유키 가지게 됨
 };
 
 #pragma pack(push, 1)

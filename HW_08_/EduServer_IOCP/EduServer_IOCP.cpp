@@ -13,6 +13,7 @@
 #include "PlayerManager.h"
 #include "GrandCentralExecuter.h"
 #include "DBManager.h"
+#include "RSA.h"
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -28,6 +29,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	GGrandCentralExecuter = new GrandCentralExecuter;
 	GPlayerManager = new PlayerManager;
 	GDatabaseManager = new DBManager;
+	RSA::Init();
 
 	/// main threadµµ lock order check...
 	LLockOrderChecker = new LockOrderChecker(-1);
@@ -53,6 +55,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	
 	GDatabaseManager->Finalize();
 	GIocpManager->Finalize();
+	RSA::ExceptionHandling();
 
 	printf_s("End Server\n");
 

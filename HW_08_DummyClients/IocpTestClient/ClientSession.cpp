@@ -293,6 +293,16 @@ bool ClientSession::PacketHandler()
 
 	switch ( recvPacket->mType )
 	{
+	case PKT_SC_BASE_PUBLIC_KEY:
+	{
+
+	}
+			break;
+	case PKT_SC_EXPORT_PUBLIC_KEY:
+	{
+
+	}
+			break;
 		case PKT_SC_LOGIN:
 		{
 			LoginResponse* clientPacket = reinterpret_cast<LoginResponse*>( recvPacket );

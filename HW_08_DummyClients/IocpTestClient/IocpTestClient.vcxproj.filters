@@ -57,6 +57,12 @@
     <ClInclude Include="Player.h">
       <Filter>Main</Filter>
     </ClInclude>
+    <ClInclude Include="Crypt.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="RSA.h">
+      <Filter>Main</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IocpTestClient.cpp">
@@ -87,6 +93,9 @@
       <Filter>Main</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Crypt.cpp">
       <Filter>Main</Filter>
     </ClCompile>
   </ItemGroup>
