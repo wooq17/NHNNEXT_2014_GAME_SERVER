@@ -108,7 +108,7 @@ public:
 	void	SendCompletion(DWORD transferred);
 
 	bool	WritePacket( PacketHeader* packet );
-	void PacketHandler();
+	bool	PacketHandler();
 
 	void	DisconnectRequest(DisconnectReason dr);
 	void	DisconnectCompletion(DisconnectReason dr);

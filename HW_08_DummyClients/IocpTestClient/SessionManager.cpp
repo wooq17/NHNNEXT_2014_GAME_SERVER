@@ -31,6 +31,7 @@ void SessionManager::PrepareSessions()
 	for (int i = 0; i < mMaxConnection; ++i)
 	{
 		ClientSession* client = xnew<ClientSession>();
+		client->SessionReset();
 		client->SetClientId( i );
 			
 		mFreeSessionList.push_back(client);
@@ -49,6 +50,8 @@ void SessionManager::ReturnClientSession(ClientSession* client)
 	mFreeSessionList.push_back(client);
 
 	++mCurrentReturnCount;
+
+	// printf( "return session\n" );
 }
 
 bool SessionManager::ConnectSessions()
@@ -141,19 +144,19 @@ void SessionManager::DoPeriodJob()
 		}
 
 		// 1 / 3ÀÇ È®·ü·Î move
-// 		if ( 0 == rand() % 3 )
-// 		{
-// 			Float3D pos{ 
-// 				static_cast<float>( rand() % 2000 - 1000 ),
-// 				static_cast<float>( rand() % 2000 - 1000 ),
-// 				static_cast<float>( rand() % 2000 - 1000 )
-// 			};
-// 
-// 			if ( client->mPlayer->SendMove( pos ) )
-// 			{
-// 				wprintf_s( L"[LOG] %s Send move to ( %f , %f , %f )\n", client->mPlayer->GetName(), pos.m_X, pos.m_Y, pos.m_Z );
-// 			}
-// 		}
+ 		if ( 0 == rand() % 3 )
+ 		{
+ 			Float3D pos{ 
+ 				static_cast<float>( rand() % 2000 - 1000 ),
+ 				static_cast<float>( rand() % 2000 - 1000 ),
+ 				static_cast<float>( rand() % 2000 - 1000 )
+ 			};
+ 
+ 			if ( client->mPlayer->SendMove( pos ) )
+ 			{
+ 				wprintf_s( L"[LOG] %s Send move to ( %f , %f , %f )\n", client->mPlayer->GetName(), pos.m_X, pos.m_Y, pos.m_Z );
+ 			}
+ 		}
 
 	}
 

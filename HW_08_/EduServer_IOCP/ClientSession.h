@@ -23,7 +23,7 @@ public:
 	void	SetSocket(SOCKET sock) { mSocket = sock; }
 	SOCKET	GetSocket() const { return mSocket;  }
 
-	void	PacketHandling();
+	bool	PacketHandling();
 
 	virtual void OnDisconnect( DisconnectReason dr );
 	virtual void OnRelease();

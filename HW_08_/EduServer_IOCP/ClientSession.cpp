@@ -179,14 +179,14 @@ void ClientSession::OnRelease()
 	GClientSessionManager->ReturnClientSession( this );
 }
 
-void ClientSession::PacketHandling()
+bool ClientSession::PacketHandling()
 {
 	TRACE_THIS;
 
 	size_t len = mRecvBuffer.GetContiguiousBytes();
 
 	if ( len == 0 )
-		return;
+		return true;
 
 	PacketHeader* recvPacket = reinterpret_cast<PacketHeader*>( mRecvBuffer.GetBufferStart() );
 
@@ -237,10 +237,19 @@ void ClientSession::PacketHandling()
 		}
 		break;
 	default:
+		// echo
 		if ( false == PostSend( mRecvBuffer.GetBufferStart(), len ) )
-			return;
+			return false;
+
+		mRecvBuffer.Remove( len );
 		break;
 	}
 
-	mRecvBuffer.Remove( len );
+	// CRASH_ASSERT( len == recvPacket->mSize );
+	// mRecvBuffer.Remove( len );
+
+
+	DWORD retVal = recvPacket->mSize;
+	mRecvBuffer.Remove( recvPacket->mSize );
+	return len == retVal;
 }

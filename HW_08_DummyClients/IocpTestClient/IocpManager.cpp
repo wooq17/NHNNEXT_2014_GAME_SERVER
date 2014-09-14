@@ -5,7 +5,7 @@
 #include "ClientSession.h"
 #include "SessionManager.h"
 
-#define GQCS_TIMEOUT	INFINITE //20
+#define GQCS_TIMEOUT	20 // INFINITE //20
 
 __declspec(thread) int LIoThreadId = 0;
 IocpManager* GIocpManager = nullptr;
@@ -108,6 +108,26 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 		
 		if (ret == 0 || dwTransferred == 0)
 		{
+			
+			/// check time out first 
+			if ( context == nullptr && GetLastError() == WAIT_TIMEOUT )
+				continue;
+
+
+			if ( context->mIoType == IO_RECV || context->mIoType == IO_SEND )
+			{
+				CRASH_ASSERT( nullptr != theClient );
+
+				/// In most cases in here: ERROR_NETNAME_DELETED(64)
+
+				theClient->DisconnectRequest( DR_COMPLETION_ERROR );
+
+				DeleteIoContext( context );
+
+				continue;
+			}
+
+			/*
 			DWORD gle = GetLastError();
 
 			/// check time out first 
@@ -129,6 +149,7 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 
 				continue;
 			}
+			*/
 		}
 
 		CRASH_ASSERT(nullptr != theClient);
@@ -142,7 +163,10 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 			break;
 
 		case IO_CONNECT:
-			theClient->ConnectCompletion();
+			if ( ret )
+				theClient->ConnectCompletion();
+			else
+				theClient->ReleaseRef();
 			completionOk = true;
 			break;
 

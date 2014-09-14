@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.30110.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IocpTestClient", "IocpTestClient\IocpTestClient.vcxproj", "{3C5BD18F-43ED-41A6-BC76-980478D0F0AF}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DDFramework", "DDFramework\DDFramework.vcxproj", "{3C2E53C6-E69A-4362-9F90-FEAB58AAEB4B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,16 +27,6 @@ Global
 		{3C5BD18F-43ED-41A6-BC76-980478D0F0AF}.Release|Win32.Build.0 = Release|Win32
 		{3C5BD18F-43ED-41A6-BC76-980478D0F0AF}.Release|x64.ActiveCfg = Release|x64
 		{3C5BD18F-43ED-41A6-BC76-980478D0F0AF}.Release|x64.Build.0 = Release|x64
-		{3C2E53C6-E69A-4362-9F90-FEAB58AAEB4B}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-		{3C2E53C6-E69A-4362-9F90-FEAB58AAEB4B}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-		{3C2E53C6-E69A-4362-9F90-FEAB58AAEB4B}.Debug|Win32.ActiveCfg = Debug|Win32
-		{3C2E53C6-E69A-4362-9F90-FEAB58AAEB4B}.Debug|Win32.Build.0 = Debug|Win32
-		{3C2E53C6-E69A-4362-9F90-FEAB58AAEB4B}.Debug|x64.ActiveCfg = Debug|Win32
-		{3C2E53C6-E69A-4362-9F90-FEAB58AAEB4B}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-		{3C2E53C6-E69A-4362-9F90-FEAB58AAEB4B}.Release|Mixed Platforms.Build.0 = Release|Win32
-		{3C2E53C6-E69A-4362-9F90-FEAB58AAEB4B}.Release|Win32.ActiveCfg = Release|Win32
-		{3C2E53C6-E69A-4362-9F90-FEAB58AAEB4B}.Release|Win32.Build.0 = Release|Win32
-		{3C2E53C6-E69A-4362-9F90-FEAB58AAEB4B}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

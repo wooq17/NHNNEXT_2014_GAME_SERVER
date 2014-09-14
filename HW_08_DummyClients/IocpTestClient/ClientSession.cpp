@@ -99,7 +99,7 @@ bool ClientSession::PostConnect()
 		if ( WSAGetLastError() != WSA_IO_PENDING )
 		{
 			DeleteIoContext(connectContext);
-			printf_s( "AcceptEx Error : %d\n", GetLastError() );
+			printf_s( "ConnectEx Error : %d\n", GetLastError() );
 
 			return false;
 		}
@@ -217,7 +217,9 @@ void ClientSession::RecvCompletion(DWORD transferred)
 	// 버퍼에 받은 길이만큼 저장
  	mRecvBuffer.Commit(transferred);
 
-	PacketHandler();
+	while ( !PacketHandler() )
+	{
+	}
 }
 
 
@@ -266,6 +268,8 @@ bool ClientSession::WritePacket( PacketHeader* packet )
 {
 	//FastSpinlockGuard criticalSection( mBufferLock );
 
+	assert( packet->mType != 0 );
+
 	if ( mSendBuffer.GetFreeSpaceSize() < packet->mSize )
 		return false;
 
@@ -278,12 +282,12 @@ bool ClientSession::WritePacket( PacketHeader* packet )
 	return true;
 }
 
-void ClientSession::PacketHandler()
+bool ClientSession::PacketHandler()
 {
 	size_t len = mRecvBuffer.GetContiguiousBytes();
 
 	if ( len == 0 )
-		return;
+		return true;
 
 	PacketHeader* recvPacket = reinterpret_cast<PacketHeader*>( mRecvBuffer.GetBufferStart() );
 
@@ -347,11 +351,15 @@ void ClientSession::PacketHandler()
 		}
 			break;
 		default:
+			printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
 			break;
 	}
 
 	// 패킷 처리다했으면 처리한 패킷 크기만큼 삭제
+	DWORD retVal = recvPacket->mSize;
 	mRecvBuffer.Remove( recvPacket->mSize );
+
+	return retVal == len;
 }
 
 void ClientSession::AddRef()

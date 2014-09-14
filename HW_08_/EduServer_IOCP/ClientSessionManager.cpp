@@ -17,11 +17,13 @@ ClientSessionManager::~ClientSessionManager()
 		xdelete( it );
 	}
 
+	/*
 	for ( auto it : mLogedinSessionList )
 	{
 		xdelete( it.second );
 	}
 	mLogedinSessionList.clear();
+	*/
 }
 
 void ClientSessionManager::PrepareClientSessions()
@@ -80,14 +82,15 @@ bool ClientSessionManager::AcceptClientSessions()
 
 	return true;
 }
-
+/*/
 void ClientSessionManager::RegisterLogedinSession( ClientSession* client )
 {
 	FastSpinlockGuard guard( mLock );
 
 	auto it = mLogedinSessionList.find( client->GetSocket() );
-	CRASH_ASSERT( it == mLogedinSessionList.end() ); // 같은 게 이미 있으면 이상하다
 
+	printf( "****client register : %d\n", client->GetSocket() );
+	CRASH_ASSERT( it == mLogedinSessionList.end() ); // 같은 게 이미 있으면 이상하다
 	mLogedinSessionList.insert( xmap<SOCKET, ClientSession*>::type::value_type( client->GetSocket(), client ) );
 }
 
@@ -96,10 +99,12 @@ void ClientSessionManager::DeregisterLogedinSession( ClientSession* client )
 	FastSpinlockGuard guard( mLock );
 
 	auto it = mLogedinSessionList.find( client->GetSocket() );
+
+	printf( "****client deregister : %d\n", client->GetSocket() );
 	CRASH_ASSERT( it != mLogedinSessionList.end() );
 	mLogedinSessionList.erase( it );
 }
-
+*/
 void ClientSessionManager::NearbyBroadcast( const char* message, int len, int from )
 {
 	PlayerList targetList;
