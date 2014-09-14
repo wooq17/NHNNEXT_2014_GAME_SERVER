@@ -27,4 +27,7 @@
 #include <ppl.h>
 #include <concurrent_queue.h>
 
+#include <windows.h>
+#include <wincrypt.h>
+
 // TODO: reference additional headers your program requires here
