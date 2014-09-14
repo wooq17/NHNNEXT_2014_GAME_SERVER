@@ -96,14 +96,20 @@ void SessionManager::DoPeriodJob()
 		// player login		
 		if ( !client->mPlayer->IsLoaded() )
 		{
-			wchar_t name[5];
+			wchar_t name[6];
 			name[0] = static_cast<wchar_t>( rand() % 26 + 65 );
 			name[1] = static_cast<wchar_t>( rand() % 26 + 65 );
 			name[2] = static_cast<wchar_t>( rand() % 26 + 65 );
 			name[3] = static_cast<wchar_t>( rand() % 26 + 65 );
 			name[4] = static_cast<wchar_t>( rand() % 26 + 65 );
+			name[5] = '\0';
 
-			client->mPlayer->SendLogin(name);
+			if ( client->mPlayer->SendLogin( name ) )
+			{
+				wprintf_s( L"[LOG] %s send login packet\n", name );				
+				client->mPlayer->SetName( name );
+			}
+			continue;
 		}
 		
 // 		if ( !client->mPlayer->IsAlive() )
@@ -114,9 +120,10 @@ void SessionManager::DoPeriodJob()
 		// 1 / 5ÀÇ È®·ü·Î send message
 		if ( 0 == rand() % 5 )
 		{
-			wchar_t chatMessage[10];
+			wchar_t chatMessage[11];
 			chatMessage[0] = static_cast<wchar_t>( rand() % 26 + 97 );
 			chatMessage[1] = static_cast<wchar_t>( rand() % 26 + 97 );
+			chatMessage[2] = static_cast<wchar_t>( rand() % 26 + 97 );
 			chatMessage[3] = static_cast<wchar_t>( rand() % 26 + 97 );
 			chatMessage[4] = static_cast<wchar_t>( rand() % 26 + 97 );
 			chatMessage[5] = static_cast<wchar_t>( rand() % 26 + 97 );
@@ -124,20 +131,29 @@ void SessionManager::DoPeriodJob()
 			chatMessage[7] = static_cast<wchar_t>( rand() % 26 + 97 );
 			chatMessage[8] = static_cast<wchar_t>( rand() % 26 + 97 );
 			chatMessage[9] = static_cast<wchar_t>( rand() % 26 + 97 );
+			chatMessage[10] = '\0';
 			
-			client->mPlayer->SendChat( chatMessage );
+			if ( client->mPlayer->SendChat( chatMessage ) )
+			{
+				wprintf_s( L"[LOG] %s send chat Message : %s\n", client->mPlayer->GetName(), chatMessage );
+			}
+			
 		}
 
 		// 1 / 3ÀÇ È®·ü·Î move
-		if ( 0 == rand() % 3 )
-		{
-			Float3D pos{ static_cast<float>( rand() % 2000 - 1000 ),
-				static_cast<float>( rand() % 2000 - 1000 ),
-				static_cast<float>( rand() % 2000 - 1000 )
-			};
-
-			client->mPlayer->SendMove( pos );
-		}
+// 		if ( 0 == rand() % 3 )
+// 		{
+// 			Float3D pos{ 
+// 				static_cast<float>( rand() % 2000 - 1000 ),
+// 				static_cast<float>( rand() % 2000 - 1000 ),
+// 				static_cast<float>( rand() % 2000 - 1000 )
+// 			};
+// 
+// 			if ( client->mPlayer->SendMove( pos ) )
+// 			{
+// 				wprintf_s( L"[LOG] %s Send move to ( %f , %f , %f )\n", client->mPlayer->GetName(), pos.m_X, pos.m_Y, pos.m_Z );
+// 			}
+// 		}
 
 	}
 

@@ -119,7 +119,7 @@ void ClientSession::ConnectCompletion()
 		return;
 	}
 
-	if ( false == PostSend() )
+	if ( false == PostRecv() )
 	{
 		printf_s( "[DEBUG] PreRecv error: %d\n", GetLastError() );
 	}
@@ -221,75 +221,6 @@ void ClientSession::RecvCompletion(DWORD transferred)
 }
 
 
-bool ClientSession::WritePacket( PacketHeader* packet )
-{
-	//FastSpinlockGuard criticalSection( mBufferLock );
-
-	if ( mSendBuffer.GetFreeSpaceSize() < packet->mSize )
-		return false;
-
-	char* destData = mSendBuffer.GetBuffer();
-
-	memcpy( destData, packet, packet->mSize);
-
-	mSendBuffer.Commit( packet->mSize );
-
-	return true;
-}
-
-void ClientSession::PacketHandler()
-{
-	size_t len = mRecvBuffer.GetContiguiousBytes();
-
-	if ( len == 0 )
-		return ;
-
-	PacketHeader* recvPacket = reinterpret_cast<PacketHeader*>( mRecvBuffer.GetBufferStart() );
-
-	switch ( recvPacket->mType )
-	{
-		case PKT_SC_LOGIN:
-		{
-			LoginResponse* clientPacket = reinterpret_cast<LoginResponse*>( recvPacket );
-			mPlayer->Start( clientPacket->mPlayerId );
-		}
-			break;
-		case PKT_SC_LOGOUT:
-		{
-			LogoutResponse* clientPacket = reinterpret_cast<LogoutResponse*>( recvPacket );
-			mPlayer->PlayerReset();
-		}
-			break;
-		case PKT_SC_CHAT:
-		{
-			ChatBroadcastResponse* clientPacket = reinterpret_cast<ChatBroadcastResponse*>( recvPacket );
-			if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
-				break;
-			
-			--mPlayer->mHealth; 
-			
-			if ( !mPlayer->IsAlive() )
-			{
-				mPlayer->SendLogout();
-			}
-			
-			printf_s( "%s : %s\n", clientPacket->mName, clientPacket->mChat );
-		}
-			break;
-		case PKT_SC_MOVE:
-		{
-			MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
-			if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
-				break;
-
-			mPlayer->SetPosition( clientPacket->mX, clientPacket->mY, clientPacket->mZ );
-		}
-			break;
-		default:			
-			break;
-	}
-
-}
 
 bool ClientSession::PostSend()
 {
@@ -330,6 +261,98 @@ void ClientSession::SendCompletion(DWORD transferred)
 	mSendBuffer.Remove(transferred);
 }
 
+
+bool ClientSession::WritePacket( PacketHeader* packet )
+{
+	//FastSpinlockGuard criticalSection( mBufferLock );
+
+	if ( mSendBuffer.GetFreeSpaceSize() < packet->mSize )
+		return false;
+
+	char* destData = mSendBuffer.GetBuffer();
+
+	memcpy( destData, packet, packet->mSize );
+
+	mSendBuffer.Commit( packet->mSize );
+
+	return true;
+}
+
+void ClientSession::PacketHandler()
+{
+	size_t len = mRecvBuffer.GetContiguiousBytes();
+
+	if ( len == 0 )
+		return;
+
+	PacketHeader* recvPacket = reinterpret_cast<PacketHeader*>( mRecvBuffer.GetBufferStart() );
+
+	switch ( recvPacket->mType )
+	{
+		case PKT_SC_LOGIN:
+		{
+			LoginResponse* clientPacket = reinterpret_cast<LoginResponse*>( recvPacket );
+			mPlayer->Start( clientPacket->mPlayerId );
+			wprintf_s( L"[LOG] %s Recv login packet \n", mPlayer->GetName() );
+		}
+			break;
+		case PKT_SC_LOGOUT:
+		{
+			LogoutResponse* clientPacket = reinterpret_cast<LogoutResponse*>( recvPacket );
+			mPlayer->PlayerReset();
+			wprintf_s( L"[LOG] %s Recv logout packet\n", mPlayer->GetName() );
+			DisconnectRequest( DR_NONE );
+		}
+			break;
+		case PKT_SC_CHAT:
+		{
+			if ( !mPlayer->IsLoaded() )
+			{
+				wprintf_s( L"[DEBUG] LOGOUT PLAYER GOT A MESSAGE" );
+				break;
+			}
+				
+
+			ChatBroadcastResponse* clientPacket = reinterpret_cast<ChatBroadcastResponse*>( recvPacket );
+			if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
+				break;
+			
+			--mPlayer->mHealth;
+			wprintf_s( L"[LOG] %s : %s Health : %d\n", clientPacket->mName, clientPacket->mChat, mPlayer->GetPlayerHealth() );
+
+			if ( !mPlayer->IsAlive() )
+			{
+				wprintf_s( L"[LOG] %s player dead\n", mPlayer->GetName() );
+				if ( mPlayer->SendLogout() )
+				{
+					wprintf_s( L"[LOG] %s Send logout packet\n", mPlayer->GetName() );
+				}
+			}
+		}
+			break;
+		case PKT_SC_MOVE:
+		{
+			if ( !mPlayer->IsLoaded() )
+			{
+				wprintf_s( L"[DEBUG] LOGOUT PLAYER MOVES" );
+				break;
+			}
+
+			MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
+			if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
+				break;
+
+			mPlayer->SetPosition( clientPacket->mX, clientPacket->mY, clientPacket->mZ );
+			wprintf_s( L"[LOG] %s Recv move packet ( %f , %f , %f )\n", mPlayer->GetName(), clientPacket->mX, clientPacket->mY, clientPacket->mZ );
+		}
+			break;
+		default:
+			break;
+	}
+
+	// 패킷 처리다했으면 처리한 패킷 크기만큼 삭제
+	mRecvBuffer.Remove( recvPacket->mSize );
+}
 
 void ClientSession::AddRef()
 {
