@@ -108,7 +108,7 @@ public:
 	void	SendCompletion(DWORD transferred);
 
 	bool	WritePacket( PacketHeader* packet );
-	bool	PacketHandler();
+	void PacketHandler();
 
 	void	DisconnectRequest(DisconnectReason dr);
 	void	DisconnectCompletion(DisconnectReason dr);
@@ -129,9 +129,8 @@ private:
 
 	SOCKADDR_IN		mClientAddr ;
 		
-	FastSpinlock	mBufferLock;
-
-	CircularBuffer	mBuffer;
+	CircularBuffer	mSendBuffer;
+	CircularBuffer	mRecvBuffer;
 
 	volatile long	mRefCount;
 	volatile long	mConnected;

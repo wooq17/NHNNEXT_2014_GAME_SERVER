@@ -20,5 +20,7 @@
 #include <cstdint>
 #include <memory>
 #include <string.h>
+#include <stdlib.h>
+#include <ctime>
 
 // TODO: reference additional headers your program requires here

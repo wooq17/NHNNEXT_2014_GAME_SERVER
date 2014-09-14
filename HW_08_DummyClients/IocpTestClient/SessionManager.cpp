@@ -7,6 +7,7 @@
 #include "IocpManager.h"
 
 
+
 SessionManager* GSessionManager = nullptr;
 
 SessionManager::~SessionManager()
@@ -16,9 +17,9 @@ SessionManager::~SessionManager()
 		xdelete(it);
 	}
 
-	for ( auto i = 0; i < mMaxConnection; ++i)
+	for ( auto it : mClientList )
 	{
-		xdelete( mClientList[i] );
+		xdelete( it );
 	}
 }
 
@@ -26,18 +27,16 @@ void SessionManager::PrepareSessions()
 {
 	CRASH_ASSERT(LThreadType == THREAD_MAIN);
 
+	srand( (int)time(NULL) );
 	for (int i = 0; i < mMaxConnection; ++i)
 	{
 		ClientSession* client = xnew<ClientSession>();
 		client->SetClientId( i );
 			
 		mFreeSessionList.push_back(client);
+		mClientList.push_back( client );
 	}
 }
-
-
-
-
 
 void SessionManager::ReturnClientSession(ClientSession* client)
 {
@@ -85,4 +84,61 @@ void SessionManager::Initialize( wchar_t* hostIP, unsigned short port, int maxCo
 	serverAddr.sin_addr.s_addr = inet_addr( pStr );
 
 	mMaxConnection = maxConnection;
+}
+
+void SessionManager::DoPeriodJob()
+{
+	for ( auto client : mClientList )
+	{
+		if ( !client->IsConnected() )
+			continue;
+
+		// player login		
+		if ( !client->mPlayer->IsLoaded() )
+		{
+			wchar_t name[5];
+			name[0] = static_cast<wchar_t>( rand() % 26 + 65 );
+			name[1] = static_cast<wchar_t>( rand() % 26 + 65 );
+			name[2] = static_cast<wchar_t>( rand() % 26 + 65 );
+			name[3] = static_cast<wchar_t>( rand() % 26 + 65 );
+			name[4] = static_cast<wchar_t>( rand() % 26 + 65 );
+
+			client->mPlayer->SendLogin(name);
+		}
+		
+// 		if ( !client->mPlayer->IsAlive() )
+// 		{
+// 			client->mPlayer->SendLogout() ;
+// 		}
+
+		// 1 / 5ÀÇ È®·ü·Î send message
+		if ( 0 == rand() % 5 )
+		{
+			wchar_t chatMessage[10];
+			chatMessage[0] = static_cast<wchar_t>( rand() % 26 + 97 );
+			chatMessage[1] = static_cast<wchar_t>( rand() % 26 + 97 );
+			chatMessage[3] = static_cast<wchar_t>( rand() % 26 + 97 );
+			chatMessage[4] = static_cast<wchar_t>( rand() % 26 + 97 );
+			chatMessage[5] = static_cast<wchar_t>( rand() % 26 + 97 );
+			chatMessage[6] = static_cast<wchar_t>( rand() % 26 + 97 );
+			chatMessage[7] = static_cast<wchar_t>( rand() % 26 + 97 );
+			chatMessage[8] = static_cast<wchar_t>( rand() % 26 + 97 );
+			chatMessage[9] = static_cast<wchar_t>( rand() % 26 + 97 );
+			
+			client->mPlayer->SendChat( chatMessage );
+		}
+
+		// 1 / 3ÀÇ È®·ü·Î move
+		if ( 0 == rand() % 3 )
+		{
+			Float3D pos{ static_cast<float>( rand() % 2000 - 1000 ),
+				static_cast<float>( rand() % 2000 - 1000 ),
+				static_cast<float>( rand() % 2000 - 1000 )
+			};
+
+			client->mPlayer->SendMove( pos );
+		}
+
+	}
+
 }

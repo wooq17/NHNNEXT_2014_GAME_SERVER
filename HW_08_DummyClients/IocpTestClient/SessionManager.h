@@ -22,12 +22,13 @@ public:
 	void ReturnClientSession(ClientSession* client);
 		
 	void SetMaxConnection( int val ) { mMaxConnection = val; }	
+	void DoPeriodJob();	
 	sockaddr_in* GetServerAddr() { return &serverAddr; }
 
 private:
 	typedef xlist<ClientSession*>::type ClientList;
 	ClientList	mFreeSessionList;
-	xarray<ClientSession*>::type mClientList;
+	ClientList  mClientList;
 
 	FastSpinlock mLock;
 

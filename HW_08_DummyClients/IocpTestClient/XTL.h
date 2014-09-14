@@ -55,13 +55,6 @@ public:
 };
 
 template <class T>
-struct xarray
-{
-	typedef std::array<T, STLAllocator<T>> type;
-};
-
-
-template <class T>
 struct xvector
 {
 	typedef std::vector<T, STLAllocator<T>> type;

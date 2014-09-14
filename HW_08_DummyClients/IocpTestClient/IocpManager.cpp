@@ -73,6 +73,7 @@ void IocpManager::StartConnect()
 			DWORD a = ::GetTickCount();
 			break;
 		}
+		GSessionManager->DoPeriodJob();
 
 		Sleep(100);
 	}
@@ -184,11 +185,12 @@ bool IocpManager::PreReceiveCompletion(ClientSession* client, OverlappedPreRecvC
 bool IocpManager::ReceiveCompletion(ClientSession* client, OverlappedRecvContext* context, DWORD dwTransferred)
 {
 	client->RecvCompletion(dwTransferred);
-
-	if ( context->mWsaBuf.buf[0] != (char)( client->GetClientId() % 10 + 48 ) )
-		printf_s( "What the hell!!\n" );
+// 
+// 	if ( context->mWsaBuf.buf[0] != (char)( client->GetClientId() % 10 + 48 ) )
+// 		printf_s( "What the hell!!\n" );
 	/// echo back
 	//return client->PostSend();
+	return client->PreRecv();
 }
 
 bool IocpManager::SendCompletion(ClientSession* client, OverlappedSendContext* context, DWORD dwTransferred)
@@ -199,22 +201,8 @@ bool IocpManager::SendCompletion(ClientSession* client, OverlappedSendContext* c
 	{
 		printf_s("Partial SendCompletion requested [%d], sent [%d]\n", context->mWsaBuf.len, dwTransferred) ;
 		return false;
-	}
-	
-	/// zero receive
-	return client->PreRecv();
-}
-
-// 호출하는 함수에서 lock을 거니까
-void IocpManager::IncreaseReadBytes( DWORD readBytes )
-{
-	//FastSpinlockGuard criticalSection( mByteCounterLock );
-	mTotalByteRead += readBytes;
-}
-
-void IocpManager::IncreaseWriteBytes( DWORD writtenBytes )
-{	
-	mTotalByteWritten += writtenBytes;
+	}		
+	return true;
 }
 
 

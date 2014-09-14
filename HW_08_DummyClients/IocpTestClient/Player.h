@@ -13,10 +13,18 @@ public:
 	virtual ~Player();
 
 	bool	IsLoaded() { return mPlayerId > 0; }
+	bool	IsAlive() { return mHealth > 0; }
 	int		GetPlayerId() { return mPlayerId; }	
 	void	Start(int id);
 
 	void	PlayerReset();	
+	void	SetPosition( Float3D pos ) { mPos = pos; }
+	void	SetPosition( float x, float y, float z ) { mPos = Float3D( x, y, z ); }
+
+	bool	SendLogin(wchar_t* name);
+	void	SendLogout();
+	void	SendMove( Float3D position );
+	void	SendChat( wchar_t* chatString );
 		
 	ClientSession* GetSession() { return mSession; }
 	

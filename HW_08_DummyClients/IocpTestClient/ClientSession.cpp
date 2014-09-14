@@ -31,7 +31,7 @@ OverlappedIOContext::OverlappedIOContext(ClientSession* owner, IOType ioType)
 	mSessionObject->AddRef();
 }
 
-ClientSession::ClientSession() : mBuffer(BUFSIZE), mConnected(0), mRefCount(0), mPlayer(new Player(this))
+ClientSession::ClientSession() : mRecvBuffer(BUFSIZE), mSendBuffer(BUFSIZE), mConnected(0), mRefCount(0), mPlayer(new Player(this))
 {
 	//memset(&mClientAddr, 0, sizeof(SOCKADDR_IN));
 	mSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
@@ -44,7 +44,8 @@ void ClientSession::SessionReset()
 	mRefCount = 0;
 	//memset(&mClientAddr, 0, sizeof(SOCKADDR_IN));
 
-	mBuffer.BufferReset();
+	mSendBuffer.BufferReset();
+	mRecvBuffer.BufferReset();
 
 	LINGER lingerOption;
 	lingerOption.l_onoff = 1;
@@ -183,17 +184,17 @@ bool ClientSession::PostRecv()
 	if (!IsConnected())
 		return false;
 
-	FastSpinlockGuard criticalSection(mBufferLock);
+	//FastSpinlockGuard criticalSection(mBufferLock);
 
-	if (0 == mBuffer.GetFreeSpaceSize())
+	if (0 == mRecvBuffer.GetFreeSpaceSize())
 		return false;
 
 	OverlappedRecvContext* recvContext = new OverlappedRecvContext(this);
 
 	DWORD recvbytes = 0;
 	DWORD flags = 0;
-	recvContext->mWsaBuf.len = (ULONG)mBuffer.GetFreeSpaceSize();
-	recvContext->mWsaBuf.buf = mBuffer.GetBuffer();
+	recvContext->mWsaBuf.len = (ULONG)mRecvBuffer.GetFreeSpaceSize();
+	recvContext->mWsaBuf.buf = mRecvBuffer.GetBuffer();
 	
 
 	/// start real recv
@@ -212,34 +213,81 @@ bool ClientSession::PostRecv()
 }
 
 void ClientSession::RecvCompletion(DWORD transferred)
-{
-	FastSpinlockGuard criticalSection( mBufferLock );
-
-	GIocpManager->IncreaseReadBytes( transferred );
-
+{	
 	// 버퍼에 받은 길이만큼 저장
- 	mBuffer.Commit(transferred);
+ 	mRecvBuffer.Commit(transferred);
+
+	PacketHandler();
 }
 
 
 bool ClientSession::WritePacket( PacketHeader* packet )
 {
-	FastSpinlockGuard criticalSection( mBufferLock );
+	//FastSpinlockGuard criticalSection( mBufferLock );
 
-	if ( mBuffer.GetFreeSpaceSize() < packet->mSize )
+	if ( mSendBuffer.GetFreeSpaceSize() < packet->mSize )
 		return false;
 
-	char* destData = mBuffer.GetBuffer();
+	char* destData = mSendBuffer.GetBuffer();
 
 	memcpy( destData, packet, packet->mSize);
 
-	mBuffer.Commit( packet->mSize );
+	mSendBuffer.Commit( packet->mSize );
 
 	return true;
 }
 
-bool ClientSession::PacketHandler()
+void ClientSession::PacketHandler()
 {
+	size_t len = mRecvBuffer.GetContiguiousBytes();
+
+	if ( len == 0 )
+		return ;
+
+	PacketHeader* recvPacket = reinterpret_cast<PacketHeader*>( mRecvBuffer.GetBufferStart() );
+
+	switch ( recvPacket->mType )
+	{
+		case PKT_SC_LOGIN:
+		{
+			LoginResponse* clientPacket = reinterpret_cast<LoginResponse*>( recvPacket );
+			mPlayer->Start( clientPacket->mPlayerId );
+		}
+			break;
+		case PKT_SC_LOGOUT:
+		{
+			LogoutResponse* clientPacket = reinterpret_cast<LogoutResponse*>( recvPacket );
+			mPlayer->PlayerReset();
+		}
+			break;
+		case PKT_SC_CHAT:
+		{
+			ChatBroadcastResponse* clientPacket = reinterpret_cast<ChatBroadcastResponse*>( recvPacket );
+			if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
+				break;
+			
+			--mPlayer->mHealth; 
+			
+			if ( !mPlayer->IsAlive() )
+			{
+				mPlayer->SendLogout();
+			}
+			
+			printf_s( "%s : %s\n", clientPacket->mName, clientPacket->mChat );
+		}
+			break;
+		case PKT_SC_MOVE:
+		{
+			MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
+			if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
+				break;
+
+			mPlayer->SetPosition( clientPacket->mX, clientPacket->mY, clientPacket->mZ );
+		}
+			break;
+		default:			
+			break;
+	}
 
 }
 
@@ -248,15 +296,15 @@ bool ClientSession::PostSend()
 	if (!IsConnected())
 		return false;
 
-	FastSpinlockGuard criticalSection(mBufferLock);
+	//FastSpinlockGuard criticalSection(mBufferLock);
 	
 	OverlappedSendContext* sendContext = new OverlappedSendContext(this);
 
 	DWORD sendbytes = 0;
 	DWORD flags = 0;
 
-	sendContext->mWsaBuf.len = (ULONG) mBuffer.GetContiguiousBytes(); 
-	sendContext->mWsaBuf.buf = mBuffer.GetBufferStart();
+	sendContext->mWsaBuf.len = (ULONG) mSendBuffer.GetContiguiousBytes(); 
+	sendContext->mWsaBuf.buf = mSendBuffer.GetBufferStart();
 
 	/// start async send
 	if (SOCKET_ERROR == WSASend(mSocket, &sendContext->mWsaBuf, 1, &sendbytes, flags, (LPWSAOVERLAPPED)sendContext, NULL))
@@ -276,12 +324,10 @@ bool ClientSession::PostSend()
 
 void ClientSession::SendCompletion(DWORD transferred)
 {
-	FastSpinlockGuard criticalSection( mBufferLock );
-	// 데이터 보낸 양 기록
-	GIocpManager->IncreaseWriteBytes( transferred );
-
+	//FastSpinlockGuard criticalSection( mBufferLock );
+	
 	// 버퍼 초기화
-	mBuffer.Remove(transferred);
+	mSendBuffer.Remove(transferred);
 }
 
 
