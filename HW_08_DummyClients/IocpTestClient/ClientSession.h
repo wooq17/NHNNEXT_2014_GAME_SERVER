@@ -4,6 +4,7 @@
 #include "CircularBuffer.h"
 #include "ContentsConfig.h"
 #include "Player.h"
+#include "Crypt.h"
 
 #define BUFSIZE	65536
 #define SEND_BUFF 4096
@@ -108,6 +109,7 @@ public:
 	void	SendCompletion(DWORD transferred);
 
 	bool	WritePacket( PacketHeader* packet );
+	bool	WritePacket( const char* packet, DWORD len );
 	bool	PacketHandler();
 
 	void	DisconnectRequest(DisconnectReason dr);
@@ -118,6 +120,8 @@ public:
 
 	void	SetSocket(SOCKET sock) { mSocket = sock; }
 	SOCKET	GetSocket() const { return mSocket;  }
+
+	bool	IsKeyShared(){ return mIsKeyShared; }
 
 	static LPFN_DISCONNECTEX mFnDisconnectEx;
 	static LPFN_ACCEPTEX mFnAcceptEx;
@@ -136,6 +140,9 @@ private:
 	volatile long	mConnected;
 
 	std::shared_ptr<Player> mPlayer;
+
+	Crypt			mCrypt;
+	bool			mIsKeyShared;
 	
 	friend class SessionManager;
 } ;

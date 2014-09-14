@@ -5,7 +5,7 @@
 #include "IocpManager.h"
 #include "SessionManager.h"
 #include <string>
-
+#include "RSA.h"
 
 LPFN_DISCONNECTEX ClientSession::mFnDisconnectEx = nullptr;
 LPFN_CONNECTEX ClientSession::mFnConnectEx = nullptr;
@@ -31,7 +31,7 @@ OverlappedIOContext::OverlappedIOContext(ClientSession* owner, IOType ioType)
 	mSessionObject->AddRef();
 }
 
-ClientSession::ClientSession() : mRecvBuffer(BUFSIZE), mSendBuffer(BUFSIZE), mConnected(0), mRefCount(0), mPlayer(new Player(this))
+ClientSession::ClientSession() : mRecvBuffer( BUFSIZE ), mSendBuffer( BUFSIZE ), mConnected( 0 ), mRefCount( 0 ), mPlayer( new Player( this ) ), mIsKeyShared( false )
 {
 	//memset(&mClientAddr, 0, sizeof(SOCKADDR_IN));
 	mSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
@@ -58,7 +58,10 @@ void ClientSession::SessionReset()
 	}
 	closesocket(mSocket);
 
-	mSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+	mSocket = WSASocket( AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED );
+
+	mCrypt.ReleaseResources();
+	mIsKeyShared = false;
 }
 
 bool ClientSession::PostConnect()
@@ -278,7 +281,29 @@ bool ClientSession::WritePacket( PacketHeader* packet )
 
 	memcpy( destData, packet, packet->mSize );
 
+	if ( mIsKeyShared )
+	{
+		if ( !mCrypt.Encrypt( (PBYTE)destData + sizeof( PacketHeader ), ( (PacketHeader*)destData )->mSize ) )
+			printf( "[DH] Decrypt failed\n" );
+	}
+
 	mSendBuffer.Commit( packet->mSize );
+
+	return true;
+}
+
+bool ClientSession::WritePacket( const char* packet, DWORD len )
+{
+	//FastSpinlockGuard criticalSection( mBufferLock );
+
+	if ( mSendBuffer.GetFreeSpaceSize() < len )
+		return false;
+
+	char* destData = mSendBuffer.GetBuffer();
+
+	memcpy( destData, packet, len );
+
+	mSendBuffer.Commit( len );
 
 	return true;
 }
@@ -292,17 +317,80 @@ bool ClientSession::PacketHandler()
 
 	PacketHeader* recvPacket = reinterpret_cast<PacketHeader*>( mRecvBuffer.GetBufferStart() );
 
+	if ( mIsKeyShared )
+	{
+		if ( !mCrypt.Decrypt( (PBYTE)recvPacket + sizeof( PacketHeader ), recvPacket->mSize ) )
+			printf( "[DH] Decrypt failed\n" );
+	}
+
 	switch ( recvPacket->mType )
 	{
-	case PKT_SC_BASE_PUBLIC_KEY:
-	{
+		case PKT_SC_BASE_PUBLIC_KEY:
+		{
+			RSA::Init();
 
-	}
+			PBYTE data = (PBYTE)recvPacket + sizeof( PacketHeader );
+			PBYTE base = nullptr;
+			if ( !RSA::Decrypt( data, P_LENGTH + G_LENGTH, &base ) )
+				printf( "fail\n" );
+
+			DATA_BLOB clientG;
+			DATA_BLOB clientP;
+			PBYTE pos = base;
+
+			clientG.cbData = *pos;
+			clientG.pbData = pos + 4;
+			pos += 68;
+			mCrypt.SetG( clientG );
+
+			clientP.cbData = *pos;
+			clientP.pbData = pos + 4;
+			pos += 68;
+			mCrypt.SetP( clientP );
+
+			// printf( "%d / %d", clientG.cbData, clientP.cbData );
+
+			// send client public key
+			if ( !mCrypt.GeneratePrivateKey() )
+				break;
+
+			DWORD exportedLen = 0;
+			PBYTE exportedData = mCrypt.ExportPublicKey( &exportedLen );
+
+			unsigned short pktLen = sizeof(PacketHeader)+sizeof(DWORD)+exportedLen;
+			PBYTE pkt = (PBYTE)malloc( pktLen );
+			PBYTE currentPos = pkt;
+
+			( (PacketHeader*)currentPos )->mSize = pktLen;
+			( (PacketHeader*)currentPos )->mType = PKT_CS_EXPORT_PUBLIC_KEY;
+			currentPos += sizeof( PacketHeader );
+
+			memcpy( currentPos, &exportedLen, sizeof( DWORD ) );
+			currentPos += sizeof( DWORD );
+
+			memcpy( currentPos, exportedData, exportedLen );
+
+			if ( !WritePacket( (char*)pkt, pktLen ) )
+			{
+				printf( "[RSA] post key fail %d\n", GetLastError() );
+				DisconnectRequest( DR_ONCONNECT_ERROR );
+			}
+			PostSend();
+
+			delete pkt;
+		}
 			break;
-	case PKT_SC_EXPORT_PUBLIC_KEY:
-	{
+		case PKT_SC_EXPORT_PUBLIC_KEY:
+		{
+			DWORD exportedLen = 0;
+			memcpy( &exportedLen, recvPacket + sizeof( PacketHeader ), sizeof( DWORD ) );
+			PBYTE exportedData = PBYTE(recvPacket) + sizeof(PacketHeader)+sizeof( DWORD );
 
-	}
+			if ( !mCrypt.GenerateSessionKey( exportedData, exportedLen ) )
+				break;
+
+			mIsKeyShared = true;
+		}
 			break;
 		case PKT_SC_LOGIN:
 		{

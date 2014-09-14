@@ -118,8 +118,8 @@ bool Session::PostSend(const char* data, size_t len)
 	
 	char* destData = mSendBuffer.GetBuffer();
 
-	unsigned short* size = (unsigned short*)data;
-	CRASH_ASSERT( *size != 65278 );
+	// unsigned short* size = (unsigned short*)data;
+	// CRASH_ASSERT( *size != 65278 );
 
 	memcpy(destData, data, len);
 

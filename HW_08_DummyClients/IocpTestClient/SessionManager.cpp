@@ -93,7 +93,7 @@ void SessionManager::DoPeriodJob()
 {
 	for ( auto client : mClientList )
 	{
-		if ( !client->IsConnected() )
+		if ( !client->IsConnected() || !client->IsKeyShared() )
 			continue;
 
 		// player login		

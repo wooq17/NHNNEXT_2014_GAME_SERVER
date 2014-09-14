@@ -48,7 +48,7 @@ void ClientSession::SessionReset()
 	mSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 
 	/// 플레이어 리셋
-	mPlayer->DoSync( &Player::PlayerReset );
+	// mPlayer->DoSync( &Player::PlayerReset );
 
 	mCrypt.ReleaseResources();
 	mIsKeyShared = false;
@@ -162,7 +162,7 @@ void ClientSession::AcceptCompletion()
 	// mPlayer.TestDeletePlayerData( id );
 	//
 
-
+	RSA::Init();
 	// 여기서 첫 암호화 한 베이스 코드를 보낸다
 	DWORD headerLen = 0;
 	PBYTE header = nullptr;
@@ -195,7 +195,7 @@ void ClientSession::AcceptCompletion()
 	memcpy( currentPos, p.pbData, 64 );
 	currentPos += 64;
 
-	if ( !RSA::Encrypt( ( pkt + headerLen ), P_LENGTH + G_LENGTH ) )
+	if ( !RSA::Encrypt( ( pkt + sizeof(PacketHeader) + headerLen ), P_LENGTH + G_LENGTH ) )
 	{
 		printf( "[RSA] Encrypt fail %d\n", GetLastError() );
 		DisconnectRequest( DR_ONCONNECT_ERROR );
@@ -206,6 +206,8 @@ void ClientSession::AcceptCompletion()
 		printf( "[RSA] post key fail %d\n", GetLastError() );
 		DisconnectRequest( DR_ONCONNECT_ERROR );
 	}
+
+	// printf( "%d / %d", g.cbData, p.cbData );
 
 	delete pkt;
 }
@@ -249,21 +251,12 @@ bool ClientSession::PacketHandling()
 	{
 	case PKT_CS_EXPORT_PUBLIC_KEY:
 	{
-		// mSize / mType / len / data
-		DWORD exportedLen = 0;
-		memcpy( &exportedLen, recvPacket + sizeof( PacketHeader ), sizeof( DWORD ) );
-		PBYTE exportedData = PBYTE( recvPacket + sizeof( PacketHeader ) + sizeof( DWORD ) );
-
-		if ( !mCrypt.GenerateSessionKey( exportedData, exportedLen ) )
-			break;
-
-		// send server public key
 		if ( !mCrypt.GeneratePrivateKey() )
 			break;
 
-		mIsKeyShared = true;
-
-		exportedData = mCrypt.ExportPublicKey( &exportedLen );
+		// send server public key
+		DWORD exportedLen = 0;
+		PBYTE exportedData = mCrypt.ExportPublicKey( &exportedLen );
 
 		unsigned short pktLen = sizeof( PacketHeader ) + sizeof( DWORD ) + exportedLen;
 		PBYTE pkt = (PBYTE)malloc( pktLen );
@@ -283,6 +276,15 @@ bool ClientSession::PacketHandling()
 			printf( "[RSA] post key fail %d\n", GetLastError() );
 			DisconnectRequest( DR_ONCONNECT_ERROR );
 		}
+
+		// mSize / mType / len / data
+		exportedLen = recvPacket->mSize - sizeof(PacketHeader)-sizeof( DWORD );
+		exportedData = PBYTE(recvPacket) + sizeof(PacketHeader)+sizeof( DWORD );
+
+		if ( !mCrypt.GenerateSessionKey( exportedData, exportedLen ) )
+			break;
+
+		mIsKeyShared = true;
 
 		delete pkt;
 	}
