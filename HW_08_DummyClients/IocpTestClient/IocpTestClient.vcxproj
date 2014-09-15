@@ -68,8 +68,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>E:\My Documents\NHNNEXT_2014_GAME_SERVER\HW_08_DummyClients\external;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\My Documents\NHNNEXT_2014_GAME_SERVER\HW_08_DummyClients\external\google\library;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\external;$(IncludePath)</IncludePath>
+    <LibraryPath>..\external\google\library;$(LibraryPath)</LibraryPath>
     <SourcePath>$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

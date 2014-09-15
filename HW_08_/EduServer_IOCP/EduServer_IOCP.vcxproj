@@ -71,8 +71,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>E:\My Documents\NHNNEXT_2014_GAME_SERVER\HW_08_\external;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\My Documents\NHNNEXT_2014_GAME_SERVER\HW_08_\external\google\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\external;$(IncludePath)</IncludePath>
+    <LibraryPath>..\external\google\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
