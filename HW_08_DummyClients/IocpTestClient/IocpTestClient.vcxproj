@@ -180,9 +180,7 @@
     <ClCompile Include="IocpManager.cpp" />
     <ClCompile Include="IocpTestClient.cpp" />
     <ClCompile Include="MemoryPool.cpp" />
-    <ClCompile Include="MyPacket.pb.cc">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="MyPacket.pb.cc" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="SessionManager.cpp" />
     <ClCompile Include="stdafx.cpp">
