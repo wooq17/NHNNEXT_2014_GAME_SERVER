@@ -128,15 +128,30 @@ class LoginRequest : public ::google::protobuf::MessageLite {
   inline ::google::protobuf::int32 playerid() const;
   inline void set_playerid(::google::protobuf::int32 value);
 
+  // required string PlayerName = 2;
+  inline bool has_playername() const;
+  inline void clear_playername();
+  static const int kPlayerNameFieldNumber = 2;
+  inline const ::std::string& playername() const;
+  inline void set_playername(const ::std::string& value);
+  inline void set_playername(const char* value);
+  inline void set_playername(const char* value, size_t size);
+  inline ::std::string* mutable_playername();
+  inline ::std::string* release_playername();
+  inline void set_allocated_playername(::std::string* playername);
+
   // @@protoc_insertion_point(class_scope:MyPacket.LoginRequest)
  private:
   inline void set_has_playerid();
   inline void clear_has_playerid();
+  inline void set_has_playername();
+  inline void clear_has_playername();
 
   ::std::string _unknown_fields_;
 
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
+  ::std::string* playername_;
   ::google::protobuf::int32 playerid_;
   #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
   friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
@@ -330,42 +345,15 @@ class LoginResult : public ::google::protobuf::MessageLite {
   inline ::google::protobuf::int32 playerid() const;
   inline void set_playerid(::google::protobuf::int32 value);
 
-  // required string PlayerName = 2;
-  inline bool has_playername() const;
-  inline void clear_playername();
-  static const int kPlayerNameFieldNumber = 2;
-  inline const ::std::string& playername() const;
-  inline void set_playername(const ::std::string& value);
-  inline void set_playername(const char* value);
-  inline void set_playername(const char* value, size_t size);
-  inline ::std::string* mutable_playername();
-  inline ::std::string* release_playername();
-  inline void set_allocated_playername(::std::string* playername);
-
-  // required .MyPacket.Position PlayerPos = 3;
-  inline bool has_playerpos() const;
-  inline void clear_playerpos();
-  static const int kPlayerPosFieldNumber = 3;
-  inline const ::MyPacket::Position& playerpos() const;
-  inline ::MyPacket::Position* mutable_playerpos();
-  inline ::MyPacket::Position* release_playerpos();
-  inline void set_allocated_playerpos(::MyPacket::Position* playerpos);
-
   // @@protoc_insertion_point(class_scope:MyPacket.LoginResult)
  private:
   inline void set_has_playerid();
   inline void clear_has_playerid();
-  inline void set_has_playername();
-  inline void clear_has_playername();
-  inline void set_has_playerpos();
-  inline void clear_has_playerpos();
 
   ::std::string _unknown_fields_;
 
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
-  ::std::string* playername_;
-  ::MyPacket::Position* playerpos_;
   ::google::protobuf::int32 playerid_;
   #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
   friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
@@ -832,6 +820,82 @@ inline void LoginRequest::set_playerid(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:MyPacket.LoginRequest.PlayerId)
 }
 
+// required string PlayerName = 2;
+inline bool LoginRequest::has_playername() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void LoginRequest::set_has_playername() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void LoginRequest::clear_has_playername() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void LoginRequest::clear_playername() {
+  if (playername_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    playername_->clear();
+  }
+  clear_has_playername();
+}
+inline const ::std::string& LoginRequest::playername() const {
+  // @@protoc_insertion_point(field_get:MyPacket.LoginRequest.PlayerName)
+  return *playername_;
+}
+inline void LoginRequest::set_playername(const ::std::string& value) {
+  set_has_playername();
+  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    playername_ = new ::std::string;
+  }
+  playername_->assign(value);
+  // @@protoc_insertion_point(field_set:MyPacket.LoginRequest.PlayerName)
+}
+inline void LoginRequest::set_playername(const char* value) {
+  set_has_playername();
+  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    playername_ = new ::std::string;
+  }
+  playername_->assign(value);
+  // @@protoc_insertion_point(field_set_char:MyPacket.LoginRequest.PlayerName)
+}
+inline void LoginRequest::set_playername(const char* value, size_t size) {
+  set_has_playername();
+  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    playername_ = new ::std::string;
+  }
+  playername_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:MyPacket.LoginRequest.PlayerName)
+}
+inline ::std::string* LoginRequest::mutable_playername() {
+  set_has_playername();
+  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    playername_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:MyPacket.LoginRequest.PlayerName)
+  return playername_;
+}
+inline ::std::string* LoginRequest::release_playername() {
+  clear_has_playername();
+  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = playername_;
+    playername_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void LoginRequest::set_allocated_playername(::std::string* playername) {
+  if (playername_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete playername_;
+  }
+  if (playername) {
+    set_has_playername();
+    playername_ = playername;
+  } else {
+    clear_has_playername();
+    playername_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:MyPacket.LoginRequest.PlayerName)
+}
+
 // -------------------------------------------------------------------
 
 // Position
@@ -934,127 +998,6 @@ inline void LoginResult::set_playerid(::google::protobuf::int32 value) {
   set_has_playerid();
   playerid_ = value;
   // @@protoc_insertion_point(field_set:MyPacket.LoginResult.PlayerId)
-}
-
-// required string PlayerName = 2;
-inline bool LoginResult::has_playername() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void LoginResult::set_has_playername() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void LoginResult::clear_has_playername() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void LoginResult::clear_playername() {
-  if (playername_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playername_->clear();
-  }
-  clear_has_playername();
-}
-inline const ::std::string& LoginResult::playername() const {
-  // @@protoc_insertion_point(field_get:MyPacket.LoginResult.PlayerName)
-  return *playername_;
-}
-inline void LoginResult::set_playername(const ::std::string& value) {
-  set_has_playername();
-  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playername_ = new ::std::string;
-  }
-  playername_->assign(value);
-  // @@protoc_insertion_point(field_set:MyPacket.LoginResult.PlayerName)
-}
-inline void LoginResult::set_playername(const char* value) {
-  set_has_playername();
-  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playername_ = new ::std::string;
-  }
-  playername_->assign(value);
-  // @@protoc_insertion_point(field_set_char:MyPacket.LoginResult.PlayerName)
-}
-inline void LoginResult::set_playername(const char* value, size_t size) {
-  set_has_playername();
-  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playername_ = new ::std::string;
-  }
-  playername_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:MyPacket.LoginResult.PlayerName)
-}
-inline ::std::string* LoginResult::mutable_playername() {
-  set_has_playername();
-  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playername_ = new ::std::string;
-  }
-  // @@protoc_insertion_point(field_mutable:MyPacket.LoginResult.PlayerName)
-  return playername_;
-}
-inline ::std::string* LoginResult::release_playername() {
-  clear_has_playername();
-  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    return NULL;
-  } else {
-    ::std::string* temp = playername_;
-    playername_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-    return temp;
-  }
-}
-inline void LoginResult::set_allocated_playername(::std::string* playername) {
-  if (playername_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete playername_;
-  }
-  if (playername) {
-    set_has_playername();
-    playername_ = playername;
-  } else {
-    clear_has_playername();
-    playername_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  }
-  // @@protoc_insertion_point(field_set_allocated:MyPacket.LoginResult.PlayerName)
-}
-
-// required .MyPacket.Position PlayerPos = 3;
-inline bool LoginResult::has_playerpos() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
-}
-inline void LoginResult::set_has_playerpos() {
-  _has_bits_[0] |= 0x00000004u;
-}
-inline void LoginResult::clear_has_playerpos() {
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline void LoginResult::clear_playerpos() {
-  if (playerpos_ != NULL) playerpos_->::MyPacket::Position::Clear();
-  clear_has_playerpos();
-}
-inline const ::MyPacket::Position& LoginResult::playerpos() const {
-  // @@protoc_insertion_point(field_get:MyPacket.LoginResult.PlayerPos)
-#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  return playerpos_ != NULL ? *playerpos_ : *default_instance().playerpos_;
-#else
-  return playerpos_ != NULL ? *playerpos_ : *default_instance_->playerpos_;
-#endif
-}
-inline ::MyPacket::Position* LoginResult::mutable_playerpos() {
-  set_has_playerpos();
-  if (playerpos_ == NULL) playerpos_ = new ::MyPacket::Position;
-  // @@protoc_insertion_point(field_mutable:MyPacket.LoginResult.PlayerPos)
-  return playerpos_;
-}
-inline ::MyPacket::Position* LoginResult::release_playerpos() {
-  clear_has_playerpos();
-  ::MyPacket::Position* temp = playerpos_;
-  playerpos_ = NULL;
-  return temp;
-}
-inline void LoginResult::set_allocated_playerpos(::MyPacket::Position* playerpos) {
-  delete playerpos_;
-  playerpos_ = playerpos;
-  if (playerpos) {
-    set_has_playerpos();
-  } else {
-    clear_has_playerpos();
-  }
-  // @@protoc_insertion_point(field_set_allocated:MyPacket.LoginResult.PlayerPos)
 }
 
 // -------------------------------------------------------------------
