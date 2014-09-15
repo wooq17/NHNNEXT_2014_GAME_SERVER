@@ -83,6 +83,15 @@ struct OverlappedConnectContext : public OverlappedIOContext, public ObjectPool<
 
 void DeleteIoContext(OverlappedIOContext* context) ;
 
+enum ClientState
+{
+	NOTHING = -1,
+	SHARING_KEY,
+	WAIT_FOR_LOGIN,
+	LOGGED_IN,
+	WAIT_FOR_LOGOUT,
+};
+
 //TODO: 아래의 ClientSession은 xnew/xdelete사용 가능하도록 클래스 정의 부분 수정
 class ClientSession : public PooledAllocatable
 {
@@ -121,11 +130,18 @@ public:
 	void	SetSocket(SOCKET sock) { mSocket = sock; }
 	SOCKET	GetSocket() const { return mSocket;  }
 
-	bool	IsKeyShared(){ return mIsKeyShared; }
+	ClientState GetCurrentState() { return mState; }
 
 	static LPFN_DISCONNECTEX mFnDisconnectEx;
 	static LPFN_ACCEPTEX mFnAcceptEx;
 	static LPFN_CONNECTEX mFnConnectEx;
+
+	// 조심해!
+	// 아래 전송 요청은 결국 세션이 하는 일인데, 내부적으로 플레이어를 거쳐서 다시 세션에서 처리함
+	// 바로 세션에서 처리하도록 수정할 것
+	void RequestLogin();
+	void RequestMove();
+	void RequestChat();
 
 private:
 	int				mClientId;
@@ -142,7 +158,7 @@ private:
 	std::shared_ptr<Player> mPlayer;
 
 	Crypt			mCrypt;
-	bool			mIsKeyShared;
+	ClientState		mState;
 	
 	friend class SessionManager;
 } ;

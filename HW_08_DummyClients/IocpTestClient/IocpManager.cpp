@@ -75,7 +75,7 @@ void IocpManager::StartConnect()
 		}
 		GSessionManager->DoPeriodJob();
 
-		Sleep(200);
+		Sleep(10);
 	}
 }
 

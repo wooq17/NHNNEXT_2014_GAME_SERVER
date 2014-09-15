@@ -162,11 +162,11 @@ void ClientSession::AcceptCompletion()
 	// mPlayer.TestDeletePlayerData( id );
 	//
 
-	RSA::Init();
+	// RSA::Init();
 	// 여기서 첫 암호화 한 베이스 코드를 보낸다
 	DWORD headerLen = 0;
 	PBYTE header = nullptr;
-	header = RSA::GetHeader( headerLen );
+	header = GRSA->GetHeader( headerLen );
 
 	mCrypt.GenerateBaseKey();
 	DATA_BLOB g = mCrypt.GetG();
@@ -195,7 +195,7 @@ void ClientSession::AcceptCompletion()
 	memcpy( currentPos, p.pbData, 64 );
 	currentPos += 64;
 
-	if ( !RSA::Encrypt( ( pkt + sizeof(PacketHeader) + headerLen ), P_LENGTH + G_LENGTH ) )
+	if ( !GRSA->Encrypt( ( pkt + sizeof(PacketHeader)+headerLen ), P_LENGTH + G_LENGTH ) )
 	{
 		printf( "[RSA] Encrypt fail %d\n", GetLastError() );
 		DisconnectRequest( DR_ONCONNECT_ERROR );
@@ -277,6 +277,8 @@ bool ClientSession::PacketHandling()
 			DisconnectRequest( DR_ONCONNECT_ERROR );
 		}
 
+		delete pkt;
+
 		// mSize / mType / len / data
 		exportedLen = recvPacket->mSize - sizeof(PacketHeader)-sizeof( DWORD );
 		exportedData = PBYTE(recvPacket) + sizeof(PacketHeader)+sizeof( DWORD );
@@ -285,8 +287,6 @@ bool ClientSession::PacketHandling()
 			break;
 
 		mIsKeyShared = true;
-
-		delete pkt;
 	}
 		break;
 	case PKT_CS_LOGIN:
@@ -333,17 +333,19 @@ bool ClientSession::PacketHandling()
 		break;
 	default:
 		// echo
-		//if ( false == PostSend( mRecvBuffer.GetBufferStart(), len ) )
-		//	return false;
+		if ( false == PostSend( mRecvBuffer.GetBufferStart(), len ) )
+			return false;
 
-		//mRecvBuffer.Remove( len );
+		mRecvBuffer.Remove( len );
 		return true;
+		
 	}
+
+	mRecvBuffer.Remove( recvPacket->mSize );
 
 	// CRASH_ASSERT( len == recvPacket->mSize );
 	// mRecvBuffer.Remove( len );
-
-
+	/*
 	DWORD retVal = recvPacket->mSize;
 	mRecvBuffer.Remove( recvPacket->mSize );
 
@@ -353,4 +355,6 @@ bool ClientSession::PacketHandling()
 	}
 
 	return len == retVal;
+	*/
+
 }

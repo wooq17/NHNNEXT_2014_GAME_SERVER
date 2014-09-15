@@ -31,7 +31,7 @@ OverlappedIOContext::OverlappedIOContext(ClientSession* owner, IOType ioType)
 	mSessionObject->AddRef();
 }
 
-ClientSession::ClientSession() : mRecvBuffer( BUFSIZE ), mSendBuffer( BUFSIZE ), mConnected( 0 ), mRefCount( 0 ), mPlayer( new Player( this ) ), mIsKeyShared( false )
+ClientSession::ClientSession() : mRecvBuffer( BUFSIZE ), mSendBuffer( BUFSIZE ), mConnected( 0 ), mRefCount( 0 ), mPlayer( new Player( this ) ), mState( NOTHING )
 {
 	//memset(&mClientAddr, 0, sizeof(SOCKADDR_IN));
 	mSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
@@ -61,7 +61,7 @@ void ClientSession::SessionReset()
 	mSocket = WSASocket( AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED );
 
 	mCrypt.ReleaseResources();
-	mIsKeyShared = false;
+	mState = NOTHING;
 }
 
 bool ClientSession::PostConnect()
@@ -126,6 +126,8 @@ void ClientSession::ConnectCompletion()
 	{
 		printf_s( "[DEBUG] PreRecv error: %d\n", GetLastError() );
 	}
+
+	mState = SHARING_KEY;
 }
 
 // 여기서 DISCONNECT관련 FUNCTION POINTER만들고 바로 사용.
@@ -281,7 +283,7 @@ bool ClientSession::WritePacket( PacketHeader* packet )
 
 	memcpy( destData, packet, packet->mSize );
 
-	if ( mIsKeyShared )
+	if ( mState != SHARING_KEY )
 	{
 		if ( !mCrypt.Encrypt( (PBYTE)destData + sizeof( PacketHeader ), ( (PacketHeader*)destData )->mSize ) )
 			printf( "[DH] Decrypt failed\n" );
@@ -317,7 +319,7 @@ bool ClientSession::PacketHandler()
 
 	PacketHeader* recvPacket = reinterpret_cast<PacketHeader*>( mRecvBuffer.GetBufferStart() );
 
-	if ( mIsKeyShared )
+	if ( mState != SHARING_KEY )
 	{
 		if ( !mCrypt.Decrypt( (PBYTE)recvPacket + sizeof( PacketHeader ), recvPacket->mSize ) )
 			printf( "[DH] Decrypt failed\n" );
@@ -327,11 +329,9 @@ bool ClientSession::PacketHandler()
 	{
 		case PKT_SC_BASE_PUBLIC_KEY:
 		{
-			RSA::Init();
-
 			PBYTE data = (PBYTE)recvPacket + sizeof( PacketHeader );
 			PBYTE base = nullptr;
-			if ( !RSA::Decrypt( data, P_LENGTH + G_LENGTH, &base ) )
+			if ( !GRSA->Decrypt( data, P_LENGTH + G_LENGTH, &base ) )
 				printf( "fail\n" );
 
 			DATA_BLOB clientG;
@@ -389,7 +389,8 @@ bool ClientSession::PacketHandler()
 			if ( !mCrypt.GenerateSessionKey( exportedData, exportedLen ) )
 				break;
 
-			mIsKeyShared = true;
+			mState = WAIT_FOR_LOGIN;
+			RequestLogin();
 		}
 			break;
 		case PKT_SC_LOGIN:
@@ -398,8 +399,9 @@ bool ClientSession::PacketHandler()
 			mPlayer->Start( clientPacket->mPlayerId );
 			wprintf_s( L"[LOG] %s <<<< login packet \n", mPlayer->GetName() );
 
-			// move (0,0,0) to random position
-			GSessionManager->CreateMovePacket( this );
+			mState = LOGGED_IN;
+
+			RequestMove();
 		}
 			break;
 		case PKT_SC_LOGOUT:
@@ -431,6 +433,7 @@ bool ClientSession::PacketHandler()
 				if ( mPlayer->SendLogout() )
 				{
 					wprintf_s( L"[LOG] %s >>>> logout packet\n", mPlayer->GetName() );
+					mState = WAIT_FOR_LOGOUT;
 				}
 			}
 		}
@@ -479,6 +482,56 @@ void ClientSession::ReleaseRef()
 	}
 }
 
+void ClientSession::RequestLogin()
+{
+	wchar_t name[6];
+	name[0] = static_cast<wchar_t>( rand() % 26 + 65 );
+	name[1] = static_cast<wchar_t>( rand() % 26 + 65 );
+	name[2] = static_cast<wchar_t>( rand() % 26 + 65 );
+	name[3] = static_cast<wchar_t>( rand() % 26 + 65 );
+	name[4] = static_cast<wchar_t>( rand() % 26 + 65 );
+	name[5] = '\0';
+
+	if ( mPlayer->SendLogin( name ) )
+	{
+		wprintf_s( L"[LOG] %s >>>> login packet\n", name );
+		mPlayer->SetName( name );
+	}
+}
+
+void ClientSession::RequestMove()
+{
+	wchar_t chatMessage[11];
+	chatMessage[0] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[1] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[2] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[3] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[4] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[5] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[6] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[7] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[8] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[9] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chatMessage[10] = '\0';
+
+	if ( mPlayer->SendChat( chatMessage ) )
+	{
+		wprintf_s( L"[LOG] %s >>>> chat Message : %s\n", mPlayer->GetName(), chatMessage );
+	}
+}
+
+void ClientSession::RequestChat()
+{
+	float x = static_cast<float>( rand() % 2000 - 1000 );
+	float y = static_cast<float>( rand() % 2000 - 1000 );
+	float z = static_cast<float>( rand() % 2000 - 1000 );
+	Float3D pos{ x, y, z };
+
+	if ( mPlayer->SendMove( pos ) )
+	{
+		wprintf_s( L"[LOG] %s >>>> move to ( %f , %f , %f )\n", mPlayer->GetName(), pos.m_X, pos.m_Y, pos.m_Z );
+	}
+}
 
 void DeleteIoContext(OverlappedIOContext* context)
 {
@@ -516,4 +569,3 @@ void DeleteIoContext(OverlappedIOContext* context)
 
 	
 }
-

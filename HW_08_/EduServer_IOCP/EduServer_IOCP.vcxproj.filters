@@ -224,5 +224,8 @@
     <ClCompile Include="Crypt.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="RSA.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

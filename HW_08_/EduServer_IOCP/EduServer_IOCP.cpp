@@ -29,7 +29,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	GGrandCentralExecuter = new GrandCentralExecuter;
 	GPlayerManager = new PlayerManager;
 	GDatabaseManager = new DBManager;
-	RSA::Init();
+	GRSA = new RSA;
 
 	/// main threadµµ lock order check...
 	LLockOrderChecker = new LockOrderChecker(-1);
@@ -47,6 +47,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	if (false == GIocpManager->StartIoThreads())
 		return -1;
 
+	if ( false == GRSA->Init() )
+		return -1;
 	
 	printf_s("Start Server\n");
 
@@ -55,10 +57,11 @@ int _tmain(int argc, _TCHAR* argv[])
 	
 	GDatabaseManager->Finalize();
 	GIocpManager->Finalize();
-	RSA::ExceptionHandling();
+	GRSA->ExceptionHandling();
 
 	printf_s("End Server\n");
 
+	delete GRSA;
 	delete GDatabaseManager;
 	delete GIocpManager;
 	delete GClientSessionManager;

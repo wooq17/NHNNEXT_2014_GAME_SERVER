@@ -139,7 +139,6 @@ void IOThread::DoIocpJob()
 		
 		while ( !static_cast<ClientSession*>( remote )->PacketHandling() )
 		{
-
 		}
 		
 		completionOk = remote->PreRecv();

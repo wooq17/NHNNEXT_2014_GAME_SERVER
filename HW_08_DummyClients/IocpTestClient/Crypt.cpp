@@ -185,24 +185,8 @@ void Crypt::ReleaseResources()
 
 bool Crypt::Encrypt( PBYTE data, DWORD length )
 {
-	/*
-	BOOL fReturn = CryptEncrypt(
-	m_SessionKey,
-	0,
-	TRUE,
-	0,
-	NULL,
-	&dwLength,
-	sizeof( data ) );
-	if ( !fReturn )
-	{
-	ReleaseResources();
-	return false;
-	}
-	*/
-
 	// Encrypt the data.
-	DWORD dwLength = sizeof( data );
+	DWORD dwLength = length;
 	BOOL fReturn = CryptEncrypt(
 		m_SessionKey,
 		0,
@@ -223,14 +207,14 @@ bool Crypt::Encrypt( PBYTE data, DWORD length )
 
 bool Crypt::Decrypt( PBYTE data, DWORD length )
 {
-	DWORD dwLength = sizeof( data );
+	DWORD dwLength = length;
 	BOOL fReturn = CryptDecrypt(
 		m_SessionKey,
 		0,
 		TRUE,
 		0,
 		data,
-		&length );
+		&dwLength );
 	if ( !fReturn )
 	{
 		printf( "Decrypt error : %d\n", GetLastError() );

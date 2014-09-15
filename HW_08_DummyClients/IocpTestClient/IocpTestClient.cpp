@@ -30,7 +30,7 @@ int _tmain( int argc, _TCHAR* argv[] )
 	GMemoryPool = new MemoryPool;
 	GSessionManager = new SessionManager;
 	GIocpManager = new IocpManager;
-	RSA::Init();
+	GRSA = new RSA;
 
 	GSessionManager->Initialize( argv[1], _wtoi( argv[2] ), _wtoi( argv[3] ) );
 
@@ -38,6 +38,9 @@ int _tmain( int argc, _TCHAR* argv[] )
 		return -1;
 
 	if ( false == GIocpManager->StartIoThreads() )
+		return -1;
+
+	if ( false == GRSA->Init() )
 		return -1;
 
 
@@ -50,7 +53,7 @@ int _tmain( int argc, _TCHAR* argv[] )
 	GIocpManager->StartConnect(); ///< block here...
 
 	GIocpManager->Finalize();
-	RSA::ExceptionHandling();
+	GRSA->ExceptionHandling();
 
 	wprintf_s( L"Total bytes written\t\t: %lld\n", GIocpManager->GetTotalByteWritten());
 	wprintf_s( L"Total bytes read\t\t: %lld\n", GIocpManager->GetTotalByteRead() );
@@ -58,6 +61,7 @@ int _tmain( int argc, _TCHAR* argv[] )
 	wprintf_s( L"End Clients\n" );
 	getchar();
 
+	delete GRSA;
 	delete GIocpManager;
 	delete GSessionManager;
 	delete GMemoryPool;
