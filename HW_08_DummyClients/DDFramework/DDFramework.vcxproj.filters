@@ -1,0 +1,155 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Framework">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Framework\Core">
+      <UniqueIdentifier>{81925101-7ebd-4b40-89a6-397be761e472}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Presentation">
+      <UniqueIdentifier>{4e7f10dd-fa98-45d2-9a92-ae5fdd1da7c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Core\Application">
+      <UniqueIdentifier>{018512f5-5fc1-4cd5-8978-2314c220e90f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Core\Scene">
+      <UniqueIdentifier>{b662fa73-d65b-4007-977c-954dc923d54e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Presentation\Renderer">
+      <UniqueIdentifier>{1ad3e283-9d93-4803-b167-d1c4975866a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="etc">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Framework\Presentation\Object">
+      <UniqueIdentifier>{c1cf06c4-cb95-4d47-a94f-7ea6c63a213d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Util">
+      <UniqueIdentifier>{5040ceae-6ef2-4b79-9552-5483c3c5804a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Core\Input">
+      <UniqueIdentifier>{597259b5-2a05-4df6-a572-6826234076ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Physics">
+      <UniqueIdentifier>{05e152e2-bfcf-456a-83d7-ed37ea20543c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Physics\DataStructure">
+      <UniqueIdentifier>{b3cce718-4262-4135-94f1-62c272c035f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Network">
+      <UniqueIdentifier>{bb78fb88-6695-4668-ba70-bd9f236a448f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>etc</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>etc</Filter>
+    </ClInclude>
+    <ClInclude Include="DDRenderer.h">
+      <Filter>Framework\Presentation\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="DDFramework.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="DDApplication.h">
+      <Filter>Framework\Core\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="DDConfig.h">
+      <Filter>Framework\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="DDMacro.h">
+      <Filter>Framework\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSceneDirector.h">
+      <Filter>Framework\Core\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="DDResourceManager.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="DDInputSystem.h">
+      <Filter>Framework\Core\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="DDPoint.h">
+      <Filter>Framework\Physics\DataStructure</Filter>
+    </ClInclude>
+    <ClInclude Include="DDObject.h">
+      <Filter>Framework\Presentation\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="DDModel.h">
+      <Filter>Framework\Presentation\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="DDScene.h">
+      <Filter>Framework\Presentation\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="DDLight.h">
+      <Filter>Framework\Presentation\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="DDCamera.h">
+      <Filter>Framework\Presentation\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="DDNetwork.h">
+      <Filter>Framework\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="DDCircularBuffer.h">
+      <Filter>Framework\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="DDPacketHeader.h">
+      <Filter>Framework\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="DDUI.h">
+      <Filter>Framework\Presentation\Object</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>etc</Filter>
+    </ClCompile>
+    <ClCompile Include="DDRenderer.cpp">
+      <Filter>Framework\Presentation\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="DDApplication.cpp">
+      <Filter>Framework\Core\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSceneDirector.cpp">
+      <Filter>Framework\Core\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="DDInputSystem.cpp">
+      <Filter>Framework\Core\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="DDPoint.cpp">
+      <Filter>Framework\Physics\DataStructure</Filter>
+    </ClCompile>
+    <ClCompile Include="DDObject.cpp">
+      <Filter>Framework\Presentation\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="DDModel.cpp">
+      <Filter>Framework\Presentation\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="DDScene.cpp">
+      <Filter>Framework\Presentation\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="DDLight.cpp">
+      <Filter>Framework\Presentation\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="DDCamera.cpp">
+      <Filter>Framework\Presentation\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="DDNetwork.cpp">
+      <Filter>Framework\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="DDCircularBuffer.cpp">
+      <Filter>Framework\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="DDUI.cpp">
+      <Filter>Framework\Presentation\Object</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
