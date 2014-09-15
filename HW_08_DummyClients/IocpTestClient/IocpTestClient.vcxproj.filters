@@ -63,6 +63,9 @@
     <ClInclude Include="RSA.h">
       <Filter>Main</Filter>
     </ClInclude>
+    <ClInclude Include="MyPacket.pb.h">
+      <Filter>Main</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IocpTestClient.cpp">
@@ -96,6 +99,9 @@
       <Filter>Main</Filter>
     </ClCompile>
     <ClCompile Include="Crypt.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="MyPacket.pb.cc">
       <Filter>Main</Filter>
     </ClCompile>
   </ItemGroup>

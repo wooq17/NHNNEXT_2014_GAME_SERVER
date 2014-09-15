@@ -357,7 +357,7 @@ bool ClientSession::PacketHandler()
 			DWORD exportedLen = 0;
 			PBYTE exportedData = mCrypt.ExportPublicKey( &exportedLen );
 
-			unsigned short pktLen = sizeof(PacketHeader)+sizeof(DWORD)+exportedLen;
+			unsigned long pktLen = sizeof(PacketHeader)+sizeof(DWORD)+exportedLen;
 			PBYTE pkt = (PBYTE)malloc( pktLen );
 			PBYTE currentPos = pkt;
 
