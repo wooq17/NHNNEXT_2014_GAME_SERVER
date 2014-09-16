@@ -222,10 +222,9 @@ void ClientSession::RecvCompletion(DWORD transferred)
 	// 버퍼에 받은 길이만큼 저장
  	mRecvBuffer.Commit(transferred);
 
-	PacketHandler();
-// 	while ( !PacketHandler() )
-// 	{
-// 	}
+ 	while ( !PacketHandler() )
+ 	{
+ 	}
 }
 
 
@@ -244,6 +243,8 @@ bool ClientSession::PostSend()
 
 	sendContext->mWsaBuf.len = (ULONG) mSendBuffer.GetContiguiousBytes(); 
 	sendContext->mWsaBuf.buf = mSendBuffer.GetBufferStart();
+
+	CRASH_ASSERT( IsValidData( (PacketHeader*)sendContext->mWsaBuf.buf, sendContext->mWsaBuf.len ) );
 
 	/// start async send
 	if (SOCKET_ERROR == WSASend(mSocket, &sendContext->mWsaBuf, 1, &sendbytes, flags, (LPWSAOVERLAPPED)sendContext, NULL))
@@ -270,7 +271,7 @@ void ClientSession::SendCompletion(DWORD transferred)
 }
 
 
-bool ClientSession::WritePacket( PacketHeader* packet )
+bool ClientSession::SendPacket( PacketHeader* packet )
 {
 	//FastSpinlockGuard criticalSection( mBufferLock );
 
@@ -285,16 +286,19 @@ bool ClientSession::WritePacket( PacketHeader* packet )
 
 	if ( mState != SHARING_KEY )
 	{
-		if ( !mCrypt.Encrypt( (PBYTE)destData + sizeof( PacketHeader ), ( (PacketHeader*)destData )->mSize ) )
+		if ( !mCrypt.Encrypt( (PBYTE)destData + sizeof( PacketHeader ), ( (PacketHeader*)destData )->mSize - sizeof( PacketHeader ) ) )
 			printf( "[DH] Decrypt failed\n" );
 	}
 
 	mSendBuffer.Commit( packet->mSize );
 
+	if ( !PostSend() )
+		return false;
+
 	return true;
 }
 
-bool ClientSession::WritePacket( const char* packet, DWORD len )
+bool ClientSession::SendPacket( const char* packet, DWORD len )
 {
 	//FastSpinlockGuard criticalSection( mBufferLock );
 
@@ -306,6 +310,9 @@ bool ClientSession::WritePacket( const char* packet, DWORD len )
 	memcpy( destData, packet, len );
 
 	mSendBuffer.Commit( len );
+
+	if ( !PostSend() )
+		return false;
 
 	return true;
 }
@@ -321,7 +328,7 @@ bool ClientSession::PacketHandler()
 
 	if ( mState != SHARING_KEY )
 	{
-		if ( !mCrypt.Decrypt( (PBYTE)recvPacket + sizeof( PacketHeader ), recvPacket->mSize ) )
+		if ( !mCrypt.Decrypt( (PBYTE)recvPacket + sizeof( PacketHeader ), recvPacket->mSize - sizeof( PacketHeader ) ) )
 			printf( "[DH] Decrypt failed\n" );
 	}
 
@@ -370,7 +377,7 @@ bool ClientSession::PacketHandler()
 
 			memcpy( currentPos, exportedData, exportedLen );
 
-			if ( !WritePacket( (char*)pkt, pktLen ) )
+			if ( !SendPacket( (char*)pkt, pktLen ) )
 			{
 				printf( "[RSA] post key fail %d\n", GetLastError() );
 				DisconnectRequest( DR_ONCONNECT_ERROR );
@@ -414,27 +421,25 @@ bool ClientSession::PacketHandler()
 			break;
 		case PKT_SC_CHAT:
 		{
-			if ( !mPlayer->IsLoaded() )
-			{
-				wprintf_s( L"[DEBUG] LOGOUT PLAYER GOT A MESSAGE" );
+			if ( mState == WAIT_FOR_LOGOUT )
 				break;
-			}
 				
 			ChatBroadcastResponse* clientPacket = reinterpret_cast<ChatBroadcastResponse*>( recvPacket );
-			if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
-				break;
 			
-			--mPlayer->mHealth;
-			wprintf_s( L"[LOG] %s : %s Health : %d\n", clientPacket->mName, clientPacket->mChat, mPlayer->GetPlayerHealth() );
+			if ( mPlayer->GetPlayerId() == clientPacket->mPlayerId )
+			{
+				mPlayer->DecrementHealth();
+				wprintf_s( L"[LOG] %s : Health = %d\n", clientPacket->mName, mPlayer->GetPlayerHealth() );
+			}
+
+			// [LOG] %s >>>> chat Message : %s\n
+			wprintf_s( L"[LOG] %s <<<< chat Message : %s\n", clientPacket->mName, clientPacket->mChat );
 
 			if ( !mPlayer->IsAlive() )
 			{
-				wprintf_s( L"[LOG] %s player dead\n", mPlayer->GetName() );
-				if ( mPlayer->SendLogout() )
-				{
-					wprintf_s( L"[LOG] %s >>>> logout packet\n", mPlayer->GetName() );
-					mState = WAIT_FOR_LOGOUT;
-				}
+				// wprintf_s( L"[LOG] %s player dead\n", mPlayer->GetName() );
+				RequestLogout();
+				mState = WAIT_FOR_LOGOUT;
 			}
 		}
 			break;
@@ -460,10 +465,10 @@ bool ClientSession::PacketHandler()
 	}
 
 	// 패킷 처리다했으면 처리한 패킷 크기만큼 삭제
-	DWORD retVal = recvPacket->mSize;
-	mRecvBuffer.Remove( recvPacket->mSize );
+	DWORD processedLen = recvPacket->mSize;
+	mRecvBuffer.Remove( processedLen );
 
-	return retVal == len;
+	return processedLen == len;
 }
 
 void ClientSession::AddRef()
@@ -492,14 +497,43 @@ void ClientSession::RequestLogin()
 	name[4] = static_cast<wchar_t>( rand() % 26 + 65 );
 	name[5] = '\0';
 
-	if ( mPlayer->SendLogin( name ) )
+	mPlayer->SetName( name );
+
+	LoginRequest loginRequest;
+	wcscpy_s( loginRequest.mName, name );
+
+	if ( !SendPacket( &loginRequest ) )
 	{
-		wprintf_s( L"[LOG] %s >>>> login packet\n", name );
-		mPlayer->SetName( name );
+		// disconnect
+		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
+
+	wprintf_s( L"[LOG] %s >>>> login packet\n", name );
 }
 
 void ClientSession::RequestMove()
+{
+	float x = static_cast<float>( rand() % 2000 - 1000 );
+	float y = static_cast<float>( rand() % 2000 - 1000 );
+	float z = static_cast<float>( rand() % 2000 - 1000 );
+	Float3D pos{ x, y, z };
+
+	MoveRequest moveRequest;
+	moveRequest.mPlayerId = mPlayer->GetPlayerId();
+	moveRequest.mX = pos.m_X;
+	moveRequest.mY = pos.m_Y;
+	moveRequest.mZ = pos.m_Z;
+
+	if ( !SendPacket( &moveRequest ) )
+	{
+		// disconnect
+		DisconnectRequest( DR_IO_REQUEST_ERROR );
+	}
+
+	wprintf_s( L"[LOG] %s >>>> move to ( %f , %f , %f )\n", mPlayer->GetName(), pos.m_X, pos.m_Y, pos.m_Z );
+}
+
+void ClientSession::RequestChat()
 {
 	wchar_t chatMessage[11];
 	chatMessage[0] = static_cast<wchar_t>( rand() % 26 + 97 );
@@ -514,23 +548,31 @@ void ClientSession::RequestMove()
 	chatMessage[9] = static_cast<wchar_t>( rand() % 26 + 97 );
 	chatMessage[10] = '\0';
 
-	if ( mPlayer->SendChat( chatMessage ) )
+	ChatBroadcastRequest chatRequest;
+	chatRequest.mPlayerId = mPlayer->GetPlayerId();
+	wcscpy_s( chatRequest.mChat, chatMessage );
+
+	if ( !SendPacket( &chatRequest ) )
 	{
-		wprintf_s( L"[LOG] %s >>>> chat Message : %s\n", mPlayer->GetName(), chatMessage );
+		// disconnect
+		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
+
+	wprintf_s( L"[LOG] %s >>>> chat Message : %s\n", mPlayer->GetName(), chatMessage );
 }
 
-void ClientSession::RequestChat()
+void ClientSession::RequestLogout()
 {
-	float x = static_cast<float>( rand() % 2000 - 1000 );
-	float y = static_cast<float>( rand() % 2000 - 1000 );
-	float z = static_cast<float>( rand() % 2000 - 1000 );
-	Float3D pos{ x, y, z };
+	LogoutRequest logoutRequest;
+	logoutRequest.mPlayerId = mPlayer->GetPlayerId();
 
-	if ( mPlayer->SendMove( pos ) )
+	if ( !SendPacket( &logoutRequest ) )
 	{
-		wprintf_s( L"[LOG] %s >>>> move to ( %f , %f , %f )\n", mPlayer->GetName(), pos.m_X, pos.m_Y, pos.m_Z );
+		// disconnect
+		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
+
+	wprintf_s( L"[LOG] %s >>>> logout packet\n", mPlayer->GetName() );
 }
 
 void DeleteIoContext(OverlappedIOContext* context)
@@ -568,4 +610,25 @@ void DeleteIoContext(OverlappedIOContext* context)
 	}
 
 	
+}
+
+bool ClientSession::IsValidData( PacketHeader* start, ULONG len )
+{
+	ULONG remainLen = len;
+	PacketHeader* currentPos = start;
+
+	printf( "header : %d / len : %d\n", currentPos->mType, currentPos->mSize );
+	while ( currentPos->mSize != remainLen )
+	{
+		// 현재 위치의 값이 유효한 패킷 데이터인가
+		if ( currentPos->mSize > remainLen )
+			return false;
+
+		remainLen -= currentPos->mSize;
+		currentPos += currentPos->mSize;
+
+		printf( "header : %d / len : %d\n", currentPos->mType, currentPos->mSize );
+	}
+
+	return true;
 }

@@ -6,7 +6,7 @@
 #include "PlayerManager.h"
 #include "IocpManager.h"
 #include "MemoryPool.h"
-
+#include "Packet.h"
 
 ClientSessionManager* GClientSessionManager = nullptr;
 
@@ -105,7 +105,7 @@ void ClientSessionManager::DeregisterLogedinSession( ClientSession* client )
 	mLogedinSessionList.erase( it );
 }
 */
-void ClientSessionManager::NearbyBroadcast( const char* message, int len, int from )
+void ClientSessionManager::NearbyBroadcast( PacketHeader* pkt, int from )
 {
 	PlayerList targetList;
 	
@@ -115,6 +115,6 @@ void ClientSessionManager::NearbyBroadcast( const char* message, int len, int fr
 	// 순회하면서 방송
 	for ( auto it : targetList )
 	{
-		it->GetSession()->PostSend( message, len );
+		it->GetSession()->PostSend( reinterpret_cast<const char*>( pkt ), pkt->mSize );
 	}
 }

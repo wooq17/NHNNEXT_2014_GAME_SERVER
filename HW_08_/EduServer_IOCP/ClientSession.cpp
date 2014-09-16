@@ -239,9 +239,11 @@ bool ClientSession::PacketHandling()
 
 	PacketHeader* recvPacket = reinterpret_cast<PacketHeader*>( mRecvBuffer.GetBufferStart() );
 
+	CRASH_ASSERT( IsValidData( recvPacket, len ) );
+
 	if ( mIsKeyShared )
 	{
-		if ( !mCrypt.Decrypt( (PBYTE)recvPacket + sizeof( PacketHeader ), recvPacket->mSize ) )
+		if ( !mCrypt.Decrypt( (PBYTE)recvPacket + sizeof( PacketHeader ), recvPacket->mSize - sizeof( PacketHeader ) ) )
 			printf( "[DH] Decrypt failed\n" );
 	}
 
@@ -313,13 +315,15 @@ bool ClientSession::PacketHandling()
 			if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
 				break;
 
-			ChatBroadcastResponse packet;
+			ChatBroadcastResponse* packet = new ChatBroadcastResponse();
 
-			packet.mPlayerId = clientPacket->mPlayerId;
-			memcpy( packet.mName, mPlayer->GetName(), sizeof( packet.mName ) );
-			memcpy( packet.mChat, clientPacket->mChat, sizeof( packet.mChat ) );
+			packet->mPlayerId = clientPacket->mPlayerId;
+			wcscpy_s( packet->mName, mPlayer->GetName() );
+			wcscpy_s( packet->mChat, clientPacket->mChat );
 
-			GClientSessionManager->NearbyBroadcast( reinterpret_cast<char*>( &packet ), packet.mSize, mPlayer->GetZoneIdx() );
+			GClientSessionManager->NearbyBroadcast( packet, mPlayer->GetZoneIdx() );
+
+			delete packet;
 		}
 		break;
 	case PKT_CS_MOVE:
@@ -343,18 +347,30 @@ bool ClientSession::PacketHandling()
 
 	mRecvBuffer.Remove( recvPacket->mSize );
 
-	// CRASH_ASSERT( len == recvPacket->mSize );
-	// mRecvBuffer.Remove( len );
-	/*
-	DWORD retVal = recvPacket->mSize;
-	mRecvBuffer.Remove( recvPacket->mSize );
+	// 패킷 처리다했으면 처리한 패킷 크기만큼 삭제
+	DWORD processedLen = recvPacket->mSize;
+	mRecvBuffer.Remove( processedLen );
 
-	if (len > retVal)
+	return processedLen == len;
+}
+
+bool ClientSession::IsValidData( PacketHeader* start, ULONG len )
+{
+	ULONG remainLen = len;
+	PacketHeader* currentPos = start;
+
+	printf( "header : %d / len : %d\n", currentPos->mType, currentPos->mSize );
+	while ( currentPos->mSize != remainLen )
 	{
-		printf("\n\n[DEBUG] recv buffer left %d byte more\n\n", len - retVal);
+		// 현재 위치의 값이 유효한 패킷 데이터인가
+		if ( currentPos->mSize > remainLen )
+			return false;
+
+		remainLen -= currentPos->mSize;
+		currentPos += currentPos->mSize;
+
+		printf( "header : %d / len : %d\n", currentPos->mType, currentPos->mSize );
 	}
 
-	return len == retVal;
-	*/
-
+	return true;
 }

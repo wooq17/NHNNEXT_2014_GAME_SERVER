@@ -4,6 +4,7 @@
 #include "FastSpinlock.h"
 
 class ClientSession;
+class PacketHeader;
 
 class ClientSessionManager
 {
@@ -20,7 +21,7 @@ public:
 
 	// void RegisterLogedinSession( ClientSession* client );
 	// void DeregisterLogedinSession( ClientSession* client );
-	void NearbyBroadcast( const char* message, int len, int from );
+	void NearbyBroadcast( PacketHeader* pkt, int from );
 
 private:
 	typedef xlist<ClientSession*>::type ClientList;

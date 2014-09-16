@@ -65,17 +65,11 @@ void IOThread::DoIocpJob()
 	if (ret == 0 || dwTransferred == 0)
 	{
 		/// check time out first 
-		//if ( context == nullptr && GetLastError() == WAIT_TIMEOUT)
-		//	return;
 		int gle = GetLastError();
 
 		/// check time out first 
 		if ( gle == WAIT_TIMEOUT )
 		{
-			// 조심해!
-			// 3주차 과제 피드백에서 sm9 가라사대
-			///# timeout이라고 무조건 continue시키면 안된다, timeout인데 ret==true이고 context에 데이터가 넘어오는 경우는 어떻게?
-			// 라고 하시니 그 경우에는 context를 확인할 수 있도록 한다 (안 그러면 GQCS_TIMEOUT가 INFINITE 아닐 경우 accept를 못 하는 상황 발생)
 			if ( ret == 0 || context == nullptr )
 				return;
 		}
@@ -130,12 +124,6 @@ void IOThread::DoIocpJob()
 
 	case IO_RECV:
 		remote->RecvCompletion(dwTransferred);
-	
-		/// for test
-		// 여기서 패킷 종류에 따라서 따로 처리
-		// remote->EchoBack();
-		// completionOk = remote->PreRecv();
-		//static_cast<ClientSession*>(remote)->PacketHandling();
 		
 		while ( !static_cast<ClientSession*>( remote )->PacketHandling() )
 		{

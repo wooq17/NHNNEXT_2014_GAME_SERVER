@@ -117,8 +117,8 @@ public:
 	bool	PostSend();
 	void	SendCompletion(DWORD transferred);
 
-	bool	WritePacket( PacketHeader* packet );
-	bool	WritePacket( const char* packet, DWORD len );
+	bool	SendPacket( PacketHeader* packet );
+	bool	SendPacket( const char* packet, DWORD len );
 	bool	PacketHandler();
 
 	void	DisconnectRequest(DisconnectReason dr);
@@ -136,12 +136,12 @@ public:
 	static LPFN_ACCEPTEX mFnAcceptEx;
 	static LPFN_CONNECTEX mFnConnectEx;
 
-	// 조심해!
-	// 아래 전송 요청은 결국 세션이 하는 일인데, 내부적으로 플레이어를 거쳐서 다시 세션에서 처리함
-	// 바로 세션에서 처리하도록 수정할 것
 	void RequestLogin();
 	void RequestMove();
 	void RequestChat();
+	void RequestLogout();
+
+	bool IsValidData( PacketHeader* start, ULONG len );
 
 private:
 	int				mClientId;

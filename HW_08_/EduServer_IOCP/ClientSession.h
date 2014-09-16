@@ -7,6 +7,7 @@
 #include "Player.h"
 
 class ClientSessionManager;
+class PacketHeader;
 
 class ClientSession : public Session, public PooledAllocatable
 {
@@ -23,6 +24,7 @@ public:
 	SOCKET	GetSocket() const { return mSocket;  }
 
 	bool	PacketHandling();
+	bool	IsValidData( PacketHeader* start, ULONG len );
 
 	virtual void OnDisconnect( DisconnectReason dr );
 	virtual void OnRelease();

@@ -125,8 +125,8 @@ bool Session::PostSend(const char* data, size_t len)
 
 	if ( mIsKeyShared )
 	{
-		if ( !mCrypt.Encrypt( (PBYTE)destData + sizeof( PacketHeader ), ( (PacketHeader*)destData )->mSize ) )
-			printf( "[DH] Decrypt failed\n" );
+		if ( !mCrypt.Encrypt( (PBYTE)destData + sizeof( PacketHeader ), ( (PacketHeader*)destData )->mSize - sizeof( PacketHeader ) ) )
+			printf( "[DH] Encrypt failed\n" );
 	}
 
 	mSendBuffer.Commit(len);

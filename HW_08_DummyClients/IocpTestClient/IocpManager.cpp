@@ -108,11 +108,11 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 		
 		if (ret == 0 || dwTransferred == 0)
 		{
-			
 			/// check time out first 
 			if ( context == nullptr && GetLastError() == WAIT_TIMEOUT )
 				continue;
 
+			CRASH_ASSERT( nullptr != context );
 
 			if ( context->mIoType == IO_RECV || context->mIoType == IO_SEND )
 			{
@@ -126,30 +126,6 @@ unsigned int WINAPI IocpManager::IoWorkerThread(LPVOID lpParam)
 
 				continue;
 			}
-
-			/*
-			DWORD gle = GetLastError();
-
-			/// check time out first 
-			if (gle == WAIT_TIMEOUT)
-				continue;
-			if ( gle == WSA_INVALID_HANDLE || gle == ERROR_ABANDONED_WAIT_0 )
-				break;
-			
-
-			if (context->mIoType == IO_RECV || context->mIoType == IO_SEND )
-			{
-				CRASH_ASSERT(nullptr != theClient);
-
-				/// In most cases in here: ERROR_NETNAME_DELETED(64)
-
-				theClient->DisconnectRequest(DR_COMPLETION_ERROR);
-
-				DeleteIoContext(context);
-
-				continue;
-			}
-			*/
 		}
 
 		CRASH_ASSERT(nullptr != theClient);
