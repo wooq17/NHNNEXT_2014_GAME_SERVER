@@ -25,10 +25,15 @@ public:
 	void DoPeriodJob();	
 	sockaddr_in* GetServerAddr() { return &serverAddr; }
 
+	void RegisterLogedinSession( ClientSession* client );
+	void DeregisterLogedinSession( ClientSession* client );
+
 private:
 	typedef xlist<ClientSession*>::type ClientList;
 	ClientList	mFreeSessionList;
-	ClientList  mClientList;
+
+	typedef xmap<SOCKET, ClientSession*>::type ClientMap;
+	ClientMap	mLogedinSessionList;
 
 	FastSpinlock mLock;
 

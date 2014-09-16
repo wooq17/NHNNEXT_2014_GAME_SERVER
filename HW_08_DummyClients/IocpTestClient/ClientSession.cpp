@@ -264,7 +264,7 @@ bool ClientSession::PostSend()
 
 void ClientSession::SendCompletion(DWORD transferred)
 {
-	//FastSpinlockGuard criticalSection( mBufferLock );
+	FastSpinlockGuard criticalSection( mSendBufferLock );
 	
 	// 버퍼 초기화
 	mSendBuffer.Remove(transferred);
@@ -273,9 +273,7 @@ void ClientSession::SendCompletion(DWORD transferred)
 
 bool ClientSession::SendPacket( PacketHeader* packet )
 {
-	//FastSpinlockGuard criticalSection( mBufferLock );
-
-	assert( packet->mType != 0 );
+	FastSpinlockGuard criticalSection( mSendBufferLock );
 
 	if ( mSendBuffer.GetFreeSpaceSize() < packet->mSize )
 		return false;
@@ -300,7 +298,7 @@ bool ClientSession::SendPacket( PacketHeader* packet )
 
 bool ClientSession::SendPacket( const char* packet, DWORD len )
 {
-	//FastSpinlockGuard criticalSection( mBufferLock );
+	FastSpinlockGuard criticalSection( mSendBufferLock );
 
 	if ( mSendBuffer.GetFreeSpaceSize() < len )
 		return false;
@@ -407,6 +405,7 @@ bool ClientSession::PacketHandler()
 			wprintf_s( L"[LOG] %s <<<< login packet \n", mPlayer->GetName() );
 
 			mState = LOGGED_IN;
+			GSessionManager->RegisterLogedinSession( this );
 
 			RequestMove();
 		}

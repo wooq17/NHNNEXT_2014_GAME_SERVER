@@ -151,6 +151,7 @@ private:
 		
 	CircularBuffer	mSendBuffer;
 	CircularBuffer	mRecvBuffer;
+	FastSpinlock	mSendBufferLock;
 
 	volatile long	mRefCount;
 	volatile long	mConnected;

@@ -17,10 +17,11 @@ SessionManager::~SessionManager()
 		xdelete(it);
 	}
 
-	for ( auto it : mClientList )
+	for ( auto it : mLogedinSessionList )
 	{
-		xdelete( it );
+		xdelete( it.second );
 	}
+	mLogedinSessionList.clear();
 }
 
 void SessionManager::PrepareSessions()
@@ -35,8 +36,13 @@ void SessionManager::PrepareSessions()
 		client->SetClientId( i );
 			
 		mFreeSessionList.push_back(client);
-		mClientList.push_back( client );
 	}
+
+	for ( auto it : mLogedinSessionList )
+	{
+		xdelete( it.second );
+	}
+	mLogedinSessionList.clear( );
 }
 
 void SessionManager::ReturnClientSession(ClientSession* client)
@@ -45,7 +51,8 @@ void SessionManager::ReturnClientSession(ClientSession* client)
 
 	CRASH_ASSERT(client->mConnected == 0 && client->mRefCount == 0);
 
-	client->SessionReset();
+	client->SessionReset( );
+	DeregisterLogedinSession( client );
 
 	mFreeSessionList.push_back(client);
 
@@ -91,16 +98,36 @@ void SessionManager::Initialize( wchar_t* hostIP, unsigned short port, int maxCo
 
 void SessionManager::DoPeriodJob()
 {
-	for ( auto client : mClientList )
+	for ( auto client : mLogedinSessionList )
 	{
-		if ( client->GetCurrentState() != LOGGED_IN )
+		if ( client.second->GetCurrentState() != LOGGED_IN )
 			continue;
 
 		// 1 / 5의 확률로 move / chat
  		if ( 0 == rand() % 5 )
  		{
-			client->RequestMove();
-			client->RequestChat();
+			client.second->RequestMove( );
+			client.second->RequestChat( );
  		}
 	}
+}
+
+void SessionManager::RegisterLogedinSession( ClientSession* client )
+{
+	FastSpinlockGuard guard( mLock );
+
+	auto it = mLogedinSessionList.find( client->GetSocket( ) );
+
+	printf( "****client register : %d\n", client->GetSocket( ) );
+	CRASH_ASSERT( it == mLogedinSessionList.end( ) ); // 같은 게 이미 있으면 이상하다
+	mLogedinSessionList.insert( xmap<SOCKET, ClientSession*>::type::value_type( client->GetSocket( ), client ) );
+}
+
+void SessionManager::DeregisterLogedinSession( ClientSession* client )
+{
+	auto it = mLogedinSessionList.find( client->GetSocket( ) );
+
+	printf( "****client deregister : %d\n", client->GetSocket( ) );
+	CRASH_ASSERT( it != mLogedinSessionList.end( ) );
+	mLogedinSessionList.erase( it );
 }
