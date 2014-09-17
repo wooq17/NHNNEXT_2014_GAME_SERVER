@@ -114,7 +114,7 @@ public:
 	bool	PostRecv();
 	void	RecvCompletion(DWORD transferred);
 
-	bool	PostSend();
+	// bool	PostSend();
 	void	SendCompletion(DWORD transferred);
 
 	bool	SendPacket( PacketHeader* packet );
@@ -142,6 +142,7 @@ public:
 	void RequestLogout();
 
 	bool IsValidData( PacketHeader* start, ULONG len );
+	bool TestPostSend( char* start, ULONG len );
 
 private:
 	int				mClientId;

@@ -228,11 +228,13 @@ void ClientSession::RecvCompletion(DWORD transferred)
 }
 
 
-
+/*
 bool ClientSession::PostSend()
 {
 	if (!IsConnected())
 		return false;
+
+	printf("post!!\n");
 
 	//FastSpinlockGuard criticalSection(mBufferLock);
 	
@@ -261,6 +263,7 @@ bool ClientSession::PostSend()
 
 	return true;
 }
+*/
 
 void ClientSession::SendCompletion(DWORD transferred)
 {
@@ -290,7 +293,8 @@ bool ClientSession::SendPacket( PacketHeader* packet )
 
 	mSendBuffer.Commit( packet->mSize );
 
-	if ( !PostSend() )
+	// if ( !PostSend() )
+	if ( !TestPostSend( destData, packet->mSize ) )
 		return false;
 
 	return true;
@@ -309,7 +313,8 @@ bool ClientSession::SendPacket( const char* packet, DWORD len )
 
 	mSendBuffer.Commit( len );
 
-	if ( !PostSend() )
+	// if ( !PostSend() )
+	if ( !TestPostSend( destData, len ) )
 		return false;
 
 	return true;
@@ -317,6 +322,7 @@ bool ClientSession::SendPacket( const char* packet, DWORD len )
 
 bool ClientSession::PacketHandler()
 {
+	printf("PacketHandler\n");
 	size_t len = mRecvBuffer.GetContiguiousBytes();
 
 	if ( len == 0 )
@@ -334,6 +340,8 @@ bool ClientSession::PacketHandler()
 	{
 		case PKT_SC_BASE_PUBLIC_KEY:
 		{
+			printf( "PKT_SC_BASE_PUBLIC_KEY\n" );
+
 			PBYTE data = (PBYTE)recvPacket + sizeof( PacketHeader );
 			PBYTE base = nullptr;
 			if ( !GRSA->Decrypt( data, P_LENGTH + G_LENGTH, &base ) )
@@ -380,13 +388,13 @@ bool ClientSession::PacketHandler()
 				printf( "[RSA] post key fail %d\n", GetLastError() );
 				DisconnectRequest( DR_ONCONNECT_ERROR );
 			}
-			PostSend();
 
 			delete pkt;
 		}
 			break;
 		case PKT_SC_EXPORT_PUBLIC_KEY:
 		{
+			printf("PKT_SC_EXPORT_PUBLIC_KEY\n");
 			DWORD exportedLen = 0;
 			memcpy( &exportedLen, recvPacket + sizeof( PacketHeader ), sizeof( DWORD ) );
 			PBYTE exportedData = PBYTE(recvPacket) + sizeof(PacketHeader)+sizeof( DWORD );
@@ -407,7 +415,7 @@ bool ClientSession::PacketHandler()
 			mState = LOGGED_IN;
 			GSessionManager->RegisterLogedinSession( this );
 
-			RequestMove();
+			// RequestMove();
 		}
 			break;
 		case PKT_SC_LOGOUT:
@@ -512,6 +520,8 @@ void ClientSession::RequestLogin()
 
 void ClientSession::RequestMove()
 {
+	CRASH_ASSERT( LThreadType == THREAD_MAIN );
+
 	float x = static_cast<float>( rand() % 2000 - 1000 );
 	float y = static_cast<float>( rand() % 2000 - 1000 );
 	float z = static_cast<float>( rand() % 2000 - 1000 );
@@ -534,6 +544,8 @@ void ClientSession::RequestMove()
 
 void ClientSession::RequestChat()
 {
+	CRASH_ASSERT( LThreadType == THREAD_MAIN );
+
 	wchar_t chatMessage[11];
 	chatMessage[0] = static_cast<wchar_t>( rand() % 26 + 97 );
 	chatMessage[1] = static_cast<wchar_t>( rand() % 26 + 97 );
@@ -627,6 +639,41 @@ bool ClientSession::IsValidData( PacketHeader* start, ULONG len )
 		currentPos += currentPos->mSize;
 
 		printf( "header : %d / len : %d\n", currentPos->mType, currentPos->mSize );
+	}
+
+	return true;
+}
+
+bool ClientSession::TestPostSend( char* start, ULONG len )
+{
+	if ( !IsConnected() )
+		return false;
+
+	printf( "post!!\n" );
+
+	//FastSpinlockGuard criticalSection(mBufferLock);
+
+	OverlappedSendContext* sendContext = new OverlappedSendContext( this );
+
+	DWORD sendbytes = 0;
+	DWORD flags = 0;
+
+	sendContext->mWsaBuf.len = len;
+	sendContext->mWsaBuf.buf = start;
+
+	CRASH_ASSERT( IsValidData( (PacketHeader*)sendContext->mWsaBuf.buf, sendContext->mWsaBuf.len ) );
+
+	/// start async send
+	if ( SOCKET_ERROR == WSASend( mSocket, &sendContext->mWsaBuf, 1, &sendbytes, flags, (LPWSAOVERLAPPED)sendContext, NULL ) )
+	{
+		if ( WSAGetLastError() != WSA_IO_PENDING )
+		{
+			DeleteIoContext( sendContext );
+			printf_s( "ClientSession::PostSend Error : %d\n", GetLastError() );
+
+			return false;
+		}
+
 	}
 
 	return true;

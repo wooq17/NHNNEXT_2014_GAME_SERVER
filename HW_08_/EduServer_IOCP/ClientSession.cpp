@@ -348,10 +348,14 @@ bool ClientSession::PacketHandling()
 	mRecvBuffer.Remove( recvPacket->mSize );
 
 	// 패킷 처리다했으면 처리한 패킷 크기만큼 삭제
+	/*
 	DWORD processedLen = recvPacket->mSize;
 	mRecvBuffer.Remove( processedLen );
 
 	return processedLen == len;
+	*/
+	mRecvBuffer.Remove( len );
+	return true;
 }
 
 bool ClientSession::IsValidData( PacketHeader* start, ULONG len )

@@ -105,9 +105,9 @@ void SessionManager::DoPeriodJob()
 
 		// 1 / 5ÀÇ È®·ü·Î move / chat
  		if ( 0 == rand() % 5 )
- 		{
-			client.second->RequestMove( );
-			client.second->RequestChat( );
+		{
+			client.second->RequestMove();
+			client.second->RequestChat();
  		}
 	}
 }
