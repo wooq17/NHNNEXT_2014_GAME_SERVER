@@ -105,7 +105,9 @@ void ClientSessionManager::DeregisterLogedinSession( ClientSession* client )
 	mLogedinSessionList.erase( it );
 }
 */
-void ClientSessionManager::NearbyBroadcast( PacketHeader* pkt, int from )
+// protobuf 사용을 위해 parameter변경
+//void ClientSessionManager::NearbyBroadcast( PacketHeader* pkt, int from )
+void ClientSessionManager::NearbyBroadcast( const char* pkt, size_t pktSize, int from )
 {
 	PlayerList targetList;
 	
@@ -117,7 +119,7 @@ void ClientSessionManager::NearbyBroadcast( PacketHeader* pkt, int from )
 	// 순회하면서 방송
 	for ( auto it : targetList )
 	{
-		it->GetSession()->PostSend( reinterpret_cast<const char*>( pkt ), pkt->mSize );
+		it->GetSession()->PostSend( reinterpret_cast<const char*>( pkt ), pktSize );
 	}
 }
 

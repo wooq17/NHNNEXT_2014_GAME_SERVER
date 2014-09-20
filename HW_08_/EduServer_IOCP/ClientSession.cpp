@@ -11,6 +11,7 @@
 #include "LockOrderChecker.h"
 #include "Packet.h"
 #include "RSA.h"
+#include "MyPacket.pb.h"
 
 #define CLIENT_BUFSIZE	65536
 
@@ -401,8 +402,18 @@ void ClientSession::ResponseExportedKey( PacketHeader* recvPacket )
 
 void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 {
-	LoginRequest* clientPacket = reinterpret_cast<LoginRequest*>( recvPacket );
-	mPlayer->RequestRegisterPlayer( clientPacket->mName );
+	// protobuf용 부분
+	size_t packetHeaderSize = sizeof( PacketHeader );
+	MyPacket::LoginRequest request;
+	request.ParseFromArray( recvPacket + packetHeaderSize, recvPacket->mSize );
+
+	wchar_t playerName[6];
+	MultiByteToWideChar( CP_ACP, 0, request.playername().c_str(), -1, playerName, 6);
+	mPlayer->RequestRegisterPlayer( playerName );
+	// protobuf 끄읕
+
+	//LoginRequest* clientPacket = reinterpret_cast<LoginRequest*>( recvPacket );
+	//mPlayer->RequestRegisterPlayer( clientPacket->mName );
 	// 응답 보내기는 나중에 비동기로 수행
 
 	mState = LOGGED_IN;
@@ -410,26 +421,63 @@ void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 
 void ClientSession::ResponseLogout( PacketHeader* recvPacket )
 {
-	LogoutRequest* clientPacket = reinterpret_cast<LogoutRequest*>( recvPacket );
-	if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
-		return;
+	// protobuf용 부분
+	size_t packetHeaderSize = sizeof( PacketHeader );
+	MyPacket::LogoutRequest request;
+	request.ParseFromArray( recvPacket + packetHeaderSize, recvPacket->mSize );
 
-	mPlayer->RequestDeregisterPlayer( clientPacket->mPlayerId );
+	mPlayer->RequestDeregisterPlayer( request.playerid() );
+	// protobuf 끄읕
+
+// 	LogoutRequest* clientPacket = reinterpret_cast<LogoutRequest*>( recvPacket );
+// 	if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
+// 		return;
+// 
+// 	mPlayer->RequestDeregisterPlayer( clientPacket->mPlayerId );
 }
 
 void ClientSession::ResponseChat( PacketHeader* recvPacket )
 {
-	ChatBroadcastRequest* clientPacket = reinterpret_cast<ChatBroadcastRequest*>( recvPacket );
-	if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
-		return;
+	// protobuf용 부분 - recieve
+	size_t packetHeaderSize = sizeof( PacketHeader );
+	MyPacket::ChatRequest request;
+	request.ParseFromArray( recvPacket + packetHeaderSize, recvPacket->mSize );
+		
+	// protobuf send
+	MyPacket::ChatResult chatResult;
+	char playerName[6];
+	WideCharToMultiByte( CP_ACP, 0, mPlayer->GetName(), -1, playerName, 6, NULL, NULL );
+	chatResult.set_playername( playerName );
+	chatResult.set_playerid( request.playerid() );
+	chatResult.set_playermessage( request.playermessage() );
 
-	ChatBroadcastResponse packet; // = new ChatBroadcastResponse();
+	// serialize packet 
+	PacketHeader packetHeader;
+	packetHeader.mType = MyPacket::PKT_SC_CHAT;
+	packetHeader.mSize = chatResult.ByteSize();
+		
+	size_t serializedPacketSize = packetHeader.mSize + packetHeaderSize;
+	char* encoded = new char[serializedPacketSize];
+	memcpy( encoded, &packetHeader, packetHeaderSize );
+	int encodingResult = chatResult.SerializeToArray( encoded + packetHeaderSize, packetHeader.mSize );
 
-	packet.mPlayerId = clientPacket->mPlayerId;
-	wcscpy_s( packet.mName, mPlayer->GetName() );
-	wcscpy_s( packet.mChat, clientPacket->mChat );
+	GClientSessionManager->NearbyBroadcast( encoded, serializedPacketSize, mPlayer->GetZoneIdx() );
+	delete[] encoded;
+	// protobuf 끄읕
+	
 
-	GClientSessionManager->NearbyBroadcast( &packet, mPlayer->GetZoneIdx() );
+
+// 	ChatBroadcastRequest* clientPacket = reinterpret_cast<ChatBroadcastRequest*>( recvPacket );
+// 	if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
+// 		return;
+
+// 	ChatBroadcastResponse packet; // = new ChatBroadcastResponse();
+// 
+// 	packet.mPlayerId = clientPacket->mPlayerId;
+// 	wcscpy_s( packet.mName, mPlayer->GetName() );
+// 	wcscpy_s( packet.mChat, clientPacket->mChat );
+// 
+// 	GClientSessionManager->NearbyBroadcast( &packet, mPlayer->GetZoneIdx() );
 	// PostSend( (char*)&packet, packet.mSize );
 
 	// delete packet;

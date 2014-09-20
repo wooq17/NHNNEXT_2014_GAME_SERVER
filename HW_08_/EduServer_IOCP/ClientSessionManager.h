@@ -21,7 +21,7 @@ public:
 
 	// void RegisterLogedinSession( ClientSession* client );
 	// void DeregisterLogedinSession( ClientSession* client );
-	void NearbyBroadcast( PacketHeader* pkt, int from );
+	void NearbyBroadcast( const char* pkt, size_t pktSize, int from );
 
 	uint64_t GetTempId();
 

@@ -278,22 +278,22 @@ bool ClientSession::PacketHandler()
 
 	switch ( recvPacket->mType )
 	{
-		case PKT_SC_BASE_PUBLIC_KEY:
+		case MyPacket::PKT_SC_BASE_PUBLIC_KEY:
 			ResponseBaseKey( recvPacket );
 			break;
-		case PKT_SC_EXPORT_PUBLIC_KEY:
+		case MyPacket::PKT_SC_EXPORT_PUBLIC_KEY:
 			ResponseExportedKey( recvPacket );
 			break;
-		case PKT_SC_LOGIN:
+		case MyPacket::PKT_SC_LOGIN:
 			ResponseLogin( recvPacket );
 			break;
-		case PKT_SC_LOGOUT:
+		case MyPacket::PKT_SC_LOGOUT:
 			ResponseLogout( recvPacket );
 			break;
-		case PKT_SC_CHAT:
+		case MyPacket::PKT_SC_CHAT:
 			ResponseChat( recvPacket );
 			break;
-		case PKT_SC_MOVE:
+		case MyPacket::PKT_SC_MOVE:
 			ResponseMove( recvPacket );
 			break;
 		default:
@@ -336,16 +336,19 @@ void ClientSession::RequestLogin()
 
 	mPlayer->SetName( name );
 
-	char* playerName;
+	char playerName[6];
 	WideCharToMultiByte( CP_ACP, 0, name, -1, playerName, 6, NULL, NULL );
 	
+	// payload积己
 	MyPacket::LoginRequest loginRequest;
 	loginRequest.set_playername( playerName );
 
+	// header积己
 	PacketHeader packetHeader;
-	packetHeader.mType = PKT_CS_LOGIN;
+	packetHeader.mType = MyPacket::PKT_CS_LOGIN;
 	packetHeader.mSize = loginRequest.ByteSize();
 
+	// 炼赋
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	size_t serializedPacketSize = packetHeader.mSize + packetHeaderSize;
 	char* encoded = new char[serializedPacketSize];
@@ -391,7 +394,7 @@ void ClientSession::RequestMove()
 	moveReqeust.set_allocated_playerpos( &playerPosition );
 
 	PacketHeader packetHeader;
-	packetHeader.mType = PKT_CS_MOVE;
+	packetHeader.mType = MyPacket::PKT_CS_MOVE;
 	packetHeader.mSize = moveReqeust.ByteSize();
 
 	size_t packetHeaderSize = sizeof( PacketHeader );
@@ -439,7 +442,7 @@ void ClientSession::RequestChat()
 	chat[9] = static_cast<wchar_t>( rand() % 26 + 97 );
 	chat[10] = '\0';
 
-	char* chatMessage;
+	char chatMessage[11];
 	WideCharToMultiByte( CP_ACP, 0, chat, -1, chatMessage, 6, NULL, NULL );
 
 	MyPacket::ChatRequest chatReqeust;
@@ -447,7 +450,7 @@ void ClientSession::RequestChat()
 	chatReqeust.set_playermessage( chatMessage );
 
 	PacketHeader packetHeader;
-	packetHeader.mType = PKT_CS_CHAT;
+	packetHeader.mType = MyPacket::PKT_CS_CHAT;
 	packetHeader.mSize = chatReqeust.ByteSize();
 
 	size_t packetHeaderSize = sizeof( PacketHeader );
@@ -483,7 +486,7 @@ void ClientSession::RequestLogout()
 	logoutReqeust.set_playerid( mPlayer->GetPlayerId() );	
 
 	PacketHeader packetHeader;
-	packetHeader.mType = PKT_CS_LOGOUT;
+	packetHeader.mType = MyPacket::PKT_CS_LOGOUT;
 	packetHeader.mSize = logoutReqeust.ByteSize();
 
 	size_t packetHeaderSize = sizeof( PacketHeader );
@@ -769,9 +772,10 @@ void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::LoginResult loginResult;
 	loginResult.ParseFromArray( recvPacket + packetHeaderSize, recvPacket->mSize );
+	mPlayer->Start( loginResult.playerid() );
 
-	LoginResponse* clientPacket = reinterpret_cast<LoginResponse*>( recvPacket );
-	mPlayer->Start( clientPacket->mPlayerId );
+// 	LoginResponse* clientPacket = reinterpret_cast<LoginResponse*>( recvPacket );
+// 	mPlayer->Start( clientPacket->mPlayerId );
 	// wprintf_s( L"[LOG] %s <<<< login packet \n", mPlayer->GetName() );
 
 	mState = LOGGED_IN;
@@ -779,10 +783,25 @@ void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 
 void ClientSession::ResponseLogout( PacketHeader* recvPacket )
 {
-	LogoutResponse* clientPacket = reinterpret_cast<LogoutResponse*>( recvPacket );
-	mPlayer->PlayerReset();
-	// wprintf_s( L"[LOG] %s <<<< logout packet\n", mPlayer->GetName() );
-	DisconnectRequest( DR_NONE );
+	size_t packetHeaderSize = sizeof( PacketHeader );
+	MyPacket::LogoutResult logoutResult;
+	logoutResult.ParseFromArray( recvPacket + packetHeaderSize, recvPacket->mSize );
+
+	if ( mPlayer->mPlayerId != logoutResult.playerid() )
+		printf_s( "\nWrong ID\n\n" );
+	else
+	{
+		mPlayer->PlayerReset();
+		// wprintf_s( L"[LOG] %s <<<< logout packet\n", mPlayer->GetName() );
+		DisconnectRequest( DR_NONE );
+	}
+
+
+
+// 	LogoutResponse* clientPacket = reinterpret_cast<LogoutResponse*>( recvPacket );
+// 	mPlayer->PlayerReset();
+// 	// wprintf_s( L"[LOG] %s <<<< logout packet\n", mPlayer->GetName() );
+// 	DisconnectRequest( DR_NONE );
 
 	mState = WAIT_FOR_LOGOUT;
 }
@@ -792,7 +811,11 @@ void ClientSession::ResponseChat( PacketHeader* recvPacket )
 	if ( mState != LOGGED_IN )
 		return;
 
-	ChatBroadcastResponse* clientPacket = reinterpret_cast<ChatBroadcastResponse*>( recvPacket );
+	size_t packetHeaderSize = sizeof( PacketHeader );
+	MyPacket::ChatResult chatResult;
+	chatResult.ParseFromArray( recvPacket + packetHeaderSize, recvPacket->mSize );
+
+	//ChatBroadcastResponse* clientPacket = reinterpret_cast<ChatBroadcastResponse*>( recvPacket );
 
 	// if ( mPlayer->GetPlayerId() == clientPacket->mPlayerId )
 	if ( true )
@@ -816,8 +839,14 @@ void ClientSession::ResponseMove( PacketHeader* recvPacket )
 	if ( mState != LOGGED_IN )
 		return;
 
-	MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
+	size_t packetHeaderSize = sizeof( PacketHeader );
+	MyPacket::MoveResult moveResult;
+	moveResult.ParseFromArray( recvPacket + packetHeaderSize, recvPacket->mSize );
+	MyPacket::Position pos = moveResult.playerpos();
+	mPlayer->SetPosition( pos.x(), pos.y(), pos.z() );
 
-	mPlayer->SetPosition( clientPacket->mX, clientPacket->mY, clientPacket->mZ );
+	//MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
+
+	//mPlayer->SetPosition( clientPacket->mX, clientPacket->mY, clientPacket->mZ );
 	// wprintf_s( L"[LOG] %s <<<< move packet ( %f , %f , %f )\n", mPlayer->GetName(), clientPacket->mX, clientPacket->mY, clientPacket->mZ );
 }
