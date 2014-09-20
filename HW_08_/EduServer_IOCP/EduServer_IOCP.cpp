@@ -28,7 +28,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	GIocpManager = new IocpManager;
 	GGrandCentralExecuter = new GrandCentralExecuter;
 	GPlayerManager = new PlayerManager;
-	GDatabaseManager = new DBManager;
+	// GDatabaseManager = new DBManager;
 	GRSA = new RSA;
 
 	/// main threadµµ lock order check...
@@ -38,11 +38,11 @@ int _tmain(int argc, _TCHAR* argv[])
 	if (false == GIocpManager->Initialize())
 		return -1;
 
-	if ( false == GDatabaseManager->Initialize() )
-		return -1;
+	// if ( false == GDatabaseManager->Initialize() )
+	// 	return -1;
 
-	if ( false == GDatabaseManager->StartDatabaseThreads() )
-		return -1;
+	// if ( false == GDatabaseManager->StartDatabaseThreads() )
+	// 	return -1;
 
 	if (false == GIocpManager->StartIoThreads())
 		return -1;
@@ -55,14 +55,14 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	GIocpManager->StartAccept(); ///< block here...
 	
-	GDatabaseManager->Finalize();
+	// GDatabaseManager->Finalize();
 	GIocpManager->Finalize();
 	GRSA->ExceptionHandling();
 
 	printf_s("End Server\n");
 
 	delete GRSA;
-	delete GDatabaseManager;
+	// delete GDatabaseManager;
 	delete GIocpManager;
 	delete GClientSessionManager;
 	delete GMemoryPool;
