@@ -164,52 +164,11 @@ void ClientSession::AcceptCompletion()
 
 	// RSA::Init();
 	// 여기서 첫 암호화 한 베이스 코드를 보낸다
-	DWORD headerLen = 0;
-	PBYTE header = nullptr;
-	header = GRSA->GetHeader( headerLen );
-
-	mCrypt.GenerateBaseKey();
-	DATA_BLOB g = mCrypt.GetG();
-	DATA_BLOB p = mCrypt.GetP();
-
-	unsigned short pktLen = sizeof( PacketHeader ) + headerLen + P_LENGTH + G_LENGTH;
-	PBYTE pkt = (PBYTE)malloc( pktLen );
-	PBYTE currentPos = pkt;
-
-	( (PacketHeader*)currentPos )->mSize = pktLen;
-	( (PacketHeader*)currentPos )->mType = PKT_SC_BASE_PUBLIC_KEY;
-	currentPos += sizeof( PacketHeader );
-
-	memcpy( currentPos, header, headerLen );
-	currentPos += headerLen;
-
-	memcpy( currentPos, &g.cbData, 4 );
-	currentPos += 4;
-
-	memcpy( currentPos, g.pbData, 64 );
-	currentPos += 64;
-
-	memcpy( currentPos, &p.cbData, 4 );
-	currentPos += 4;
-
-	memcpy( currentPos, p.pbData, 64 );
-	currentPos += 64;
-
-	if ( !GRSA->Encrypt( ( pkt + sizeof(PacketHeader)+headerLen ), P_LENGTH + G_LENGTH ) )
+	if ( !SendBaseKey() )
 	{
 		printf( "[RSA] Encrypt fail %d\n", GetLastError() );
 		DisconnectRequest( DR_ONCONNECT_ERROR );
 	}
-
-	if ( !PostSend( (char*)pkt, pktLen ) )
-	{
-		printf( "[RSA] post key fail %d\n", GetLastError() );
-		DisconnectRequest( DR_ONCONNECT_ERROR );
-	}
-
-	// printf( "%d / %d", g.cbData, p.cbData );
-
-	delete pkt;
 }
 
 void ClientSession::OnDisconnect( DisconnectReason dr )
@@ -239,102 +198,29 @@ bool ClientSession::PacketHandling()
 
 	PacketHeader* recvPacket = reinterpret_cast<PacketHeader*>( mRecvBuffer.GetBufferStart() );
 
+	// for debug(use before encrypt)
 	// CRASH_ASSERT( IsValidData( recvPacket, len ) );
-
-	if ( mIsKeyShared )
-	{
-		if ( !mCrypt.Decrypt( (PBYTE)recvPacket + sizeof( PacketHeader ), recvPacket->mSize - sizeof( PacketHeader ) ) )
-			printf( "[DH] Decrypt failed\n" );
-	}
 
 	// 맙소사 ㅋㅋㅋ
 	// 일단 switch-case로 ㅋㅋㅋ
 	switch ( recvPacket->mType )
 	{
 	case PKT_CS_EXPORT_PUBLIC_KEY:
-	{
-		if ( !mCrypt.GeneratePrivateKey() )
-			break;
-
-		// send server public key
-		DWORD exportedLen = 0;
-		PBYTE exportedData = mCrypt.ExportPublicKey( &exportedLen );
-
-		unsigned short pktLen = sizeof( PacketHeader ) + sizeof( DWORD ) + exportedLen;
-		PBYTE pkt = (PBYTE)malloc( pktLen );
-		PBYTE currentPos = pkt;
-
-		( (PacketHeader*)currentPos )->mSize = pktLen;
-		( (PacketHeader*)currentPos )->mType = PKT_SC_EXPORT_PUBLIC_KEY;
-		currentPos += sizeof( PacketHeader );
-
-		memcpy( currentPos, &exportedLen, sizeof( DWORD ) );
-		currentPos += sizeof( DWORD );
-
-		memcpy( currentPos, exportedData, exportedLen );
-
-		if ( !PostSend( (char*)pkt, pktLen ) )
-		{
-			printf( "[RSA] post key fail %d\n", GetLastError() );
-			DisconnectRequest( DR_ONCONNECT_ERROR );
-		}
-
-		delete pkt;
-
-		// mSize / mType / len / data
-		exportedLen = recvPacket->mSize - sizeof(PacketHeader)-sizeof( DWORD );
-		exportedData = PBYTE(recvPacket) + sizeof(PacketHeader)+sizeof( DWORD );
-
-		if ( !mCrypt.GenerateSessionKey( exportedData, exportedLen ) )
-			break;
-
-		mIsKeyShared = true;
-	}
+		ResponseExportedKey( recvPacket );
 		break;
 	case PKT_CS_LOGIN:
 		// db에 로그인하고 
-		{
-			LoginRequest* clientPacket = reinterpret_cast<LoginRequest*>( recvPacket );
-			mPlayer->RequestRegisterPlayer( clientPacket->mName );
-			// 응답 보내기는 나중에 비동기로 수행
-		}
+		ResponseLogin( recvPacket );
 		break;
 	case PKT_CS_LOGOUT:
 		// db에 로그아웃하고 
-		{
-			LogoutRequest* clientPacket = reinterpret_cast<LogoutRequest*>( recvPacket );
-			if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
-				break;
-
-			mPlayer->RequestDeregisterPlayer( clientPacket->mPlayerId );
-		}
+		ResponseLogout( recvPacket );
 		break;
 	case PKT_CS_CHAT:
-		{
-			ChatBroadcastRequest* clientPacket = reinterpret_cast<ChatBroadcastRequest*>( recvPacket );
-			if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
-				break;
-
-			ChatBroadcastResponse* packet = new ChatBroadcastResponse();
-
-			packet->mPlayerId = clientPacket->mPlayerId;
-			wcscpy_s( packet->mName, mPlayer->GetName() );
-			wcscpy_s( packet->mChat, clientPacket->mChat );
-
-			GClientSessionManager->NearbyBroadcast( packet, mPlayer->GetZoneIdx() );
-			// PostSend( (char*)packet, packet->mSize );
-
-			delete packet;
-		}
+		ResponseChat( recvPacket );
 		break;
 	case PKT_CS_MOVE:
-		{
-			MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
-			if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
-				break;
-
-			mPlayer->RequestUpdatePosition( clientPacket->mX, clientPacket->mY, clientPacket->mZ );
-		}
+		ResponseMove( recvPacket );
 		break;
 	default:
 		// echo
@@ -343,9 +229,7 @@ bool ClientSession::PacketHandling()
 
 		mRecvBuffer.Remove( len );
 		return true;
-		
 	}
-
 
 	// 패킷 처리다했으면 처리한 패킷 크기만큼 삭제
 	DWORD processedLen = recvPacket->mSize;
@@ -379,4 +263,174 @@ bool ClientSession::IsValidData( PacketHeader* start, ULONG len )
 	}
 
 	return true;
+}
+
+bool ClientSession::SendBaseKey()
+{
+	// RSA 이용 버전
+	/*
+	DWORD headerLen = 0;
+	PBYTE header = nullptr;
+	header = GRSA->GetHeader( headerLen );
+
+	mCrypt.GenerateBaseKey();
+	DATA_BLOB g = mCrypt.GetG();
+	DATA_BLOB p = mCrypt.GetP();
+
+	unsigned short pktLen = sizeof(PacketHeader)+headerLen + P_LENGTH + G_LENGTH;
+	PBYTE pkt = (PBYTE)malloc( pktLen );
+	PBYTE currentPos = pkt;
+
+	( (PacketHeader*)currentPos )->mSize = pktLen;
+	( (PacketHeader*)currentPos )->mType = PKT_SC_BASE_PUBLIC_KEY;
+	currentPos += sizeof( PacketHeader );
+
+	memcpy( currentPos, header, headerLen );
+	currentPos += headerLen;
+
+	memcpy( currentPos, &g.cbData, 4 );
+	currentPos += 4;
+
+	memcpy( currentPos, g.pbData, 64 );
+	currentPos += 64;
+
+	memcpy( currentPos, &p.cbData, 4 );
+	currentPos += 4;
+
+	memcpy( currentPos, p.pbData, 64 );
+	currentPos += 64;
+
+	if ( !GRSA->Encrypt( ( pkt + sizeof(PacketHeader)+headerLen ), P_LENGTH + G_LENGTH ) )
+	{
+		printf( "[RSA] Encrypt fail %d\n", GetLastError() );
+		return false;
+	}
+
+	if ( !PostSend( (char*)pkt, pktLen ) )
+	{
+		printf( "[RSA] post key fail %d\n", GetLastError() );
+		return false;
+	}
+
+	delete pkt;
+	*/
+
+	// 그냥 보내는 버전
+	PBYTE header = nullptr;
+
+	mCrypt.GenerateBaseKey();
+	DATA_BLOB g = mCrypt.GetG();
+	DATA_BLOB p = mCrypt.GetP();
+
+	unsigned short pktLen = sizeof(PacketHeader) + P_LENGTH + G_LENGTH;
+	PBYTE pkt = (PBYTE)malloc( pktLen );
+	PBYTE currentPos = pkt;
+
+	( (PacketHeader*)currentPos )->mSize = pktLen;
+	( (PacketHeader*)currentPos )->mType = PKT_SC_BASE_PUBLIC_KEY;
+	currentPos += sizeof( PacketHeader );
+
+	memcpy( currentPos, &g.cbData, 4 );
+	currentPos += 4;
+
+	memcpy( currentPos, g.pbData, 64 );
+	currentPos += 64;
+
+	memcpy( currentPos, &p.cbData, 4 );
+	currentPos += 4;
+
+	memcpy( currentPos, p.pbData, 64 );
+	currentPos += 64;
+
+	if ( !PostSend( (char*)pkt, pktLen ) )
+	{
+		printf( "post base key fail %d\n", GetLastError() );
+		return false;
+	}
+}
+
+void ClientSession::ResponseExportedKey( PacketHeader* recvPacket )
+{
+	if ( !mCrypt.GeneratePrivateKey() )
+		return;
+
+	// send server public key
+	DWORD exportedLen = 0;
+	PBYTE exportedData = mCrypt.ExportPublicKey( &exportedLen );
+
+	unsigned short pktLen = sizeof(PacketHeader)+sizeof(DWORD)+exportedLen;
+	PBYTE pkt = (PBYTE)malloc( pktLen );
+	PBYTE currentPos = pkt;
+
+	( (PacketHeader*)currentPos )->mSize = pktLen;
+	( (PacketHeader*)currentPos )->mType = PKT_SC_EXPORT_PUBLIC_KEY;
+	currentPos += sizeof( PacketHeader );
+
+	memcpy( currentPos, &exportedLen, sizeof( DWORD ) );
+	currentPos += sizeof( DWORD );
+
+	memcpy( currentPos, exportedData, exportedLen );
+
+	if ( !PostSend( (char*)pkt, pktLen ) )
+	{
+		printf( "[RSA] post key fail %d\n", GetLastError() );
+		DisconnectRequest( DR_ONCONNECT_ERROR );
+	}
+
+	delete pkt;
+
+	// mSize / mType / len / data
+	exportedLen = recvPacket->mSize - sizeof(PacketHeader)-sizeof( DWORD );
+	exportedData = PBYTE( recvPacket ) + sizeof(PacketHeader)+sizeof( DWORD );
+
+	if ( !mCrypt.GenerateSessionKey( exportedData, exportedLen ) )
+	{
+		printf( "[DH] GenerateSessionKey fail %d\n", GetLastError() );
+		DisconnectRequest( DR_ONCONNECT_ERROR );
+	}
+
+	mIsKeyShared = true;
+}
+
+void ClientSession::ResponseLogin( PacketHeader* recvPacket )
+{
+	LoginRequest* clientPacket = reinterpret_cast<LoginRequest*>( recvPacket );
+	mPlayer->RequestRegisterPlayer( clientPacket->mName );
+	// 응답 보내기는 나중에 비동기로 수행
+}
+
+void ClientSession::ResponseLogout( PacketHeader* recvPacket )
+{
+	LogoutRequest* clientPacket = reinterpret_cast<LogoutRequest*>( recvPacket );
+	if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
+		return;
+
+	mPlayer->RequestDeregisterPlayer( clientPacket->mPlayerId );
+}
+
+void ClientSession::ResponseChat( PacketHeader* recvPacket )
+{
+	ChatBroadcastRequest* clientPacket = reinterpret_cast<ChatBroadcastRequest*>( recvPacket );
+	if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
+		return;
+
+	ChatBroadcastResponse* packet = new ChatBroadcastResponse();
+
+	packet->mPlayerId = clientPacket->mPlayerId;
+	wcscpy_s( packet->mName, mPlayer->GetName() );
+	wcscpy_s( packet->mChat, clientPacket->mChat );
+
+	GClientSessionManager->NearbyBroadcast( packet, mPlayer->GetZoneIdx() );
+	// PostSend( (char*)packet, packet->mSize );
+
+	delete packet;
+}
+
+void ClientSession::ResponseMove( PacketHeader* recvPacket )
+{
+	MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
+	if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
+		return;
+
+	mPlayer->RequestUpdatePosition( clientPacket->mX, clientPacket->mY, clientPacket->mZ );
 }

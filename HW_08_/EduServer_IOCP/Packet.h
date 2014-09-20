@@ -37,7 +37,6 @@ struct PacketHeader
 	short mType;
 };
 
-
 // 로그인 요청
 struct LoginRequest : public PacketHeader
 {

@@ -118,14 +118,11 @@ bool Session::PostSend(const char* data, size_t len)
 	
 	char* destData = mSendBuffer.GetBuffer();
 
-	// unsigned short* size = (unsigned short*)data;
-	// CRASH_ASSERT( *size != 65278 );
-
 	memcpy(destData, data, len);
 
 	if ( mIsKeyShared )
 	{
-		if ( !mCrypt.Encrypt( (PBYTE)destData + sizeof( PacketHeader ), ( (PacketHeader*)destData )->mSize - sizeof( PacketHeader ) ) )
+		if ( !mCrypt.Encrypt( (PBYTE)destData, ( (PacketHeader*)destData )->mSize ) )
 			printf( "[DH] Encrypt failed\n" );
 	}
 
@@ -217,6 +214,12 @@ void Session::RecvCompletion(DWORD transferred)
 	TRACE_THIS;
 
 	mRecvBuffer.Commit(transferred);
+
+	if ( mIsKeyShared )
+	{
+		if ( !mCrypt.Decrypt( (PBYTE)mRecvBuffer.GetBufferStart(), transferred ) )
+			printf( "[DH] Decrypt failed\n" );
+	}
 }
 
 

@@ -131,6 +131,7 @@ void ClientSession::ConnectCompletion()
 	}
 
 	mState = SHARING_KEY;
+	GSessionManager->RegisterActiveSession( this );
 }
 
 // 여기서 DISCONNECT관련 FUNCTION POINTER만들고 바로 사용.
@@ -225,6 +226,12 @@ void ClientSession::RecvCompletion(DWORD transferred)
 	// 버퍼에 받은 길이만큼 저장
  	mRecvBuffer.Commit(transferred);
 
+	if ( mIsKeyShared )
+	{
+		if ( !mCrypt.Decrypt( (PBYTE)mRecvBuffer.GetBufferStart(), transferred ) )
+			printf( "[DH] Decrypt failed\n" );
+	}
+
  	while ( !PacketHandler() )
  	{
  	}
@@ -256,7 +263,7 @@ bool ClientSession::PostSend( const char* packet, DWORD len )
 
 	if ( mIsKeyShared )
 	{
-		if ( !mCrypt.Encrypt( (PBYTE)destData + sizeof( PacketHeader ), ( (PacketHeader*)destData )->mSize - sizeof( PacketHeader ) ) )
+		if ( !mCrypt.Encrypt( (PBYTE)destData, ( (PacketHeader*)destData )->mSize ) )
 			printf( "[DH] Decrypt failed\n" );
 	}
 
@@ -274,12 +281,6 @@ bool ClientSession::PacketHandler()
 		return true;
 
 	PacketHeader* recvPacket = reinterpret_cast<PacketHeader*>( mRecvBuffer.GetBufferStart() );
-
-	if ( mIsKeyShared )
-	{
-		if ( !mCrypt.Decrypt( (PBYTE)recvPacket + sizeof( PacketHeader ), recvPacket->mSize - sizeof( PacketHeader ) ) )
-			printf( "[DH] Decrypt failed\n" );
-	}
 
 	switch ( recvPacket->mType )
 	{
@@ -350,8 +351,6 @@ void ClientSession::RequestLogin()
 		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
 
-	GSessionManager->RegisterSendRequest( this );
-
 	wprintf_s( L"[LOG] %s >>>> login packet\n", name );
 }
 
@@ -376,9 +375,7 @@ void ClientSession::RequestMove()
 		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
 
-	GSessionManager->RegisterSendRequest( this );
-
-	// wprintf_s( L"[LOG] %s >>>> move to ( %f , %f , %f )\n", mPlayer->GetName(), pos.m_X, pos.m_Y, pos.m_Z );
+	wprintf_s( L"[LOG] %s >>>> move to ( %f , %f , %f )\n", mPlayer->GetName(), pos.m_X, pos.m_Y, pos.m_Z );
 }
 
 void ClientSession::RequestChat()
@@ -408,8 +405,6 @@ void ClientSession::RequestChat()
 		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
 
-	GSessionManager->RegisterSendRequest( this );
-
 	wprintf_s( L"[LOG] %s >>>> chat Message : %s\n", mPlayer->GetName(), chatMessage );
 }
 
@@ -423,8 +418,6 @@ void ClientSession::RequestLogout()
 		// disconnect
 		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
-
-	GSessionManager->RegisterSendRequest( this );
 
 	wprintf_s( L"[LOG] %s >>>> logout packet\n", mPlayer->GetName() );
 }
@@ -487,7 +480,7 @@ bool ClientSession::IsValidData( PacketHeader* start, ULONG len )
 		currentPos += pktHeader->mSize;
 		pktHeader = (PacketHeader*)currentPos;
 
-		// printf( "header : %d / len : %d\n", pktHeader->mType, pktHeader->mSize );
+		printf( "header : %d / len : %d\n", pktHeader->mType, pktHeader->mSize );
 	}
 
 	return true;
@@ -524,7 +517,8 @@ bool ClientSession::FlushSend()
 	sendContext->mWsaBuf.len = (ULONG)mSendBuffer.GetContiguiousBytes();
 	sendContext->mWsaBuf.buf = mSendBuffer.GetBufferStart();
 
-	CRASH_ASSERT( IsValidData( (PacketHeader*)sendContext->mWsaBuf.buf, sendContext->mWsaBuf.len ) );
+	// for debug (use before encrypt)
+	// CRASH_ASSERT( IsValidData( (PacketHeader*)sendContext->mWsaBuf.buf, sendContext->mWsaBuf.len ) );
 
 	/// start async send
 	if ( SOCKET_ERROR == WSASend( mSocket, &sendContext->mWsaBuf, 1, &sendbytes, flags, (LPWSAOVERLAPPED)sendContext, NULL ) )
@@ -546,6 +540,8 @@ bool ClientSession::FlushSend()
 
 void ClientSession::ResponseBaseKey( PacketHeader* recvPacket )
 {
+	// RSA 사용 버전
+	/*
 	printf( "PKT_SC_BASE_PUBLIC_KEY\n" );
 
 	PBYTE data = (PBYTE)recvPacket + sizeof( PacketHeader );
@@ -601,6 +597,54 @@ void ClientSession::ResponseBaseKey( PacketHeader* recvPacket )
 	GSessionManager->RegisterSendRequest( this );
 
 	delete pkt;
+	*/
+
+	DATA_BLOB clientG;
+	DATA_BLOB clientP;
+	PBYTE pos = (PBYTE)recvPacket + sizeof( PacketHeader );
+
+	clientG.cbData = *pos;
+	clientG.pbData = pos + 4;
+	pos += 68;
+	mCrypt.SetG( clientG );
+
+	clientP.cbData = *pos;
+	clientP.pbData = pos + 4;
+	pos += 68;
+	mCrypt.SetP( clientP );
+
+	// printf( "%d / %d", clientG.cbData, clientP.cbData );
+
+	// send client public key
+	if ( !mCrypt.GeneratePrivateKey() )
+	{
+		DisconnectRequest( DR_IO_REQUEST_ERROR );
+		return;
+	}
+
+	DWORD exportedLen = 0;
+	PBYTE exportedData = mCrypt.ExportPublicKey( &exportedLen );
+
+	unsigned short pktLen = sizeof(PacketHeader)+sizeof(DWORD)+exportedLen;
+	PBYTE pkt = (PBYTE)malloc( pktLen );
+	PBYTE currentPos = pkt;
+
+	( (PacketHeader*)currentPos )->mSize = pktLen;
+	( (PacketHeader*)currentPos )->mType = PKT_CS_EXPORT_PUBLIC_KEY;
+	currentPos += sizeof( PacketHeader );
+
+	memcpy( currentPos, &exportedLen, sizeof( DWORD ) );
+	currentPos += sizeof( DWORD );
+
+	memcpy( currentPos, exportedData, exportedLen );
+
+	if ( !PostSend( (char*)pkt, pktLen ) )
+	{
+		printf( "[RSA] post key fail %d\n", GetLastError() );
+		DisconnectRequest( DR_ONCONNECT_ERROR );
+	}
+
+	delete pkt;
 }
 
 void ClientSession::ResponseExportedKey( PacketHeader* recvPacket )
@@ -617,6 +661,12 @@ void ClientSession::ResponseExportedKey( PacketHeader* recvPacket )
 		return;
 	}
 
+	if ( !mCrypt.GenerateSessionKey( exportedData, exportedLen ) )
+	{
+		printf( "[DH] GenerateSessionKey fail %d\n", GetLastError() );
+		DisconnectRequest( DR_ONCONNECT_ERROR );
+	}
+
 	mIsKeyShared = true;
 
 	mState = WAIT_FOR_LOGIN;
@@ -630,7 +680,6 @@ void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 	wprintf_s( L"[LOG] %s <<<< login packet \n", mPlayer->GetName() );
 
 	mState = LOGGED_IN;
-	GSessionManager->RegisterLogedinSession( this );
 }
 
 void ClientSession::ResponseLogout( PacketHeader* recvPacket )

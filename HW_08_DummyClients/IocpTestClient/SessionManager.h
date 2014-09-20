@@ -23,20 +23,18 @@ public:
 		
 	void SetMaxConnection( int val ) { mMaxConnection = val; }	
 	void DoPeriodJob();	
+	void DoSendJob();
 	sockaddr_in* GetServerAddr() { return &serverAddr; }
 
-	void RegisterLogedinSession( ClientSession* client );
-	void DeregisterLogedinSession( ClientSession* client );
-
-	void RegisterSendRequest( ClientSession* client );
+	void RegisterActiveSession( ClientSession* client );
+	void DeregisterActiveSession( ClientSession* client );
 
 private:
 	typedef xlist<ClientSession*>::type ClientList;
 	ClientList	mFreeSessionList;
-	ClientList	mSendRequestSessionList;
 
 	typedef xmap<SOCKET, ClientSession*>::type ClientMap;
-	ClientMap	mLogedinSessionList;
+	ClientMap	mActiveSessionList;
 
 	FastSpinlock mLock;
 

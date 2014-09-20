@@ -17,11 +17,11 @@ SessionManager::~SessionManager()
 		xdelete(it);
 	}
 
-	for ( auto it : mLogedinSessionList )
+	for ( auto it : mActiveSessionList )
 	{
 		xdelete( it.second );
 	}
-	mLogedinSessionList.clear();
+	mActiveSessionList.clear();
 }
 
 void SessionManager::PrepareSessions()
@@ -38,12 +38,11 @@ void SessionManager::PrepareSessions()
 		mFreeSessionList.push_back(client);
 	}
 
-	for ( auto it : mLogedinSessionList )
+	for ( auto it : mActiveSessionList )
 	{
 		xdelete( it.second );
 	}
-	mLogedinSessionList.clear( );
-	mSendRequestSessionList.clear();
+	mActiveSessionList.clear();
 }
 
 void SessionManager::ReturnClientSession(ClientSession* client)
@@ -52,8 +51,7 @@ void SessionManager::ReturnClientSession(ClientSession* client)
 
 	CRASH_ASSERT(client->mConnected == 0 && client->mRefCount == 0);
 
-	if ( client->GetCurrentState() == LOGGED_IN || client->GetCurrentState() == WAIT_FOR_LOGOUT )
-		DeregisterLogedinSession( client );
+	DeregisterActiveSession( client );
 	client->SessionReset();
 
 	mFreeSessionList.push_back(client);
@@ -100,7 +98,7 @@ void SessionManager::Initialize( wchar_t* hostIP, unsigned short port, int maxCo
 
 void SessionManager::DoPeriodJob()
 {
-	for ( auto client : mLogedinSessionList )
+	for ( auto client : mActiveSessionList )
 	{
 		if ( client.second->GetCurrentState() != LOGGED_IN )
 			continue;
@@ -112,42 +110,34 @@ void SessionManager::DoPeriodJob()
 			client.second->RequestChat();
  		}
 	}
+}
 
-	while ( !mSendRequestSessionList.empty() )
+
+void SessionManager::DoSendJob()
+{
+	// 보내는 동안 건드리지 마라
+	FastSpinlockGuard guard( mLock );
+
+	for ( auto client : mActiveSessionList )
 	{
-		auto& session = mSendRequestSessionList.front();
-
-		if ( session->FlushSend() )
-		{
-			/// true 리턴 되면 빼버린다.
-			mSendRequestSessionList.pop_front();
-		}
+		client.second->FlushSend();
 	}
 }
 
-void SessionManager::RegisterLogedinSession( ClientSession* client )
+void SessionManager::RegisterActiveSession( ClientSession* client )
 {
-	FastSpinlockGuard guard( mLock );
-
-	auto it = mLogedinSessionList.find( client->GetSocket( ) );
+	auto it = mActiveSessionList.find( client->GetSocket() );
 
 	printf( "****client register : %d\n", client->GetSocket( ) );
-	CRASH_ASSERT( it == mLogedinSessionList.end( ) ); // 같은 게 이미 있으면 이상하다
-	mLogedinSessionList.insert( xmap<SOCKET, ClientSession*>::type::value_type( client->GetSocket( ), client ) );
+	CRASH_ASSERT( it == mActiveSessionList.end() ); // 같은 게 이미 있으면 이상하다
+	mActiveSessionList.insert( xmap<SOCKET, ClientSession*>::type::value_type( client->GetSocket(), client ) );
 }
 
-void SessionManager::DeregisterLogedinSession( ClientSession* client )
+void SessionManager::DeregisterActiveSession( ClientSession* client )
 {
-	auto it = mLogedinSessionList.find( client->GetSocket( ) );
+	auto it = mActiveSessionList.find( client->GetSocket() );
 
 	printf( "****client deregister : %d\n", client->GetSocket( ) );
-	CRASH_ASSERT( it != mLogedinSessionList.end( ) );
-	mLogedinSessionList.erase( it );
-}
-
-void SessionManager::RegisterSendRequest( ClientSession* client )
-{
-	FastSpinlockGuard guard( mLock );
-
-	mSendRequestSessionList.push_back( client );
+	CRASH_ASSERT( it != mActiveSessionList.end() );
+	mActiveSessionList.erase( it );
 }

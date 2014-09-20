@@ -185,7 +185,6 @@ void Crypt::ReleaseResources()
 
 bool Crypt::Encrypt( PBYTE data, DWORD length )
 {
-	/*
 	// Encrypt the data.
 	DWORD dwLength = length;
 	BOOL fReturn = CryptEncrypt(
@@ -202,13 +201,12 @@ bool Crypt::Encrypt( PBYTE data, DWORD length )
 		ReleaseResources();
 		return false;
 	}
-	*/
+
 	return true;
 }
 
 bool Crypt::Decrypt( PBYTE data, DWORD length )
 {
-	/*
 	DWORD dwLength = length;
 	BOOL fReturn = CryptDecrypt(
 		m_SessionKey,
@@ -223,6 +221,6 @@ bool Crypt::Decrypt( PBYTE data, DWORD length )
 		ReleaseResources();
 		return false;
 	}
-	*/
+
 	return true;
 }

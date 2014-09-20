@@ -29,6 +29,13 @@ public:
 	virtual void OnDisconnect( DisconnectReason dr );
 	virtual void OnRelease();
 
+	bool SendBaseKey();
+	void ResponseExportedKey( PacketHeader* recvPacket );
+	void ResponseLogin( PacketHeader* recvPacket );
+	void ResponseLogout( PacketHeader* recvPacket );
+	void ResponseChat( PacketHeader* recvPacket );
+	void ResponseMove( PacketHeader* recvPacket );
+
 public:
 	std::shared_ptr<Player> mPlayer;
 
