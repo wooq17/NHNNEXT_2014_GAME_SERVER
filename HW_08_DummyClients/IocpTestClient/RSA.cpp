@@ -151,6 +151,8 @@ bool RSA::Init()
 
 	memcpy( currentPos, pbKeyBlob, dwKeyBlobLen );
 	currentPos += dwKeyBlobLen;
+
+	return true;
 }
 
 PBYTE RSA::GetHeader( __out DWORD& headerLen )

@@ -43,6 +43,7 @@ void SessionManager::PrepareSessions()
 		xdelete( it.second );
 	}
 	mLogedinSessionList.clear( );
+	mSendRequestSessionList.clear();
 }
 
 void SessionManager::ReturnClientSession(ClientSession* client)
@@ -51,8 +52,9 @@ void SessionManager::ReturnClientSession(ClientSession* client)
 
 	CRASH_ASSERT(client->mConnected == 0 && client->mRefCount == 0);
 
-	client->SessionReset( );
-	DeregisterLogedinSession( client );
+	if ( client->GetCurrentState() == LOGGED_IN || client->GetCurrentState() == WAIT_FOR_LOGOUT )
+		DeregisterLogedinSession( client );
+	client->SessionReset();
 
 	mFreeSessionList.push_back(client);
 
@@ -110,6 +112,17 @@ void SessionManager::DoPeriodJob()
 			client.second->RequestChat();
  		}
 	}
+
+	while ( !mSendRequestSessionList.empty() )
+	{
+		auto& session = mSendRequestSessionList.front();
+
+		if ( session->FlushSend() )
+		{
+			/// true 리턴 되면 빼버린다.
+			mSendRequestSessionList.pop_front();
+		}
+	}
 }
 
 void SessionManager::RegisterLogedinSession( ClientSession* client )
@@ -130,4 +143,11 @@ void SessionManager::DeregisterLogedinSession( ClientSession* client )
 	printf( "****client deregister : %d\n", client->GetSocket( ) );
 	CRASH_ASSERT( it != mLogedinSessionList.end( ) );
 	mLogedinSessionList.erase( it );
+}
+
+void SessionManager::RegisterSendRequest( ClientSession* client )
+{
+	FastSpinlockGuard guard( mLock );
+
+	mSendRequestSessionList.push_back( client );
 }

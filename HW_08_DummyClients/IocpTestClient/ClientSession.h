@@ -110,15 +110,13 @@ public:
 	const int	GetClientId() { return mClientId; }
 
 	bool	PreRecv() ; ///< zero byte recv
-
 	bool	PostRecv();
 	void	RecvCompletion(DWORD transferred);
 
-	// bool	PostSend();
+	bool	PostSend( const char* packet, DWORD len );
+	bool	FlushSend();
 	void	SendCompletion(DWORD transferred);
 
-	bool	SendPacket( PacketHeader* packet );
-	bool	SendPacket( const char* packet, DWORD len );
 	bool	PacketHandler();
 
 	void	DisconnectRequest(DisconnectReason dr);
@@ -141,8 +139,15 @@ public:
 	void RequestChat();
 	void RequestLogout();
 
+	void ResponseBaseKey( PacketHeader* recvPacket );
+	void ResponseExportedKey( PacketHeader* recvPacket );
+	void ResponseLogin( PacketHeader* recvPacket );
+	void ResponseLogout( PacketHeader* recvPacket );
+	void ResponseChat( PacketHeader* recvPacket );
+	void ResponseMove( PacketHeader* recvPacket );
+
 	bool IsValidData( PacketHeader* start, ULONG len );
-	bool TestPostSend( char* start, ULONG len );
+
 
 private:
 	int				mClientId;
@@ -153,6 +158,7 @@ private:
 	CircularBuffer	mSendBuffer;
 	CircularBuffer	mRecvBuffer;
 	FastSpinlock	mSendBufferLock;
+	int				mSendPendingCount;
 
 	volatile long	mRefCount;
 	volatile long	mConnected;
@@ -161,6 +167,7 @@ private:
 
 	Crypt			mCrypt;
 	ClientState		mState;
+	bool			mIsKeyShared;
 	
 	friend class SessionManager;
 } ;

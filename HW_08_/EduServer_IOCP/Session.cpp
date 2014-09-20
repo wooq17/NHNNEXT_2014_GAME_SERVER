@@ -159,8 +159,9 @@ bool Session::FlushSend()
 	}
 
 	/// 이전의 send가 완료 안된 경우
-	if (mSendPendingCount > 0)
-		return false;
+	if ( mSendPendingCount > 0 )
+		return true;
+		// return false;
 
 	
 	OverlappedSendContext* sendContext = new OverlappedSendContext(this);

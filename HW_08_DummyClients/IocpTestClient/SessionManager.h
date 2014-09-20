@@ -28,9 +28,12 @@ public:
 	void RegisterLogedinSession( ClientSession* client );
 	void DeregisterLogedinSession( ClientSession* client );
 
+	void RegisterSendRequest( ClientSession* client );
+
 private:
 	typedef xlist<ClientSession*>::type ClientList;
 	ClientList	mFreeSessionList;
+	ClientList	mSendRequestSessionList;
 
 	typedef xmap<SOCKET, ClientSession*>::type ClientMap;
 	ClientMap	mLogedinSessionList;

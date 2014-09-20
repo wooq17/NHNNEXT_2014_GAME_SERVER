@@ -82,7 +82,7 @@ bool ClientSessionManager::AcceptClientSessions()
 
 	return true;
 }
-/*/
+/*
 void ClientSessionManager::RegisterLogedinSession( ClientSession* client )
 {
 	FastSpinlockGuard guard( mLock );
@@ -117,4 +117,9 @@ void ClientSessionManager::NearbyBroadcast( PacketHeader* pkt, int from )
 	{
 		it->GetSession()->PostSend( reinterpret_cast<const char*>( pkt ), pkt->mSize );
 	}
+}
+
+uint64_t ClientSessionManager::GetTempId()
+{
+	return InterlockedIncrement( &mTempId );
 }

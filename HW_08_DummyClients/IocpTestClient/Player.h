@@ -22,10 +22,10 @@ public:
 	void	Start(int id);
 
 	void	PlayerReset();	
-	void	SetName( wchar_t* name ) { wcscpy_s( mPlayerName, name ); }
+	void	SetName( wchar_t* name );
 	const wchar_t* GetName() const { return mPlayerName; }
-	void	SetPosition( Float3D pos ) { mPos = pos; }
-	void	SetPosition( float x, float y, float z ) { mPos = Float3D( x, y, z ); }
+	void	SetPosition( Float3D pos );
+	void	SetPosition( float x, float y, float z );
 	
 	ClientSession* GetSession() { return mSession; }
 	

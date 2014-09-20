@@ -9,7 +9,7 @@ class PacketHeader;
 class ClientSessionManager
 {
 public:
-	ClientSessionManager() : mCurrentIssueCount(0), mCurrentReturnCount(0)
+	ClientSessionManager() : mCurrentIssueCount( 0 ), mCurrentReturnCount( 0 ), mTempId( 0 )
 	{}
 	
 	~ClientSessionManager();
@@ -23,6 +23,8 @@ public:
 	// void DeregisterLogedinSession( ClientSession* client );
 	void NearbyBroadcast( PacketHeader* pkt, int from );
 
+	uint64_t GetTempId();
+
 private:
 	typedef xlist<ClientSession*>::type ClientList;
 	ClientList	mFreeSessionList;
@@ -34,6 +36,9 @@ private:
 
 	uint64_t mCurrentIssueCount;
 	uint64_t mCurrentReturnCount;
+
+	uint64_t mTempId;
+
 };
 
 extern ClientSessionManager* GClientSessionManager;

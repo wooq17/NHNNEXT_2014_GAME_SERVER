@@ -239,7 +239,7 @@ bool ClientSession::PacketHandling()
 
 	PacketHeader* recvPacket = reinterpret_cast<PacketHeader*>( mRecvBuffer.GetBufferStart() );
 
-	CRASH_ASSERT( IsValidData( recvPacket, len ) );
+	// CRASH_ASSERT( IsValidData( recvPacket, len ) );
 
 	if ( mIsKeyShared )
 	{
@@ -322,6 +322,7 @@ bool ClientSession::PacketHandling()
 			wcscpy_s( packet->mChat, clientPacket->mChat );
 
 			GClientSessionManager->NearbyBroadcast( packet, mPlayer->GetZoneIdx() );
+			// PostSend( (char*)packet, packet->mSize );
 
 			delete packet;
 		}
@@ -345,35 +346,36 @@ bool ClientSession::PacketHandling()
 		
 	}
 
-	mRecvBuffer.Remove( recvPacket->mSize );
 
 	// 패킷 처리다했으면 처리한 패킷 크기만큼 삭제
-	/*
 	DWORD processedLen = recvPacket->mSize;
 	mRecvBuffer.Remove( processedLen );
 
 	return processedLen == len;
-	*/
-	mRecvBuffer.Remove( len );
-	return true;
 }
 
 bool ClientSession::IsValidData( PacketHeader* start, ULONG len )
 {
 	ULONG remainLen = len;
-	PacketHeader* currentPos = start;
+	char* currentPos = (char*)start;
+	PacketHeader* pktHeader = (PacketHeader*)currentPos;
 
-	printf( "header : %d / len : %d\n", currentPos->mType, currentPos->mSize );
-	while ( currentPos->mSize != remainLen )
+	// printf( "header : %d / len : %d\n", pktHeader->mType, pktHeader->mSize );
+
+	while ( pktHeader->mSize != remainLen )
 	{
-		// 현재 위치의 값이 유효한 패킷 데이터인가
-		if ( currentPos->mSize > remainLen )
+		if ( pktHeader->mSize == 0 )
 			return false;
 
-		remainLen -= currentPos->mSize;
-		currentPos += currentPos->mSize;
+		// 현재 위치의 값이 유효한 패킷 데이터인가
+		if ( pktHeader->mSize > remainLen )
+			return false;
 
-		printf( "header : %d / len : %d\n", currentPos->mType, currentPos->mSize );
+		remainLen -= pktHeader->mSize;
+		currentPos += pktHeader->mSize;
+		pktHeader = (PacketHeader*)currentPos;
+
+		// printf( "header : %d / len : %d\n", pktHeader->mType, pktHeader->mSize );
 	}
 
 	return true;

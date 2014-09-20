@@ -31,7 +31,8 @@ OverlappedIOContext::OverlappedIOContext(ClientSession* owner, IOType ioType)
 	mSessionObject->AddRef();
 }
 
-ClientSession::ClientSession() : mRecvBuffer( BUFSIZE ), mSendBuffer( BUFSIZE ), mConnected( 0 ), mRefCount( 0 ), mPlayer( new Player( this ) ), mState( NOTHING )
+ClientSession::ClientSession() 
+: mRecvBuffer( BUFSIZE ), mSendBuffer( BUFSIZE ), mConnected( 0 ), mRefCount( 0 ), mPlayer( new Player( this ) ), mState( NOTHING ), mSendPendingCount( 0 ), mIsKeyShared( false )
 {
 	//memset(&mClientAddr, 0, sizeof(SOCKADDR_IN));
 	mSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
@@ -62,6 +63,8 @@ void ClientSession::SessionReset()
 
 	mCrypt.ReleaseResources();
 	mState = NOTHING;
+	mIsKeyShared = false;
+	mSendPendingCount = 0;
 }
 
 bool ClientSession::PostConnect()
@@ -227,82 +230,22 @@ void ClientSession::RecvCompletion(DWORD transferred)
  	}
 }
 
-
-/*
-bool ClientSession::PostSend()
-{
-	if (!IsConnected())
-		return false;
-
-	printf("post!!\n");
-
-	//FastSpinlockGuard criticalSection(mBufferLock);
-	
-	OverlappedSendContext* sendContext = new OverlappedSendContext(this);
-
-	DWORD sendbytes = 0;
-	DWORD flags = 0;
-
-	sendContext->mWsaBuf.len = (ULONG) mSendBuffer.GetContiguiousBytes(); 
-	sendContext->mWsaBuf.buf = mSendBuffer.GetBufferStart();
-
-	CRASH_ASSERT( IsValidData( (PacketHeader*)sendContext->mWsaBuf.buf, sendContext->mWsaBuf.len ) );
-
-	/// start async send
-	if (SOCKET_ERROR == WSASend(mSocket, &sendContext->mWsaBuf, 1, &sendbytes, flags, (LPWSAOVERLAPPED)sendContext, NULL))
-	{
-		if (WSAGetLastError() != WSA_IO_PENDING)
-		{
-			DeleteIoContext(sendContext);
-			printf_s("ClientSession::PostSend Error : %d\n", GetLastError());
-
-			return false;
-		}
-			
-	}
-
-	return true;
-}
-*/
-
 void ClientSession::SendCompletion(DWORD transferred)
 {
 	FastSpinlockGuard criticalSection( mSendBufferLock );
 	
 	// 버퍼 초기화
 	mSendBuffer.Remove(transferred);
+
+	--mSendPendingCount;
 }
 
-
-bool ClientSession::SendPacket( PacketHeader* packet )
+bool ClientSession::PostSend( const char* packet, DWORD len )
 {
 	FastSpinlockGuard criticalSection( mSendBufferLock );
 
-	if ( mSendBuffer.GetFreeSpaceSize() < packet->mSize )
+	if ( !IsConnected() )
 		return false;
-
-	char* destData = mSendBuffer.GetBuffer();
-
-	memcpy( destData, packet, packet->mSize );
-
-	if ( mState != SHARING_KEY )
-	{
-		if ( !mCrypt.Encrypt( (PBYTE)destData + sizeof( PacketHeader ), ( (PacketHeader*)destData )->mSize - sizeof( PacketHeader ) ) )
-			printf( "[DH] Decrypt failed\n" );
-	}
-
-	mSendBuffer.Commit( packet->mSize );
-
-	// if ( !PostSend() )
-	if ( !TestPostSend( destData, packet->mSize ) )
-		return false;
-
-	return true;
-}
-
-bool ClientSession::SendPacket( const char* packet, DWORD len )
-{
-	FastSpinlockGuard criticalSection( mSendBufferLock );
 
 	if ( mSendBuffer.GetFreeSpaceSize() < len )
 		return false;
@@ -311,11 +254,13 @@ bool ClientSession::SendPacket( const char* packet, DWORD len )
 
 	memcpy( destData, packet, len );
 
-	mSendBuffer.Commit( len );
+	if ( mIsKeyShared )
+	{
+		if ( !mCrypt.Encrypt( (PBYTE)destData + sizeof( PacketHeader ), ( (PacketHeader*)destData )->mSize - sizeof( PacketHeader ) ) )
+			printf( "[DH] Decrypt failed\n" );
+	}
 
-	// if ( !PostSend() )
-	if ( !TestPostSend( destData, len ) )
-		return false;
+	mSendBuffer.Commit( len );
 
 	return true;
 }
@@ -330,7 +275,7 @@ bool ClientSession::PacketHandler()
 
 	PacketHeader* recvPacket = reinterpret_cast<PacketHeader*>( mRecvBuffer.GetBufferStart() );
 
-	if ( mState != SHARING_KEY )
+	if ( mIsKeyShared )
 	{
 		if ( !mCrypt.Decrypt( (PBYTE)recvPacket + sizeof( PacketHeader ), recvPacket->mSize - sizeof( PacketHeader ) ) )
 			printf( "[DH] Decrypt failed\n" );
@@ -339,132 +284,22 @@ bool ClientSession::PacketHandler()
 	switch ( recvPacket->mType )
 	{
 		case PKT_SC_BASE_PUBLIC_KEY:
-		{
-			printf( "PKT_SC_BASE_PUBLIC_KEY\n" );
-
-			PBYTE data = (PBYTE)recvPacket + sizeof( PacketHeader );
-			PBYTE base = nullptr;
-			if ( !GRSA->Decrypt( data, P_LENGTH + G_LENGTH, &base ) )
-				printf( "fail\n" );
-
-			DATA_BLOB clientG;
-			DATA_BLOB clientP;
-			PBYTE pos = base;
-
-			clientG.cbData = *pos;
-			clientG.pbData = pos + 4;
-			pos += 68;
-			mCrypt.SetG( clientG );
-
-			clientP.cbData = *pos;
-			clientP.pbData = pos + 4;
-			pos += 68;
-			mCrypt.SetP( clientP );
-
-			// printf( "%d / %d", clientG.cbData, clientP.cbData );
-
-			// send client public key
-			if ( !mCrypt.GeneratePrivateKey() )
-				break;
-
-			DWORD exportedLen = 0;
-			PBYTE exportedData = mCrypt.ExportPublicKey( &exportedLen );
-
-			unsigned long pktLen = sizeof(PacketHeader)+sizeof(DWORD)+exportedLen;
-			PBYTE pkt = (PBYTE)malloc( pktLen );
-			PBYTE currentPos = pkt;
-
-			( (PacketHeader*)currentPos )->mSize = pktLen;
-			( (PacketHeader*)currentPos )->mType = PKT_CS_EXPORT_PUBLIC_KEY;
-			currentPos += sizeof( PacketHeader );
-
-			memcpy( currentPos, &exportedLen, sizeof( DWORD ) );
-			currentPos += sizeof( DWORD );
-
-			memcpy( currentPos, exportedData, exportedLen );
-
-			if ( !SendPacket( (char*)pkt, pktLen ) )
-			{
-				printf( "[RSA] post key fail %d\n", GetLastError() );
-				DisconnectRequest( DR_ONCONNECT_ERROR );
-			}
-
-			delete pkt;
-		}
+			ResponseBaseKey( recvPacket );
 			break;
 		case PKT_SC_EXPORT_PUBLIC_KEY:
-		{
-			printf("PKT_SC_EXPORT_PUBLIC_KEY\n");
-			DWORD exportedLen = 0;
-			memcpy( &exportedLen, recvPacket + sizeof( PacketHeader ), sizeof( DWORD ) );
-			PBYTE exportedData = PBYTE(recvPacket) + sizeof(PacketHeader)+sizeof( DWORD );
-
-			if ( !mCrypt.GenerateSessionKey( exportedData, exportedLen ) )
-				break;
-
-			mState = WAIT_FOR_LOGIN;
-			RequestLogin();
-		}
+			ResponseExportedKey( recvPacket );
 			break;
 		case PKT_SC_LOGIN:
-		{
-			LoginResponse* clientPacket = reinterpret_cast<LoginResponse*>( recvPacket );
-			mPlayer->Start( clientPacket->mPlayerId );
-			wprintf_s( L"[LOG] %s <<<< login packet \n", mPlayer->GetName() );
-
-			mState = LOGGED_IN;
-			GSessionManager->RegisterLogedinSession( this );
-
-			// RequestMove();
-		}
+			ResponseLogin( recvPacket );
 			break;
 		case PKT_SC_LOGOUT:
-		{
-			LogoutResponse* clientPacket = reinterpret_cast<LogoutResponse*>( recvPacket );
-			mPlayer->PlayerReset();
-			wprintf_s( L"[LOG] %s <<<< logout packet\n", mPlayer->GetName() );
-			DisconnectRequest( DR_NONE );
-		}
+			ResponseLogout( recvPacket );
 			break;
 		case PKT_SC_CHAT:
-		{
-			if ( mState == WAIT_FOR_LOGOUT )
-				break;
-				
-			ChatBroadcastResponse* clientPacket = reinterpret_cast<ChatBroadcastResponse*>( recvPacket );
-			
-			if ( mPlayer->GetPlayerId() == clientPacket->mPlayerId )
-			{
-				mPlayer->DecrementHealth();
-				wprintf_s( L"[LOG] %s : Health = %d\n", clientPacket->mName, mPlayer->GetPlayerHealth() );
-			}
-
-			// [LOG] %s >>>> chat Message : %s\n
-			wprintf_s( L"[LOG] %s <<<< chat Message : %s\n", clientPacket->mName, clientPacket->mChat );
-
-			if ( !mPlayer->IsAlive() )
-			{
-				// wprintf_s( L"[LOG] %s player dead\n", mPlayer->GetName() );
-				RequestLogout();
-				mState = WAIT_FOR_LOGOUT;
-			}
-		}
+			ResponseChat( recvPacket );
 			break;
 		case PKT_SC_MOVE:
-		{
-			if ( !mPlayer->IsLoaded() )
-			{
-				wprintf_s( L"[DEBUG] LOGOUT PLAYER MOVES" );
-				break;
-			}
-
-			MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
-			if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
-				break;
-
-			mPlayer->SetPosition( clientPacket->mX, clientPacket->mY, clientPacket->mZ );
-			wprintf_s( L"[LOG] %s <<<< move packet ( %f , %f , %f )\n", mPlayer->GetName(), clientPacket->mX, clientPacket->mY, clientPacket->mZ );
-		}
+			ResponseMove( recvPacket );
 			break;
 		default:
 			printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
@@ -509,11 +344,13 @@ void ClientSession::RequestLogin()
 	LoginRequest loginRequest;
 	wcscpy_s( loginRequest.mName, name );
 
-	if ( !SendPacket( &loginRequest ) )
+	if ( !PostSend( reinterpret_cast<const char*>( &loginRequest ), loginRequest.mSize ) )
 	{
 		// disconnect
 		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
+
+	GSessionManager->RegisterSendRequest( this );
 
 	wprintf_s( L"[LOG] %s >>>> login packet\n", name );
 }
@@ -533,13 +370,15 @@ void ClientSession::RequestMove()
 	moveRequest.mY = pos.m_Y;
 	moveRequest.mZ = pos.m_Z;
 
-	if ( !SendPacket( &moveRequest ) )
+	if ( !PostSend( reinterpret_cast<const char*>( &moveRequest ), moveRequest.mSize ) )
 	{
 		// disconnect
 		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
 
-	wprintf_s( L"[LOG] %s >>>> move to ( %f , %f , %f )\n", mPlayer->GetName(), pos.m_X, pos.m_Y, pos.m_Z );
+	GSessionManager->RegisterSendRequest( this );
+
+	// wprintf_s( L"[LOG] %s >>>> move to ( %f , %f , %f )\n", mPlayer->GetName(), pos.m_X, pos.m_Y, pos.m_Z );
 }
 
 void ClientSession::RequestChat()
@@ -563,11 +402,13 @@ void ClientSession::RequestChat()
 	chatRequest.mPlayerId = mPlayer->GetPlayerId();
 	wcscpy_s( chatRequest.mChat, chatMessage );
 
-	if ( !SendPacket( &chatRequest ) )
+	if ( !PostSend( reinterpret_cast<const char*>( &chatRequest ), chatRequest.mSize ) )
 	{
 		// disconnect
 		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
+
+	GSessionManager->RegisterSendRequest( this );
 
 	wprintf_s( L"[LOG] %s >>>> chat Message : %s\n", mPlayer->GetName(), chatMessage );
 }
@@ -577,11 +418,13 @@ void ClientSession::RequestLogout()
 	LogoutRequest logoutRequest;
 	logoutRequest.mPlayerId = mPlayer->GetPlayerId();
 
-	if ( !SendPacket( &logoutRequest ) )
+	if ( !PostSend( reinterpret_cast<const char*>( &logoutRequest ), logoutRequest.mSize ) )
 	{
 		// disconnect
 		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
+
+	GSessionManager->RegisterSendRequest( this );
 
 	wprintf_s( L"[LOG] %s >>>> logout packet\n", mPlayer->GetName() );
 }
@@ -626,40 +469,60 @@ void DeleteIoContext(OverlappedIOContext* context)
 bool ClientSession::IsValidData( PacketHeader* start, ULONG len )
 {
 	ULONG remainLen = len;
-	PacketHeader* currentPos = start;
+	char* currentPos = (char*)start;
+	PacketHeader* pktHeader = (PacketHeader*)currentPos;
 
-	printf( "header : %d / len : %d\n", currentPos->mType, currentPos->mSize );
-	while ( currentPos->mSize != remainLen )
+	// printf( "header : %d / len : %d\n", pktHeader->mType, pktHeader->mSize );
+
+	while ( pktHeader->mSize != remainLen )
 	{
-		// 현재 위치의 값이 유효한 패킷 데이터인가
-		if ( currentPos->mSize > remainLen )
+		if ( pktHeader->mSize == 0 )
 			return false;
 
-		remainLen -= currentPos->mSize;
-		currentPos += currentPos->mSize;
+		// 현재 위치의 값이 유효한 패킷 데이터인가
+		if ( pktHeader->mSize > remainLen )
+			return false;
 
-		printf( "header : %d / len : %d\n", currentPos->mType, currentPos->mSize );
+		remainLen -= pktHeader->mSize;
+		currentPos += pktHeader->mSize;
+		pktHeader = (PacketHeader*)currentPos;
+
+		// printf( "header : %d / len : %d\n", pktHeader->mType, pktHeader->mSize );
 	}
 
 	return true;
 }
 
-bool ClientSession::TestPostSend( char* start, ULONG len )
+bool ClientSession::FlushSend()
 {
 	if ( !IsConnected() )
+	{
+		return true;
+	}
+
+	FastSpinlockGuard criticalSection( mSendBufferLock );
+
+	/// 보낼 데이터가 없는 경우
+	if ( 0 == mSendBuffer.GetContiguiousBytes() )
+	{
+		/// 보낼 데이터도 없는 경우
+		if ( 0 == mSendPendingCount )
+			return true;
+
+		return false;
+	}
+
+	/// 이전의 send가 완료 안된 경우
+	if ( mSendPendingCount > 0 )
 		return false;
 
-	printf( "post!!\n" );
-
-	//FastSpinlockGuard criticalSection(mBufferLock);
 
 	OverlappedSendContext* sendContext = new OverlappedSendContext( this );
 
 	DWORD sendbytes = 0;
 	DWORD flags = 0;
-
-	sendContext->mWsaBuf.len = len;
-	sendContext->mWsaBuf.buf = start;
+	sendContext->mWsaBuf.len = (ULONG)mSendBuffer.GetContiguiousBytes();
+	sendContext->mWsaBuf.buf = mSendBuffer.GetBufferStart();
 
 	CRASH_ASSERT( IsValidData( (PacketHeader*)sendContext->mWsaBuf.buf, sendContext->mWsaBuf.len ) );
 
@@ -671,10 +534,145 @@ bool ClientSession::TestPostSend( char* start, ULONG len )
 			DeleteIoContext( sendContext );
 			printf_s( "ClientSession::PostSend Error : %d\n", GetLastError() );
 
-			return false;
+			return true;
 		}
 
 	}
 
-	return true;
+	mSendPendingCount++;
+
+	return mSendPendingCount == 1;
+}
+
+void ClientSession::ResponseBaseKey( PacketHeader* recvPacket )
+{
+	printf( "PKT_SC_BASE_PUBLIC_KEY\n" );
+
+	PBYTE data = (PBYTE)recvPacket + sizeof( PacketHeader );
+	PBYTE base = nullptr;
+	if ( !GRSA->Decrypt( data, P_LENGTH + G_LENGTH, &base ) )
+		printf( "fail\n" );
+
+	DATA_BLOB clientG;
+	DATA_BLOB clientP;
+	PBYTE pos = base;
+
+	clientG.cbData = *pos;
+	clientG.pbData = pos + 4;
+	pos += 68;
+	mCrypt.SetG( clientG );
+
+	clientP.cbData = *pos;
+	clientP.pbData = pos + 4;
+	pos += 68;
+	mCrypt.SetP( clientP );
+
+	// printf( "%d / %d", clientG.cbData, clientP.cbData );
+
+	// send client public key
+	if ( !mCrypt.GeneratePrivateKey() )
+	{
+		DisconnectRequest( DR_IO_REQUEST_ERROR );
+		return;
+	}
+
+	DWORD exportedLen = 0;
+	PBYTE exportedData = mCrypt.ExportPublicKey( &exportedLen );
+
+	unsigned short pktLen = sizeof(PacketHeader)+sizeof(DWORD)+exportedLen;
+	PBYTE pkt = (PBYTE)malloc( pktLen );
+	PBYTE currentPos = pkt;
+
+	( (PacketHeader*)currentPos )->mSize = pktLen;
+	( (PacketHeader*)currentPos )->mType = PKT_CS_EXPORT_PUBLIC_KEY;
+	currentPos += sizeof( PacketHeader );
+
+	memcpy( currentPos, &exportedLen, sizeof( DWORD ) );
+	currentPos += sizeof( DWORD );
+
+	memcpy( currentPos, exportedData, exportedLen );
+
+	if ( !PostSend( (char*)pkt, pktLen ) )
+	{
+		printf( "[RSA] post key fail %d\n", GetLastError() );
+		DisconnectRequest( DR_ONCONNECT_ERROR );
+	}
+	
+	GSessionManager->RegisterSendRequest( this );
+
+	delete pkt;
+}
+
+void ClientSession::ResponseExportedKey( PacketHeader* recvPacket )
+{
+	printf( "PKT_SC_EXPORT_PUBLIC_KEY\n" );
+	DWORD exportedLen = 0;
+	memcpy( &exportedLen, recvPacket + sizeof( PacketHeader ), sizeof( DWORD ) );
+	PBYTE exportedData = PBYTE( recvPacket ) + sizeof(PacketHeader)+sizeof( DWORD );
+
+	// send client public key
+	if ( !mCrypt.GeneratePrivateKey() )
+	{
+		DisconnectRequest( DR_IO_REQUEST_ERROR );
+		return;
+	}
+
+	mIsKeyShared = true;
+
+	mState = WAIT_FOR_LOGIN;
+	RequestLogin();
+}
+
+void ClientSession::ResponseLogin( PacketHeader* recvPacket )
+{
+	LoginResponse* clientPacket = reinterpret_cast<LoginResponse*>( recvPacket );
+	mPlayer->Start( clientPacket->mPlayerId );
+	wprintf_s( L"[LOG] %s <<<< login packet \n", mPlayer->GetName() );
+
+	mState = LOGGED_IN;
+	GSessionManager->RegisterLogedinSession( this );
+}
+
+void ClientSession::ResponseLogout( PacketHeader* recvPacket )
+{
+	LogoutResponse* clientPacket = reinterpret_cast<LogoutResponse*>( recvPacket );
+	mPlayer->PlayerReset();
+	wprintf_s( L"[LOG] %s <<<< logout packet\n", mPlayer->GetName() );
+	DisconnectRequest( DR_NONE );
+}
+
+void ClientSession::ResponseChat( PacketHeader* recvPacket )
+{
+	if ( mState != LOGGED_IN )
+		return;
+
+	ChatBroadcastResponse* clientPacket = reinterpret_cast<ChatBroadcastResponse*>( recvPacket );
+
+	// if ( mPlayer->GetPlayerId() == clientPacket->mPlayerId )
+	if ( true )
+	{
+		mPlayer->DecrementHealth();
+		wprintf_s( L"[LOG] %s : Health = %d\n", clientPacket->mName, mPlayer->GetPlayerHealth() );
+	}
+
+	// [LOG] %s >>>> chat Message : %s\n
+	wprintf_s( L"[LOG] %s <<<< chat Message : %s\n", clientPacket->mName, clientPacket->mChat );
+
+	if ( !mPlayer->IsAlive() )
+	{
+		// wprintf_s( L"[LOG] %s player dead\n", mPlayer->GetName() );
+		mState = WAIT_FOR_LOGOUT;
+		RequestLogout();
+	}
+}
+
+void ClientSession::ResponseMove( PacketHeader* recvPacket )
+{
+	if ( mState != LOGGED_IN )
+		return;
+
+	MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
+
+	mPlayer->SetPosition( clientPacket->mX, clientPacket->mY, clientPacket->mZ );
+	// wprintf_s( L"[LOG] %s <<<< move packet ( %f , %f , %f )\n", mPlayer->GetName(), clientPacket->mX, clientPacket->mY, clientPacket->mZ );
 }
