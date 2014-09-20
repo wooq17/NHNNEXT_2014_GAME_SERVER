@@ -120,12 +120,6 @@ bool Session::PostSend(const char* data, size_t len)
 
 	memcpy(destData, data, len);
 
-	if ( mIsKeyShared )
-	{
-		if ( !mCrypt.Encrypt( (PBYTE)destData, ( (PacketHeader*)destData )->mSize ) )
-			printf( "[DH] Encrypt failed\n" );
-	}
-
 	mSendBuffer.Commit(len);
 
 	return true;
@@ -160,6 +154,11 @@ bool Session::FlushSend()
 		return true;
 		// return false;
 
+	if ( mIsKeyShared )
+	{
+		if ( !mCrypt.Encrypt( (PBYTE)( mSendBuffer.GetBufferStart() ), mSendBuffer.GetContiguiousBytes() ) )
+			printf( "[DH] Decrypt failed\n" );
+	}
 	
 	OverlappedSendContext* sendContext = new OverlappedSendContext(this);
 

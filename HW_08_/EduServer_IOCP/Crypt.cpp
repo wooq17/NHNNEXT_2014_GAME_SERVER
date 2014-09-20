@@ -150,7 +150,7 @@ bool Crypt::GenerateSessionKey( PBYTE keyBlob, DWORD dataLen )
 		return false;
 	}
 
-	printf( "session key : %d\n", m_SessionKey );
+	// printf( "session key : %d\n", m_SessionKey );
 
 	return true;
 }

@@ -261,12 +261,6 @@ bool ClientSession::PostSend( const char* packet, DWORD len )
 
 	memcpy( destData, packet, len );
 
-	if ( mIsKeyShared )
-	{
-		if ( !mCrypt.Encrypt( (PBYTE)destData, ( (PacketHeader*)destData )->mSize ) )
-			printf( "[DH] Decrypt failed\n" );
-	}
-
 	mSendBuffer.Commit( len );
 
 	return true;
@@ -510,6 +504,12 @@ bool ClientSession::FlushSend()
 		return false;
 
 
+	if ( mIsKeyShared )
+	{
+		if ( !mCrypt.Encrypt( (PBYTE)( mSendBuffer.GetBufferStart() ), mSendBuffer.GetContiguiousBytes() ) )
+			printf( "[DH] Decrypt failed\n" );
+	}
+
 	OverlappedSendContext* sendContext = new OverlappedSendContext( this );
 
 	DWORD sendbytes = 0;
@@ -653,13 +653,6 @@ void ClientSession::ResponseExportedKey( PacketHeader* recvPacket )
 	DWORD exportedLen = 0;
 	memcpy( &exportedLen, recvPacket + sizeof( PacketHeader ), sizeof( DWORD ) );
 	PBYTE exportedData = PBYTE( recvPacket ) + sizeof(PacketHeader)+sizeof( DWORD );
-
-	// send client public key
-	if ( !mCrypt.GeneratePrivateKey() )
-	{
-		DisconnectRequest( DR_IO_REQUEST_ERROR );
-		return;
-	}
 
 	if ( !mCrypt.GenerateSessionKey( exportedData, exportedLen ) )
 	{

@@ -47,7 +47,7 @@ void CreatePlayerDataContext::OnSuccess()
 	// 함수가 없네
 	// db 작업 되는지만 확인하면 되니까 그냥 static 변수값 사용
 	mSessionObject->mPlayer->ResponseRegisterPlayer( mPlayerId );
-	printf("create player\n");
+	// printf("create player\n");
 }
 
 void CreatePlayerDataContext::OnFail()
@@ -93,7 +93,7 @@ bool DeletePlayerDataContext::OnSQLExecute()
 void DeletePlayerDataContext::OnSuccess()
 {
 	mSessionObject->mPlayer->ResponseDeregisterPlayer( mPlayerId );
-	printf( "delete player\n" );
+	// printf( "delete player\n" );
 }
 
 void DeletePlayerDataContext::OnFail()

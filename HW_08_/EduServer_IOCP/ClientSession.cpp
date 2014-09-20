@@ -377,6 +377,8 @@ void ClientSession::ResponseExportedKey( PacketHeader* recvPacket )
 		DisconnectRequest( DR_ONCONNECT_ERROR );
 	}
 
+	FlushSend();
+
 	delete pkt;
 
 	// mSize / mType / len / data
