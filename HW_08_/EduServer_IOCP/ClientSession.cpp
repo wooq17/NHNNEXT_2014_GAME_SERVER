@@ -422,8 +422,8 @@ void ClientSession::ResponseChat( PacketHeader* recvPacket )
 	wcscpy_s( packet->mName, mPlayer->GetName() );
 	wcscpy_s( packet->mChat, clientPacket->mChat );
 
-	GClientSessionManager->NearbyBroadcast( packet, mPlayer->GetZoneIdx() );
-	// PostSend( (char*)packet, packet->mSize );
+	// GClientSessionManager->NearbyBroadcast( packet, mPlayer->GetZoneIdx() );
+	PostSend( (char*)packet, packet->mSize );
 
 	delete packet;
 }

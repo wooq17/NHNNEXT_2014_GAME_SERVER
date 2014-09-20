@@ -201,7 +201,7 @@ bool Crypt::Encrypt( PBYTE data, DWORD length )
 		ReleaseResources();
 		return false;
 	}
-
+	
 	return true;
 }
 
@@ -221,6 +221,6 @@ bool Crypt::Decrypt( PBYTE data, DWORD length )
 		ReleaseResources();
 		return false;
 	}
-
+	
 	return true;
 }

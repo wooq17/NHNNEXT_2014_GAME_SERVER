@@ -268,7 +268,6 @@ bool ClientSession::PostSend( const char* packet, DWORD len )
 
 bool ClientSession::PacketHandler()
 {
-	printf("PacketHandler\n");
 	size_t len = mRecvBuffer.GetContiguiousBytes();
 
 	if ( len == 0 )
@@ -345,7 +344,7 @@ void ClientSession::RequestLogin()
 		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
 
-	wprintf_s( L"[LOG] %s >>>> login packet\n", name );
+	// wprintf_s( L"[LOG] %s >>>> login packet\n", name );
 }
 
 void ClientSession::RequestMove()
@@ -369,7 +368,7 @@ void ClientSession::RequestMove()
 		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
 
-	wprintf_s( L"[LOG] %s >>>> move to ( %f , %f , %f )\n", mPlayer->GetName(), pos.m_X, pos.m_Y, pos.m_Z );
+	// wprintf_s( L"[LOG] %s >>>> move to ( %f , %f , %f )\n", mPlayer->GetName(), pos.m_X, pos.m_Y, pos.m_Z );
 }
 
 void ClientSession::RequestChat()
@@ -399,7 +398,7 @@ void ClientSession::RequestChat()
 		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
 
-	wprintf_s( L"[LOG] %s >>>> chat Message : %s\n", mPlayer->GetName(), chatMessage );
+	// wprintf_s( L"[LOG] %s >>>> chat Message : %s\n", mPlayer->GetName(), chatMessage );
 }
 
 void ClientSession::RequestLogout()
@@ -413,7 +412,7 @@ void ClientSession::RequestLogout()
 		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
 
-	wprintf_s( L"[LOG] %s >>>> logout packet\n", mPlayer->GetName() );
+	// wprintf_s( L"[LOG] %s >>>> logout packet\n", mPlayer->GetName() );
 }
 
 void DeleteIoContext(OverlappedIOContext* context)
@@ -640,7 +639,7 @@ void ClientSession::ResponseBaseKey( PacketHeader* recvPacket )
 
 	if ( !PostSend( (char*)pkt, pktLen ) )
 	{
-		printf( "[RSA] post key fail %d\n", GetLastError() );
+		// printf( "[DH] post key fail %d\n", GetLastError() );
 		DisconnectRequest( DR_ONCONNECT_ERROR );
 	}
 
@@ -649,7 +648,6 @@ void ClientSession::ResponseBaseKey( PacketHeader* recvPacket )
 
 void ClientSession::ResponseExportedKey( PacketHeader* recvPacket )
 {
-	printf( "PKT_SC_EXPORT_PUBLIC_KEY\n" );
 	DWORD exportedLen = 0;
 	memcpy( &exportedLen, recvPacket + sizeof( PacketHeader ), sizeof( DWORD ) );
 	PBYTE exportedData = PBYTE( recvPacket ) + sizeof(PacketHeader)+sizeof( DWORD );
@@ -670,7 +668,7 @@ void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 {
 	LoginResponse* clientPacket = reinterpret_cast<LoginResponse*>( recvPacket );
 	mPlayer->Start( clientPacket->mPlayerId );
-	wprintf_s( L"[LOG] %s <<<< login packet \n", mPlayer->GetName() );
+	// wprintf_s( L"[LOG] %s <<<< login packet \n", mPlayer->GetName() );
 
 	mState = LOGGED_IN;
 }
@@ -679,7 +677,7 @@ void ClientSession::ResponseLogout( PacketHeader* recvPacket )
 {
 	LogoutResponse* clientPacket = reinterpret_cast<LogoutResponse*>( recvPacket );
 	mPlayer->PlayerReset();
-	wprintf_s( L"[LOG] %s <<<< logout packet\n", mPlayer->GetName() );
+	// wprintf_s( L"[LOG] %s <<<< logout packet\n", mPlayer->GetName() );
 	DisconnectRequest( DR_NONE );
 }
 
@@ -694,11 +692,11 @@ void ClientSession::ResponseChat( PacketHeader* recvPacket )
 	if ( true )
 	{
 		mPlayer->DecrementHealth();
-		wprintf_s( L"[LOG] %s : Health = %d\n", clientPacket->mName, mPlayer->GetPlayerHealth() );
+		// wprintf_s( L"[LOG] %s : Health = %d\n", clientPacket->mName, mPlayer->GetPlayerHealth() );
 	}
 
 	// [LOG] %s >>>> chat Message : %s\n
-	wprintf_s( L"[LOG] %s <<<< chat Message : %s\n", clientPacket->mName, clientPacket->mChat );
+	// wprintf_s( L"[LOG] %s <<<< chat Message : %s\n", clientPacket->mName, clientPacket->mChat );
 
 	if ( !mPlayer->IsAlive() )
 	{
