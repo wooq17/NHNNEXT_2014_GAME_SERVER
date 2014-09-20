@@ -5,6 +5,7 @@
 #include "ContentsConfig.h"
 #include "Player.h"
 #include "Crypt.h"
+#include <google\protobuf\message_lite.h>
 
 #define BUFSIZE	65536
 #define SEND_BUFF 4096
@@ -137,7 +138,8 @@ public:
 	void RequestLogin();
 	void RequestMove();
 	void RequestChat();
-	void RequestLogout();
+	void RequestLogout();	
+	//char* MergePacket(char* packetHeader, char* payload,  );
 
 	void ResponseBaseKey( PacketHeader* recvPacket );
 	void ResponseExportedKey( PacketHeader* recvPacket );
