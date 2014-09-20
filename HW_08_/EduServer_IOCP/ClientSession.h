@@ -9,6 +9,15 @@
 class ClientSessionManager;
 class PacketHeader;
 
+enum ClientState
+{
+	NOTHING = -1,
+	SHARING_KEY,
+	WAIT_FOR_LOGIN,
+	LOGGED_IN,
+	WAIT_FOR_LOGOUT,
+};
+
 class ClientSession : public Session, public PooledAllocatable
 {
 public:
@@ -51,6 +60,7 @@ private:
 
 	// volatile long	mRefCount;
 	// volatile long	mConnected;
+	ClientState			mState;
 
 	friend class ClientSessionManager;
 } ;

@@ -153,6 +153,7 @@ bool Session::FlushSend()
 	if ( mSendPendingCount > 0 )
 		return true;
 		// return false;
+		// 임시로 테스트를 위한 설정
 
 	if ( mIsKeyShared )
 	{

@@ -14,7 +14,7 @@
 
 #define CLIENT_BUFSIZE	65536
 
-ClientSession::ClientSession() : Session( CLIENT_BUFSIZE, CLIENT_BUFSIZE ), mPlayer( new Player( this ) )
+ClientSession::ClientSession() : Session( CLIENT_BUFSIZE, CLIENT_BUFSIZE ), mPlayer( new Player( this ) ), mState( NOTHING )
 {
 	memset(&mClientAddr, 0, sizeof(SOCKADDR_IN));
 }
@@ -48,10 +48,12 @@ void ClientSession::SessionReset()
 	mSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 
 	/// 플레이어 리셋
-	// mPlayer->DoSync( &Player::PlayerReset );
+	mPlayer->DoSync( &Player::PlayerReset );
 
 	mCrypt.ReleaseResources();
 	mIsKeyShared = false;
+
+	mState = NOTHING;
 }
 
 bool ClientSession::PostAccept()
@@ -164,6 +166,7 @@ void ClientSession::AcceptCompletion()
 
 	// RSA::Init();
 	// 여기서 첫 암호화 한 베이스 코드를 보낸다
+	mState = SHARING_KEY;
 	if ( !SendBaseKey() )
 	{
 		printf( "[RSA] Encrypt fail %d\n", GetLastError() );
@@ -392,6 +395,8 @@ void ClientSession::ResponseExportedKey( PacketHeader* recvPacket )
 	}
 
 	mIsKeyShared = true;
+
+	mState = WAIT_FOR_LOGIN;
 }
 
 void ClientSession::ResponseLogin( PacketHeader* recvPacket )
@@ -399,6 +404,8 @@ void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 	LoginRequest* clientPacket = reinterpret_cast<LoginRequest*>( recvPacket );
 	mPlayer->RequestRegisterPlayer( clientPacket->mName );
 	// 응답 보내기는 나중에 비동기로 수행
+
+	mState = LOGGED_IN;
 }
 
 void ClientSession::ResponseLogout( PacketHeader* recvPacket )
@@ -416,16 +423,16 @@ void ClientSession::ResponseChat( PacketHeader* recvPacket )
 	if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
 		return;
 
-	ChatBroadcastResponse* packet = new ChatBroadcastResponse();
+	ChatBroadcastResponse packet; // = new ChatBroadcastResponse();
 
-	packet->mPlayerId = clientPacket->mPlayerId;
-	wcscpy_s( packet->mName, mPlayer->GetName() );
-	wcscpy_s( packet->mChat, clientPacket->mChat );
+	packet.mPlayerId = clientPacket->mPlayerId;
+	wcscpy_s( packet.mName, mPlayer->GetName() );
+	wcscpy_s( packet.mChat, clientPacket->mChat );
 
-	// GClientSessionManager->NearbyBroadcast( packet, mPlayer->GetZoneIdx() );
-	PostSend( (char*)packet, packet->mSize );
+	GClientSessionManager->NearbyBroadcast( &packet, mPlayer->GetZoneIdx() );
+	// PostSend( (char*)&packet, packet.mSize );
 
-	delete packet;
+	// delete packet;
 }
 
 void ClientSession::ResponseMove( PacketHeader* recvPacket )

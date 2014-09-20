@@ -112,6 +112,8 @@ void ClientSessionManager::NearbyBroadcast( PacketHeader* pkt, int from )
 	// 방송할 애들을 playerManager로부터 뽑아와서
 	int targetNumber = GPlayerManager->GetClosePlayers( targetList, from );
 
+	CRASH_ASSERT( targetNumber > 0 );
+
 	// 순회하면서 방송
 	for ( auto it : targetList )
 	{

@@ -460,6 +460,9 @@ bool ClientSession::IsValidData( PacketHeader* start, ULONG len )
 
 	// printf( "header : %d / len : %d\n", pktHeader->mType, pktHeader->mSize );
 
+	if ( len % 284 == 0 && len > 284)
+		printf("Here!!\n");
+
 	while ( pktHeader->mSize != remainLen )
 	{
 		if ( pktHeader->mSize == 0 )
@@ -502,6 +505,7 @@ bool ClientSession::FlushSend()
 	if ( mSendPendingCount > 0 )
 		return false;
 
+	IsValidData( (PacketHeader*)( mSendBuffer.GetBufferStart() ), mSendBuffer.GetContiguiousBytes() );
 
 	if ( mIsKeyShared )
 	{
@@ -679,6 +683,8 @@ void ClientSession::ResponseLogout( PacketHeader* recvPacket )
 	mPlayer->PlayerReset();
 	// wprintf_s( L"[LOG] %s <<<< logout packet\n", mPlayer->GetName() );
 	DisconnectRequest( DR_NONE );
+
+	mState = WAIT_FOR_LOGOUT;
 }
 
 void ClientSession::ResponseChat( PacketHeader* recvPacket )
@@ -701,7 +707,6 @@ void ClientSession::ResponseChat( PacketHeader* recvPacket )
 	if ( !mPlayer->IsAlive() )
 	{
 		// wprintf_s( L"[LOG] %s player dead\n", mPlayer->GetName() );
-		mState = WAIT_FOR_LOGOUT;
 		RequestLogout();
 	}
 }

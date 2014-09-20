@@ -138,6 +138,7 @@ void SessionManager::DeregisterActiveSession( ClientSession* client )
 	auto it = mActiveSessionList.find( client->GetSocket() );
 
 	printf( "****client deregister : %d\n", client->GetSocket( ) );
-	CRASH_ASSERT( it != mActiveSessionList.end() );
-	mActiveSessionList.erase( it );
+	// CRASH_ASSERT( it != mActiveSessionList.end() );
+	if ( it != mActiveSessionList.end() )
+		mActiveSessionList.erase( it );
 }
