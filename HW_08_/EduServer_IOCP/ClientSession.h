@@ -51,18 +51,9 @@ public:
 	std::shared_ptr<Player> mPlayer;
 
 private:
-	
-	// SOCKET			mSocket ;
 
 	SOCKADDR_IN		mClientAddr ;
-		
-	// FastSpinlock	mBufferLock;
-
-	// CircularBuffer	mBuffer;
-
-	// volatile long	mRefCount;
-	// volatile long	mConnected;
-	ClientState			mState;
+	ClientState		mState;
 
 	friend class ClientSessionManager;
 } ;

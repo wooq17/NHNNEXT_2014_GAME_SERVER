@@ -186,11 +186,7 @@ bool IocpManager::PreReceiveCompletion(ClientSession* client, OverlappedPreRecvC
 bool IocpManager::ReceiveCompletion(ClientSession* client, OverlappedRecvContext* context, DWORD dwTransferred)
 {
 	client->RecvCompletion(dwTransferred);
-// 
-// 	if ( context->mWsaBuf.buf[0] != (char)( client->GetClientId() % 10 + 48 ) )
-// 		printf_s( "What the hell!!\n" );
-	/// echo back
-	//return client->PostSend();
+
 	return client->PreRecv();
 }
 

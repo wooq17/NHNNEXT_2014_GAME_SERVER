@@ -28,7 +28,6 @@ void SessionManager::PrepareSessions()
 {
 	CRASH_ASSERT(LThreadType == THREAD_MAIN);
 
-	//srand( (int)time(NULL) );
 	for ( int i = 0; i < mInputMaxConnection; ++i )
 	{
 		ClientSession* client = xnew<ClientSession>();
@@ -57,8 +56,6 @@ void SessionManager::ReturnClientSession(ClientSession* client)
 	mFreeSessionList.push_back(client);
 
 	++mCurrentReturnCount;
-
-	// printf( "return session\n" );
 }
 
 bool SessionManager::ConnectSessions()
@@ -66,7 +63,7 @@ bool SessionManager::ConnectSessions()
 	FastSpinlockGuard guard(mLock);
 
 	if ( mMaxConnection < mInputMaxConnection )
-		mMaxConnection += 5;
+		mMaxConnection += 1;
 
 	while (mCurrentIssueCount - mCurrentReturnCount < mMaxConnection)
 	{

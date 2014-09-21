@@ -60,10 +60,10 @@
     <ClInclude Include="Crypt.h">
       <Filter>Main</Filter>
     </ClInclude>
-    <ClInclude Include="RSA.h">
-      <Filter>Main</Filter>
-    </ClInclude>
     <ClInclude Include="MyPacket.pb.h" />
+    <ClInclude Include="RSA.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IocpTestClient.cpp">

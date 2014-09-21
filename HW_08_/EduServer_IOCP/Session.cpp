@@ -139,6 +139,7 @@ bool Session::FlushSend()
 
 	FastSpinlockGuard criticalSection(mSendBufferLock);
 
+	// 테스트를 위한 임시 설정
 	if ( 0 == mSendBuffer.GetContiguiousBytes() || mSendPendingCount > 0 )
 		return true;
 
@@ -155,9 +156,7 @@ bool Session::FlushSend()
 
 	/// 이전의 send가 완료 안된 경우
 	if ( mSendPendingCount > 0 )
-		return true;
-		// return false;
-		// 임시로 테스트를 위한 설정
+		return false;
 	*/
 
 	char* start = mSendBuffer.GetBufferStart();

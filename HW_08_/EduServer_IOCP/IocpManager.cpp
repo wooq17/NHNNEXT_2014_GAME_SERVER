@@ -11,8 +11,6 @@
 #include "ClientSessionManager.h"
 #include "DBContext.h"
 
-// #define GQCS_TIMEOUT	20 // INFINITE // 주기적인 작업을 실행하기 위해 타임아웃 설정 
-
 IocpManager* GIocpManager = nullptr;
 
 LPFN_DISCONNECTEX IocpManager::mFnDisconnectEx = nullptr;

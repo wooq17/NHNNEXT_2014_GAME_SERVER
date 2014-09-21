@@ -16,14 +16,6 @@ ClientSessionManager::~ClientSessionManager()
 	{
 		xdelete( it );
 	}
-
-	/*
-	for ( auto it : mLogedinSessionList )
-	{
-		xdelete( it.second );
-	}
-	mLogedinSessionList.clear();
-	*/
 }
 
 void ClientSessionManager::PrepareClientSessions()
@@ -37,8 +29,6 @@ void ClientSessionManager::PrepareClientSessions()
 			
 		mFreeSessionList.push_back(client);
 	}
-
-	// mLogedinSessionList.clear();
 }
 
 
@@ -82,31 +72,8 @@ bool ClientSessionManager::AcceptClientSessions()
 
 	return true;
 }
-/*
-void ClientSessionManager::RegisterLogedinSession( ClientSession* client )
-{
-	FastSpinlockGuard guard( mLock );
 
-	auto it = mLogedinSessionList.find( client->GetSocket() );
-
-	printf( "****client register : %d\n", client->GetSocket() );
-	CRASH_ASSERT( it == mLogedinSessionList.end() ); // 같은 게 이미 있으면 이상하다
-	mLogedinSessionList.insert( xmap<SOCKET, ClientSession*>::type::value_type( client->GetSocket(), client ) );
-}
-
-void ClientSessionManager::DeregisterLogedinSession( ClientSession* client )
-{
-	FastSpinlockGuard guard( mLock );
-
-	auto it = mLogedinSessionList.find( client->GetSocket() );
-
-	printf( "****client deregister : %d\n", client->GetSocket() );
-	CRASH_ASSERT( it != mLogedinSessionList.end() );
-	mLogedinSessionList.erase( it );
-}
-*/
 // protobuf 사용을 위해 parameter변경
-//void ClientSessionManager::NearbyBroadcast( PacketHeader* pkt, int from )
 void ClientSessionManager::NearbyBroadcast( const char* pkt, size_t pktSize, int from )
 {
 	PlayerList targetList;
@@ -124,7 +91,32 @@ void ClientSessionManager::NearbyBroadcast( const char* pkt, size_t pktSize, int
 	}
 }
 
+// 디비 대신 사용하는 id 발급기
 uint64_t ClientSessionManager::GetTempId()
 {
 	return InterlockedIncrement( &mTempId );
 }
+
+/*
+void ClientSessionManager::RegisterLogedinSession( ClientSession* client )
+{
+FastSpinlockGuard guard( mLock );
+
+auto it = mLogedinSessionList.find( client->GetSocket() );
+
+printf( "****client register : %d\n", client->GetSocket() );
+CRASH_ASSERT( it == mLogedinSessionList.end() ); // 같은 게 이미 있으면 이상하다
+mLogedinSessionList.insert( xmap<SOCKET, ClientSession*>::type::value_type( client->GetSocket(), client ) );
+}
+
+void ClientSessionManager::DeregisterLogedinSession( ClientSession* client )
+{
+FastSpinlockGuard guard( mLock );
+
+auto it = mLogedinSessionList.find( client->GetSocket() );
+
+printf( "****client deregister : %d\n", client->GetSocket() );
+CRASH_ASSERT( it != mLogedinSessionList.end() );
+mLogedinSessionList.erase( it );
+}
+*/

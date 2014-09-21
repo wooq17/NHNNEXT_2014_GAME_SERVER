@@ -1,5 +1,4 @@
-﻿#include "stdafx.h"if ( mState != WAIT_FOR_LOGIN )
-		return;
+﻿#include "stdafx.h"
 #include "Exception.h"
 #include "Log.h"
 #include "ThreadLocal.h"
@@ -155,18 +154,8 @@ void ClientSession::AcceptCompletion()
 		printf_s("[DEBUG] PreRecv error: %d\n", GetLastError());
 	}
 
-	/// 타이머 테스트를 위해 10ms 후에 player 가동 ㄱㄱ
-	// 로그인 성공하면 수행하도록 변경 
-	// DoSyncAfter(10, mPlayer, &Player::Start, 1000);
-
-	// 요놈의 위치는 원래 C_LOGIN 핸들링 할 때 해야하는거지만 지금은 접속 완료 시점에서 테스트 ㄱㄱ
-	// static int id = 101;
-	// mPlayer.TestCreatePlayerData( L"testName" );
-	// mPlayer.RequestLoad( id++ );
-	// mPlayer.TestDeletePlayerData( id );
-	//
-
 	// RSA::Init();
+
 	// 여기서 첫 암호화 한 베이스 코드를 보낸다
 	mState = SHARING_KEY;
 	if ( !SendBaseKey() )
@@ -181,8 +170,6 @@ void ClientSession::OnDisconnect( DisconnectReason dr )
 	TRACE_THIS;
 
 	printf_s( "[DEBUG] Client Disconnected: Reason=%d IP=%s, PORT=%d \n", dr, inet_ntoa( mClientAddr.sin_addr ), ntohs( mClientAddr.sin_port ) );
-	// log and dump test
-	// CRASH_ASSERT( false );
 }
 
 void ClientSession::OnRelease()
@@ -405,11 +392,10 @@ void ClientSession::ResponseExportedKey( PacketHeader* recvPacket )
 
 void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 {
-	
 	if ( mState != WAIT_FOR_LOGIN )
 		return;
 
-// protobuf용 부분
+	// protobuf용 부분
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::LoginRequest request;
 	int rtn = request.ParseFromArray( reinterpret_cast<const void*>(recvPacket + 1), recvPacket->mSize );
@@ -419,10 +405,6 @@ void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 	mPlayer->RequestRegisterPlayer( playerName );
 	// protobuf 끄읕
 
-	//LoginRequest* clientPacket = reinterpret_cast<LoginRequest*>( recvPacket );
-	//mPlayer->RequestRegisterPlayer( clientPacket->mName );
-	// 응답 보내기는 나중에 비동기로 수행
-
 	mState = LOGGED_IN;
 }
 
@@ -431,19 +413,13 @@ void ClientSession::ResponseLogout( PacketHeader* recvPacket )
 	if ( mState != LOGGED_IN )
 		return;
 
-// protobuf용 부분
+	// protobuf용 부분
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::LogoutRequest request;
 	request.ParseFromArray( recvPacket + 1, recvPacket->mSize );
 	mState = WAIT_FOR_LOGOUT;
 	mPlayer->RequestDeregisterPlayer( request.playerid() );
 	// protobuf 끄읕
-
-// 	LogoutRequest* clientPacket = reinterpret_cast<LogoutRequest*>( recvPacket );
-// 	if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
-// 		return;
-// 
-// 	mPlayer->RequestDeregisterPlayer( clientPacket->mPlayerId );
 }
 
 void ClientSession::ResponseChat( PacketHeader* recvPacket )
@@ -481,23 +457,6 @@ void ClientSession::ResponseChat( PacketHeader* recvPacket )
 	GClientSessionManager->NearbyBroadcast( encoded, packetHeader.mSize, mPlayer->GetZoneIdx() );
 	delete[] encoded;
 	// protobuf 끄읕
-	
-
-
-// 	ChatBroadcastRequest* clientPacket = reinterpret_cast<ChatBroadcastRequest*>( recvPacket );
-// 	if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
-// 		return;
-
-// 	ChatBroadcastResponse packet; // = new ChatBroadcastResponse();
-// 
-// 	packet.mPlayerId = clientPacket->mPlayerId;
-// 	wcscpy_s( packet.mName, mPlayer->GetName() );
-// 	wcscpy_s( packet.mChat, clientPacket->mChat );
-// 
-// 	GClientSessionManager->NearbyBroadcast( &packet, mPlayer->GetZoneIdx() );
-	// PostSend( (char*)&packet, packet.mSize );
-
-	// delete packet;
 }
 
 void ClientSession::ResponseMove( PacketHeader* recvPacket )

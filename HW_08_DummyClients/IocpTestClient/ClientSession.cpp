@@ -35,7 +35,7 @@ OverlappedIOContext::OverlappedIOContext(ClientSession* owner, IOType ioType)
 ClientSession::ClientSession() 
 : mRecvBuffer( BUFSIZE ), mSendBuffer( BUFSIZE ), mConnected( 0 ), mRefCount( 0 ), mPlayer( new Player( this ) ), mState( NOTHING ), mSendPendingCount( 0 ), mIsKeyShared( false )
 {
-	//memset(&mClientAddr, 0, sizeof(SOCKADDR_IN));
+	memset(&mClientAddr, 0, sizeof(SOCKADDR_IN));
 	mSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 }
 
@@ -44,7 +44,7 @@ void ClientSession::SessionReset()
 {
 	mConnected = 0;
 	mRefCount = 0;
-	//memset(&mClientAddr, 0, sizeof(SOCKADDR_IN));
+	memset(&mClientAddr, 0, sizeof(SOCKADDR_IN));
 
 	mSendBufferLock.EnterWriteLock();
 	mSendBuffer.BufferReset();
@@ -196,8 +196,6 @@ bool ClientSession::PostRecv()
 {
 	if (!IsConnected())
 		return false;
-
-	//FastSpinlockGuard criticalSection(mBufferLock);
 
 	if (0 == mRecvBuffer.GetFreeSpaceSize())
 		return false;
@@ -427,16 +425,6 @@ void ClientSession::RequestLogin()
 	}
 	delete[] encoded;
 
- //	LoginRequest loginRequest;
-// 
-// 	wcscpy_s( loginRequest.mName, name );
-// 
-// 	if ( !PostSend( reinterpret_cast<const char*>( &loginRequest ), loginRequest.mSize ) )
-// 	{
-// 		// disconnect
-// 		DisconnectRequest( DR_IO_REQUEST_ERROR );
-// 	}
-
 	// wprintf_s( L"[LOG] %s >>>> login packet\n", name );
 }
 
@@ -475,18 +463,6 @@ void ClientSession::RequestMove()
 		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
 	delete[] encoded;
-
-// 	MoveRequest moveRequest;
-// 	moveRequest.mPlayerId = mPlayer->GetPlayerId();
-// 	moveRequest.mX = pos.m_X;
-// 	moveRequest.mY = pos.m_Y;
-// 	moveRequest.mZ = pos.m_Z;
-// 
-// 	if ( !PostSend( reinterpret_cast<const char*>( &moveRequest ), moveRequest.mSize ) )
-// 	{
-// 		// disconnect
-// 		DisconnectRequest( DR_IO_REQUEST_ERROR );
-// 	}
 
 	// wprintf_s( L"[LOG] %s >>>> move to ( %f , %f , %f )\n", mPlayer->GetName(), pos.m_X, pos.m_Y, pos.m_Z );
 }
@@ -537,17 +513,7 @@ void ClientSession::RequestChat()
 	delete[] encoded;
 
 
-// 	ChatBroadcastRequest chatRequest;
-// 	chatRequest.mPlayerId = mPlayer->GetPlayerId();
-// 	wcscpy_s( chatRequest.mChat, chat );
-// 
-// 	if ( !PostSend( reinterpret_cast<const char*>( &chatRequest ), chatRequest.mSize ) )
-// 	{
-// 		// disconnect
-// 		DisconnectRequest( DR_IO_REQUEST_ERROR );
-// 	}
-// 
-// 	wprintf_s( L"[LOG] %s >>>> chat Message : %s\n", mPlayer->GetName(), chat );
+	// wprintf_s( L"[LOG] %s >>>> chat Message : %s\n", mPlayer->GetName(), chat );
 }
 
 void ClientSession::RequestLogout()
@@ -579,15 +545,6 @@ void ClientSession::RequestLogout()
 		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
 	delete[] encoded;
-
-// 	LogoutRequest logoutRequest;
-// 	logoutRequest.mPlayerId = mPlayer->GetPlayerId();
-// 
-// 	if ( !PostSend( reinterpret_cast<const char*>( &logoutRequest ), logoutRequest.mSize ) )
-// 	{
-// 		// disconnect
-// 		DisconnectRequest( DR_IO_REQUEST_ERROR );
-// 	}
 
 	// wprintf_s( L"[LOG] %s >>>> logout packet\n", mPlayer->GetName() );
 }
@@ -802,11 +759,9 @@ void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 	loginResult.ParseFromArray( recvPacket + 1, recvPacket->mSize );
 	mPlayer->Start( loginResult.playerid() );
 
-// 	LoginResponse* clientPacket = reinterpret_cast<LoginResponse*>( recvPacket );
-// 	mPlayer->Start( clientPacket->mPlayerId );
-	// wprintf_s( L"[LOG] %s <<<< login packet \n", mPlayer->GetName() );
-
 	mState = LOGGED_IN;
+
+	// wprintf_s( L"[LOG] %s <<<< login packet \n", mPlayer->GetName() );
 }
 
 void ClientSession::ResponseLogout( PacketHeader* recvPacket )
@@ -823,18 +778,12 @@ void ClientSession::ResponseLogout( PacketHeader* recvPacket )
 	else
 	{
 		mPlayer->PlayerReset();
-		// wprintf_s( L"[LOG] %s <<<< logout packet\n", mPlayer->GetName() );
 		DisconnectRequest( DR_LOGOUT );
+
+		mState = WAIT_FOR_LOGOUT;
+
+		// wprintf_s( L"[LOG] %s <<<< logout packet\n", mPlayer->GetName() );
 	}
-
-
-
-// 	LogoutResponse* clientPacket = reinterpret_cast<LogoutResponse*>( recvPacket );
-// 	mPlayer->PlayerReset();
-// 	// wprintf_s( L"[LOG] %s <<<< logout packet\n", mPlayer->GetName() );
-// 	DisconnectRequest( DR_NONE );
-
-	mState = WAIT_FOR_LOGOUT;
 }
 
 void ClientSession::ResponseChat( PacketHeader* recvPacket )
@@ -846,10 +795,7 @@ void ClientSession::ResponseChat( PacketHeader* recvPacket )
 	MyPacket::ChatResult chatResult;
 	chatResult.ParseFromArray( recvPacket + 1, recvPacket->mSize );
 
-	//ChatBroadcastResponse* clientPacket = reinterpret_cast<ChatBroadcastResponse*>( recvPacket );
-
-	// if ( mPlayer->GetPlayerId() == clientPacket->mPlayerId )
-	if ( true )
+	if ( mPlayer->GetPlayerId() == chatResult.playerid() )
 	{
 		mPlayer->DecrementHealth();
 		// wprintf_s( L"[LOG] %s : Health = %d\n", clientPacket->mName, mPlayer->GetPlayerHealth() );
@@ -876,8 +822,5 @@ void ClientSession::ResponseMove( PacketHeader* recvPacket )
 	MyPacket::Position pos = moveResult.playerpos();
 	mPlayer->SetPosition( pos.x(), pos.y(), pos.z() );
 
-	//MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
-
-	//mPlayer->SetPosition( clientPacket->mX, clientPacket->mY, clientPacket->mZ );
 	// wprintf_s( L"[LOG] %s <<<< move packet ( %f , %f , %f )\n", mPlayer->GetName(), clientPacket->mX, clientPacket->mY, clientPacket->mZ );
 }

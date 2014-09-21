@@ -29,9 +29,6 @@ private:
 	typedef xlist<ClientSession*>::type ClientList;
 	ClientList	mFreeSessionList;
 
-	// typedef xmap<SOCKET, ClientSession*>::type ClientMap;
-	// ClientMap	mLogedinSessionList;
-
 	FastSpinlock mLock;
 
 	uint64_t mCurrentIssueCount;
