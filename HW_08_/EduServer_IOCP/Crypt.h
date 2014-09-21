@@ -59,7 +59,8 @@ private:
 	DATA_BLOB	m_G;
 	HCRYPTKEY	m_PrivateKey = NULL;
 	PBYTE		m_KeyBlob = NULL;
-	HCRYPTKEY	m_SessionKey = NULL;
+	HCRYPTKEY	m_SessionKeyEn = NULL;
+	HCRYPTKEY	m_SessionKeyDe = NULL;
 
 
 	// RC4 keystream

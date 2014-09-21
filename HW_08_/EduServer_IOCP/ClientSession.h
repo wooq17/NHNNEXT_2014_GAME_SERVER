@@ -45,6 +45,8 @@ public:
 	void ResponseChat( PacketHeader* recvPacket );
 	void ResponseMove( PacketHeader* recvPacket );
 
+	ClientState GetState() { return mState; }
+
 public:
 	std::shared_ptr<Player> mPlayer;
 

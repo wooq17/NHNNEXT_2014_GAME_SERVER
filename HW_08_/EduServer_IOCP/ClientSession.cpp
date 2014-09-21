@@ -354,6 +354,9 @@ bool ClientSession::SendBaseKey()
 
 void ClientSession::ResponseExportedKey( PacketHeader* recvPacket )
 {
+	if ( mState != SHARING_KEY )
+		return;
+
 	if ( !mCrypt.GeneratePrivateKey() )
 		return;
 
@@ -395,12 +398,14 @@ void ClientSession::ResponseExportedKey( PacketHeader* recvPacket )
 	}
 
 	mIsKeyShared = true;
-
 	mState = WAIT_FOR_LOGIN;
 }
 
 void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 {
+	if ( mState != WAIT_FOR_LOGIN )
+		return;
+
 	LoginRequest* clientPacket = reinterpret_cast<LoginRequest*>( recvPacket );
 	mPlayer->RequestRegisterPlayer( clientPacket->mName );
 	// 응답 보내기는 나중에 비동기로 수행
@@ -410,15 +415,22 @@ void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 
 void ClientSession::ResponseLogout( PacketHeader* recvPacket )
 {
+	if ( mState != LOGGED_IN )
+		return;
+
 	LogoutRequest* clientPacket = reinterpret_cast<LogoutRequest*>( recvPacket );
 	if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
 		return;
 
+	mState = WAIT_FOR_LOGOUT;
 	mPlayer->RequestDeregisterPlayer( clientPacket->mPlayerId );
 }
 
 void ClientSession::ResponseChat( PacketHeader* recvPacket )
 {
+	if ( mState != LOGGED_IN )
+		return;
+
 	ChatBroadcastRequest* clientPacket = reinterpret_cast<ChatBroadcastRequest*>( recvPacket );
 	if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
 		return;
@@ -437,6 +449,9 @@ void ClientSession::ResponseChat( PacketHeader* recvPacket )
 
 void ClientSession::ResponseMove( PacketHeader* recvPacket )
 {
+	if ( mState != LOGGED_IN )
+		return;
+
 	MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
 	if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
 		return;

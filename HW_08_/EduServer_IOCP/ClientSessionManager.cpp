@@ -117,7 +117,8 @@ void ClientSessionManager::NearbyBroadcast( PacketHeader* pkt, int from )
 	// 순회하면서 방송
 	for ( auto it : targetList )
 	{
-		it->GetSession()->PostSend( reinterpret_cast<const char*>( pkt ), pkt->mSize );
+		if ( LOGGED_IN == it->GetSession()->GetState() )
+			it->GetSession()->PostSend( reinterpret_cast<const char*>( pkt ), pkt->mSize );
 	}
 }
 

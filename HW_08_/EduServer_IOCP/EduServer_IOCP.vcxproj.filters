@@ -228,8 +228,6 @@
     <ClCompile Include="RSA.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="MyPacket.pb.cc">
-      <Filter>Main</Filter>
-    </ClCompile>
+    <ClCompile Include="MyPacket.pb.cc" />
   </ItemGroup>
 </Project>

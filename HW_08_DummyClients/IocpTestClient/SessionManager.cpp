@@ -29,7 +29,7 @@ void SessionManager::PrepareSessions()
 	CRASH_ASSERT(LThreadType == THREAD_MAIN);
 
 	//srand( (int)time(NULL) );
-	for (int i = 0; i < mMaxConnection; ++i)
+	for ( int i = 0; i < mInputMaxConnection; ++i )
 	{
 		ClientSession* client = xnew<ClientSession>();
 		client->SessionReset();
@@ -65,6 +65,9 @@ bool SessionManager::ConnectSessions()
 {
 	FastSpinlockGuard guard(mLock);
 
+	if ( mMaxConnection < mInputMaxConnection )
+		mMaxConnection += 5;
+
 	while (mCurrentIssueCount - mCurrentReturnCount < mMaxConnection)
 	{
 		ClientSession* newClient = mFreeSessionList.back();
@@ -93,11 +96,14 @@ void SessionManager::Initialize( wchar_t* hostIP, unsigned short port, int maxCo
 	serverAddr.sin_port = htons( port );
 	serverAddr.sin_addr.s_addr = inet_addr( pStr );
 
-	mMaxConnection = maxConnection;
+	mInputMaxConnection = maxConnection;
 }
 
 void SessionManager::DoPeriodJob()
 {
+	// 보내는 동안 건드리지 마라
+	FastSpinlockGuard guard( mLock );
+
 	for ( auto client : mActiveSessionList )
 	{
 		if ( client.second->GetCurrentState() != LOGGED_IN )
@@ -126,6 +132,8 @@ void SessionManager::DoSendJob()
 
 void SessionManager::RegisterActiveSession( ClientSession* client )
 {
+	FastSpinlockGuard guard( mLock );
+
 	auto it = mActiveSessionList.find( client->GetSocket() );
 
 	printf( "****client register : %d\n", client->GetSocket( ) );
