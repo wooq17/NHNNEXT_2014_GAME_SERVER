@@ -1,0 +1,1 @@
+.\protoc\Debug\win32\protoc.exe --cpp_out=. MyPacket.proto
