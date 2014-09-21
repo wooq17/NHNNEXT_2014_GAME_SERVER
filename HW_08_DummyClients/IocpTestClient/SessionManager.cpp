@@ -66,7 +66,7 @@ bool SessionManager::ConnectSessions()
 	FastSpinlockGuard guard(mLock);
 
 	if ( mMaxConnection < mInputMaxConnection )
-		mMaxConnection += 5;
+		mMaxConnection += 1;
 
 	while (mCurrentIssueCount - mCurrentReturnCount < mMaxConnection)
 	{

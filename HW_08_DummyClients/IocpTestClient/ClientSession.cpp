@@ -558,7 +558,7 @@ void ClientSession::RequestLogout()
 	mState = WAIT_FOR_LOGOUT;
 
 	// payload 持失
-	MyPacket::MoveRequest logoutReqeust;
+	MyPacket::LogoutRequest logoutReqeust;
 	logoutReqeust.set_playerid( mPlayer->GetPlayerId() );	
 
 	// header持失

@@ -1,5 +1,4 @@
-﻿#include "stdafx.h"if ( mState != WAIT_FOR_LOGIN )
-		return;
+﻿#include "stdafx.h"
 #include "Exception.h"
 #include "Log.h"
 #include "ThreadLocal.h"
@@ -505,9 +504,14 @@ void ClientSession::ResponseMove( PacketHeader* recvPacket )
 	if ( mState != LOGGED_IN )
 		return;
 
-	MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
-	if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
+	//MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
+	size_t packetHeaderSize = sizeof( PacketHeader );
+	MyPacket::MoveRequest request;
+	request.ParseFromArray( recvPacket + 1, recvPacket->mSize - packetHeaderSize );
+
+
+	if ( mPlayer->GetPlayerId() != request.playerid() )
 		return;
 
-	mPlayer->RequestUpdatePosition( clientPacket->mX, clientPacket->mY, clientPacket->mZ );
+	mPlayer->RequestUpdatePosition( request.playerpos().x(), request.playerpos().y(), request.playerpos().z() );
 }
