@@ -7,7 +7,7 @@
 #include "Player.h"
 
 class ClientSessionManager;
-class PacketHeader;
+struct PacketHeader;
 
 enum ClientState
 {

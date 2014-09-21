@@ -6,18 +6,19 @@ enum MessageType
 {
     PKT_CS_LOGIN = 1;
 	PKT_SC_LOGIN = 2;
+	PKT_CS_LOGOUT = 3;
+	PKT_SC_LOGOUT = 4;
 	
-	PKT_CS_CHAT = 3;
-	PKT_SC_CHAT = 4;
+	PKT_CS_CHAT = 10;
+	PKT_SC_CHAT = 11;
 	
-	PKT_CS_MOVE = 5;
-	PKT_SC_MOVE = 6;
-}
+	PKT_CS_MOVE = 20;
+	PKT_SC_MOVE = 21;
+	
+	PKT_SC_BASE_PUBLIC_KEY = 100;
 
-message LoginRequest
-{
-    required int32 PlayerId = 1;
-	required string PlayerName = 2;
+	PKT_CS_EXPORT_PUBLIC_KEY = 110;
+	PKT_SC_EXPORT_PUBLIC_KEY = 111;	
 }
 
 message Position 
@@ -27,7 +28,22 @@ message Position
 	required float z = 3;
 }
 
+message LoginRequest
+{
+	required string PlayerName = 1;
+}
+
 message LoginResult
+{
+    required int32 PlayerId = 1;
+}
+
+message LogoutRequest
+{
+	required int32 PlayerId = 1;
+}
+
+message LogoutResult
 {
     required int32 PlayerId = 1;
 }
@@ -40,8 +56,9 @@ message ChatRequest
 
 message ChatResult
 {
-    required string PlayerName = 1;
-    required string PlayerMessage = 2;
+	required int32 PlayerId = 1;
+    required string PlayerName = 2;
+    required string PlayerMessage = 3;
 }
 
 message MoveRequest

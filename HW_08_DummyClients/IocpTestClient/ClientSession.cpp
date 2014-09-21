@@ -6,6 +6,7 @@
 #include "SessionManager.h"
 #include <string>
 #include "RSA.h"
+#include "MyPacket.pb.h"
 
 LPFN_DISCONNECTEX ClientSession::mFnDisconnectEx = nullptr;
 LPFN_CONNECTEX ClientSession::mFnConnectEx = nullptr;
@@ -340,22 +341,22 @@ bool ClientSession::PacketHandler()
 
 	switch ( recvPacket->mType )
 	{
-		case PKT_SC_BASE_PUBLIC_KEY:
+		case MyPacket::PKT_SC_BASE_PUBLIC_KEY:
 			ResponseBaseKey( recvPacket );
 			break;
-		case PKT_SC_EXPORT_PUBLIC_KEY:
+		case MyPacket::PKT_SC_EXPORT_PUBLIC_KEY:
 			ResponseExportedKey( recvPacket );
 			break;
-		case PKT_SC_LOGIN:
+		case MyPacket::PKT_SC_LOGIN:
 			ResponseLogin( recvPacket );
 			break;
-		case PKT_SC_LOGOUT:
+		case MyPacket::PKT_SC_LOGOUT:
 			ResponseLogout( recvPacket );
 			break;
-		case PKT_SC_CHAT:
+		case MyPacket::PKT_SC_CHAT:
 			ResponseChat( recvPacket );
 			break;
-		case PKT_SC_MOVE:
+		case MyPacket::PKT_SC_MOVE:
 			ResponseMove( recvPacket );
 			break;
 		default:
@@ -388,6 +389,7 @@ void ClientSession::ReleaseRef()
 
 void ClientSession::RequestLogin()
 {
+	// contents 积己
 	wchar_t name[6];
 	name[0] = static_cast<wchar_t>( rand() % 26 + 65 );
 	name[1] = static_cast<wchar_t>( rand() % 26 + 65 );
@@ -398,14 +400,42 @@ void ClientSession::RequestLogin()
 
 	mPlayer->SetName( name );
 
-	LoginRequest loginRequest;
-	wcscpy_s( loginRequest.mName, name );
+	char playerName[6];
+	WideCharToMultiByte( CP_ACP, 0, name, -1, playerName, 6, NULL, NULL );
+	
+	// payload积己
+	MyPacket::LoginRequest loginRequest;
+	loginRequest.set_playername( playerName );
 
-	if ( !PostSend( reinterpret_cast<const char*>( &loginRequest ), loginRequest.mSize ) )
+	// header积己
+	PacketHeader packetHeader;
+	packetHeader.mType = MyPacket::PKT_CS_LOGIN;
+
+	size_t packetHeaderSize = sizeof( PacketHeader );
+	size_t packetPayloadSize = loginRequest.ByteSize();
+	packetHeader.mSize = packetHeaderSize + packetPayloadSize;
+
+	// 炼赋	
+	char* encoded = new char[packetHeader.mSize];
+	memcpy( encoded, &packetHeader, packetHeaderSize );
+	int encodingResult = loginRequest.SerializeToArray( encoded + BYTE( packetHeaderSize ), packetPayloadSize );
+
+	if ( !PostSend( reinterpret_cast<const char*>( encoded ), packetHeader.mSize ) )
 	{
 		// disconnect
 		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
+	delete[] encoded;
+
+ //	LoginRequest loginRequest;
+// 
+// 	wcscpy_s( loginRequest.mName, name );
+// 
+// 	if ( !PostSend( reinterpret_cast<const char*>( &loginRequest ), loginRequest.mSize ) )
+// 	{
+// 		// disconnect
+// 		DisconnectRequest( DR_IO_REQUEST_ERROR );
+// 	}
 
 	// wprintf_s( L"[LOG] %s >>>> login packet\n", name );
 }
@@ -414,22 +444,49 @@ void ClientSession::RequestMove()
 {
 	CRASH_ASSERT( LThreadType == THREAD_MAIN );
 
+	// contents 积己
 	float x = static_cast<float>( rand() % 2000 - 1000 );
 	float y = static_cast<float>( rand() % 2000 - 1000 );
 	float z = static_cast<float>( rand() % 2000 - 1000 );
-	Float3D pos{ x, y, z };
+	//Float3D pos{ x, y, z };
+	
+	// payload积己
+	MyPacket::MoveRequest moveReqeust;	
+	moveReqeust.set_playerid( mPlayer->GetPlayerId() );
+	moveReqeust.mutable_playerpos()->set_x( x );
+	moveReqeust.mutable_playerpos()->set_y( y );
+	moveReqeust.mutable_playerpos()->set_z( z );
 
-	MoveRequest moveRequest;
-	moveRequest.mPlayerId = mPlayer->GetPlayerId();
-	moveRequest.mX = pos.m_X;
-	moveRequest.mY = pos.m_Y;
-	moveRequest.mZ = pos.m_Z;
+	// header积己
+	PacketHeader packetHeader;
+	packetHeader.mType = MyPacket::PKT_CS_MOVE;
+	size_t packetHeaderSize = sizeof( PacketHeader );
+	size_t packetPayloadSize = moveReqeust.ByteSize();
+	packetHeader.mSize = packetHeaderSize + packetPayloadSize;
 
-	if ( !PostSend( reinterpret_cast<const char*>( &moveRequest ), moveRequest.mSize ) )
+	// 炼赋	
+	char* encoded = new char[packetHeader.mSize];
+	memcpy( encoded, &packetHeader, packetHeaderSize );
+	int encodingResult = moveReqeust.SerializeToArray( encoded + BYTE( packetHeaderSize ), packetPayloadSize );
+	
+	if ( !PostSend( reinterpret_cast<const char*>( encoded ), packetHeader.mSize ) )
 	{
 		// disconnect
 		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
+	delete[] encoded;
+
+// 	MoveRequest moveRequest;
+// 	moveRequest.mPlayerId = mPlayer->GetPlayerId();
+// 	moveRequest.mX = pos.m_X;
+// 	moveRequest.mY = pos.m_Y;
+// 	moveRequest.mZ = pos.m_Z;
+// 
+// 	if ( !PostSend( reinterpret_cast<const char*>( &moveRequest ), moveRequest.mSize ) )
+// 	{
+// 		// disconnect
+// 		DisconnectRequest( DR_IO_REQUEST_ERROR );
+// 	}
 
 	// wprintf_s( L"[LOG] %s >>>> move to ( %f , %f , %f )\n", mPlayer->GetName(), pos.m_X, pos.m_Y, pos.m_Z );
 }
@@ -438,30 +495,59 @@ void ClientSession::RequestChat()
 {
 	CRASH_ASSERT( LThreadType == THREAD_MAIN );
 
-	wchar_t chatMessage[11];
-	chatMessage[0] = static_cast<wchar_t>( rand() % 26 + 97 );
-	chatMessage[1] = static_cast<wchar_t>( rand() % 26 + 97 );
-	chatMessage[2] = static_cast<wchar_t>( rand() % 26 + 97 );
-	chatMessage[3] = static_cast<wchar_t>( rand() % 26 + 97 );
-	chatMessage[4] = static_cast<wchar_t>( rand() % 26 + 97 );
-	chatMessage[5] = static_cast<wchar_t>( rand() % 26 + 97 );
-	chatMessage[6] = static_cast<wchar_t>( rand() % 26 + 97 );
-	chatMessage[7] = static_cast<wchar_t>( rand() % 26 + 97 );
-	chatMessage[8] = static_cast<wchar_t>( rand() % 26 + 97 );
-	chatMessage[9] = static_cast<wchar_t>( rand() % 26 + 97 );
-	chatMessage[10] = '\0';
+	// contents 积己
+	wchar_t chat[11];
+	chat[0] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chat[1] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chat[2] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chat[3] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chat[4] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chat[5] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chat[6] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chat[7] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chat[8] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chat[9] = static_cast<wchar_t>( rand() % 26 + 97 );
+	chat[10] = '\0';
 
-	ChatBroadcastRequest chatRequest;
-	chatRequest.mPlayerId = mPlayer->GetPlayerId();
-	wcscpy_s( chatRequest.mChat, chatMessage );
+	char chatMessage[11];
+	WideCharToMultiByte( CP_ACP, 0, chat, -1, chatMessage, 6, NULL, NULL );
 
-	if ( !PostSend( reinterpret_cast<const char*>( &chatRequest ), chatRequest.mSize ) )
+	// payload 积己
+	MyPacket::ChatRequest chatReqeust;
+	chatReqeust.set_playerid( mPlayer->GetPlayerId() );
+	chatReqeust.set_playermessage( chatMessage );
+
+	// header 积己
+	PacketHeader packetHeader;
+	packetHeader.mType = MyPacket::PKT_CS_CHAT;
+	size_t packetHeaderSize = sizeof( PacketHeader );
+	size_t packetPayloadSize = chatReqeust.ByteSize();
+	packetHeader.mSize = packetHeaderSize + packetPayloadSize;
+
+	// 炼赋	
+	char* encoded = new char[packetHeader.mSize];
+	memcpy( encoded, &packetHeader, packetHeaderSize );
+	int encodingResult = chatReqeust.SerializeToArray( encoded + BYTE( packetHeaderSize ), packetPayloadSize );
+
+	if ( !PostSend( reinterpret_cast<const char*>( encoded ), packetHeader.mSize ) )
 	{
 		// disconnect
 		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
+	delete[] encoded;
 
-	// wprintf_s( L"[LOG] %s >>>> chat Message : %s\n", mPlayer->GetName(), chatMessage );
+
+// 	ChatBroadcastRequest chatRequest;
+// 	chatRequest.mPlayerId = mPlayer->GetPlayerId();
+// 	wcscpy_s( chatRequest.mChat, chat );
+// 
+// 	if ( !PostSend( reinterpret_cast<const char*>( &chatRequest ), chatRequest.mSize ) )
+// 	{
+// 		// disconnect
+// 		DisconnectRequest( DR_IO_REQUEST_ERROR );
+// 	}
+// 
+// 	wprintf_s( L"[LOG] %s >>>> chat Message : %s\n", mPlayer->GetName(), chat );
 }
 
 void ClientSession::RequestLogout()
@@ -471,14 +557,37 @@ void ClientSession::RequestLogout()
 
 	mState = WAIT_FOR_LOGOUT;
 
-	LogoutRequest logoutRequest;
-	logoutRequest.mPlayerId = mPlayer->GetPlayerId();
+	// payload 积己
+	MyPacket::MoveRequest logoutReqeust;
+	logoutReqeust.set_playerid( mPlayer->GetPlayerId() );	
 
-	if ( !PostSend( reinterpret_cast<const char*>( &logoutRequest ), logoutRequest.mSize ) )
+	// header积己
+	PacketHeader packetHeader;
+	packetHeader.mType = MyPacket::PKT_CS_LOGOUT;
+	size_t packetHeaderSize = sizeof( PacketHeader );
+	size_t packetPayloadSize = logoutReqeust.ByteSize();
+	packetHeader.mSize = packetHeaderSize + packetPayloadSize;
+
+	// 炼赋	
+	char* encoded = new char[packetHeader.mSize];
+	memcpy( encoded, &packetHeader, packetHeaderSize );
+	int encodingResult = logoutReqeust.SerializeToArray( encoded + BYTE( packetHeaderSize ), packetPayloadSize );
+
+	if ( !PostSend( reinterpret_cast<const char*>( encoded ), packetHeader.mSize ) )
 	{
 		// disconnect
 		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
+	delete[] encoded;
+
+// 	LogoutRequest logoutRequest;
+// 	logoutRequest.mPlayerId = mPlayer->GetPlayerId();
+// 
+// 	if ( !PostSend( reinterpret_cast<const char*>( &logoutRequest ), logoutRequest.mSize ) )
+// 	{
+// 		// disconnect
+// 		DisconnectRequest( DR_IO_REQUEST_ERROR );
+// 	}
 
 	// wprintf_s( L"[LOG] %s >>>> logout packet\n", mPlayer->GetName() );
 }
@@ -684,11 +793,17 @@ void ClientSession::ResponseExportedKey( PacketHeader* recvPacket )
 
 void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 {
+	
 	if ( mState != WAIT_FOR_LOGIN )
 		return;
 
-	LoginResponse* clientPacket = reinterpret_cast<LoginResponse*>( recvPacket );
-	mPlayer->Start( clientPacket->mPlayerId );
+	size_t packetHeaderSize = sizeof( PacketHeader );
+	MyPacket::LoginResult loginResult;
+	loginResult.ParseFromArray( recvPacket + 1, recvPacket->mSize );
+	mPlayer->Start( loginResult.playerid() );
+
+// 	LoginResponse* clientPacket = reinterpret_cast<LoginResponse*>( recvPacket );
+// 	mPlayer->Start( clientPacket->mPlayerId );
 	// wprintf_s( L"[LOG] %s <<<< login packet \n", mPlayer->GetName() );
 
 	mState = LOGGED_IN;
@@ -699,10 +814,27 @@ void ClientSession::ResponseLogout( PacketHeader* recvPacket )
 	if ( mState != WAIT_FOR_LOGOUT )
 		return;
 
-	LogoutResponse* clientPacket = reinterpret_cast<LogoutResponse*>( recvPacket );
-	mPlayer->PlayerReset();
-	// wprintf_s( L"[LOG] %s <<<< logout packet\n", mPlayer->GetName() );
-	DisconnectRequest( DR_LOGOUT );
+	size_t packetHeaderSize = sizeof( PacketHeader );
+	MyPacket::LogoutResult logoutResult;
+	logoutResult.ParseFromArray( recvPacket + 1, recvPacket->mSize );
+
+	if ( mPlayer->mPlayerId != logoutResult.playerid() )
+		printf_s( "\nWrong ID\n\n" );
+	else
+	{
+		mPlayer->PlayerReset();
+		// wprintf_s( L"[LOG] %s <<<< logout packet\n", mPlayer->GetName() );
+		DisconnectRequest( DR_LOGOUT );
+	}
+
+
+
+// 	LogoutResponse* clientPacket = reinterpret_cast<LogoutResponse*>( recvPacket );
+// 	mPlayer->PlayerReset();
+// 	// wprintf_s( L"[LOG] %s <<<< logout packet\n", mPlayer->GetName() );
+// 	DisconnectRequest( DR_NONE );
+
+	mState = WAIT_FOR_LOGOUT;
 }
 
 void ClientSession::ResponseChat( PacketHeader* recvPacket )
@@ -710,7 +842,11 @@ void ClientSession::ResponseChat( PacketHeader* recvPacket )
 	if ( mState != LOGGED_IN )
 		return;
 
-	ChatBroadcastResponse* clientPacket = reinterpret_cast<ChatBroadcastResponse*>( recvPacket );
+	size_t packetHeaderSize = sizeof( PacketHeader );
+	MyPacket::ChatResult chatResult;
+	chatResult.ParseFromArray( recvPacket + 1, recvPacket->mSize );
+
+	//ChatBroadcastResponse* clientPacket = reinterpret_cast<ChatBroadcastResponse*>( recvPacket );
 
 	// if ( mPlayer->GetPlayerId() == clientPacket->mPlayerId )
 	if ( true )
@@ -734,8 +870,14 @@ void ClientSession::ResponseMove( PacketHeader* recvPacket )
 	if ( mState != LOGGED_IN )
 		return;
 
-	MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
+	size_t packetHeaderSize = sizeof( PacketHeader );
+	MyPacket::MoveResult moveResult;
+	moveResult.ParseFromArray( recvPacket + 1, recvPacket->mSize );
+	MyPacket::Position pos = moveResult.playerpos();
+	mPlayer->SetPosition( pos.x(), pos.y(), pos.z() );
 
-	mPlayer->SetPosition( clientPacket->mX, clientPacket->mY, clientPacket->mZ );
+	//MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
+
+	//mPlayer->SetPosition( clientPacket->mX, clientPacket->mY, clientPacket->mZ );
 	// wprintf_s( L"[LOG] %s <<<< move packet ( %f , %f , %f )\n", mPlayer->GetName(), clientPacket->mX, clientPacket->mY, clientPacket->mZ );
 }
