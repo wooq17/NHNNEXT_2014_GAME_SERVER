@@ -781,7 +781,7 @@ void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 {
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::LoginResult loginResult;
-	loginResult.ParseFromArray( recvPacket + 1, recvPacket->mSize );
+	loginResult.ParseFromArray( recvPacket + 1, recvPacket->mSize - packetHeaderSize );
 	mPlayer->Start( loginResult.playerid() );
 
 // 	LoginResponse* clientPacket = reinterpret_cast<LoginResponse*>( recvPacket );
@@ -795,7 +795,7 @@ void ClientSession::ResponseLogout( PacketHeader* recvPacket )
 {
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::LogoutResult logoutResult;
-	logoutResult.ParseFromArray( recvPacket + 1, recvPacket->mSize );
+	logoutResult.ParseFromArray( recvPacket + 1, recvPacket->mSize - packetHeaderSize );
 
 	if ( mPlayer->mPlayerId != logoutResult.playerid() )
 		printf_s( "\nWrong ID\n\n" );
@@ -823,7 +823,7 @@ void ClientSession::ResponseChat( PacketHeader* recvPacket )
 
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::ChatResult chatResult;
-	chatResult.ParseFromArray( recvPacket + 1, recvPacket->mSize );
+	chatResult.ParseFromArray( recvPacket + 1, recvPacket->mSize - packetHeaderSize );
 
 	//ChatBroadcastResponse* clientPacket = reinterpret_cast<ChatBroadcastResponse*>( recvPacket );
 
@@ -851,7 +851,7 @@ void ClientSession::ResponseMove( PacketHeader* recvPacket )
 
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::MoveResult moveResult;
-	moveResult.ParseFromArray( recvPacket + 1, recvPacket->mSize );
+	moveResult.ParseFromArray( recvPacket + 1, recvPacket->mSize - packetHeaderSize );
 	MyPacket::Position pos = moveResult.playerpos();
 	mPlayer->SetPosition( pos.x(), pos.y(), pos.z() );
 

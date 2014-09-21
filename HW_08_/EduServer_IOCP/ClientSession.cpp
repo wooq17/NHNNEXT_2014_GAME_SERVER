@@ -405,7 +405,7 @@ void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 	// protobuf용 부분
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::LoginRequest request;
-	int rtn = request.ParseFromArray( reinterpret_cast<const void*>(recvPacket + 1), recvPacket->mSize );
+	int rtn = request.ParseFromArray( reinterpret_cast<const void*>( recvPacket + 1 ), recvPacket->mSize - packetHeaderSize );
 
 	wchar_t playerName[6];
 	MultiByteToWideChar( CP_ACP, 0, request.playername().c_str(), -1, playerName, 6);
@@ -424,7 +424,7 @@ void ClientSession::ResponseLogout( PacketHeader* recvPacket )
 	// protobuf용 부분
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::LogoutRequest request;
-	request.ParseFromArray( recvPacket + 1, recvPacket->mSize );
+	request.ParseFromArray( recvPacket + 1, recvPacket->mSize - packetHeaderSize );
 
 	mPlayer->RequestDeregisterPlayer( request.playerid() );
 	// protobuf 끄읕
@@ -441,7 +441,7 @@ void ClientSession::ResponseChat( PacketHeader* recvPacket )
 	// protobuf용 부분 - recieve
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::ChatRequest request;
-	request.ParseFromArray( recvPacket + 1, recvPacket->mSize );
+	request.ParseFromArray( recvPacket + 1, recvPacket->mSize - packetHeaderSize );
 		
 	// protobuf용 부분 - send
 	// content 생성
