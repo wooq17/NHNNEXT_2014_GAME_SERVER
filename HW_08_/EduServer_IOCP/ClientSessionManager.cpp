@@ -119,7 +119,8 @@ void ClientSessionManager::NearbyBroadcast( const char* pkt, size_t pktSize, int
 	// 순회하면서 방송
 	for ( auto it : targetList )
 	{
-		it->GetSession()->PostSend( reinterpret_cast<const char*>( pkt ), pktSize );
+		if ( LOGGED_IN == it->GetSession()->GetState() )
+			it->GetSession()->PostSend( reinterpret_cast<const char*>( pkt ), pktSize );
 	}
 }
 

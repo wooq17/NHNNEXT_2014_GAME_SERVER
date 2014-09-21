@@ -79,6 +79,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>..\external;$(IncludePath)</IncludePath>
+    <LibraryPath>..\external\google\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -168,7 +170,9 @@
     <ClInclude Include="LockOrderChecker.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="MemoryPool.h" />
-    <ClInclude Include="MyPacket.pb.h" />
+    <ClInclude Include="MyPacket.pb.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="ObjectPool.h" />
     <ClInclude Include="OverlappedIOContext.h" />
     <ClInclude Include="Packet.h" />
@@ -209,7 +213,9 @@
     <ClCompile Include="LockOrderChecker.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="MemoryPool.cpp" />
-    <ClCompile Include="MyPacket.pb.cc" />
+    <ClCompile Include="MyPacket.pb.cc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="OverlappedIOContext.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerDBContext.cpp" />

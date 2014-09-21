@@ -124,7 +124,20 @@ bool Crypt::GenerateSessionKey( PBYTE keyBlob, DWORD dataLen )
 		dataLen,
 		m_PrivateKey,
 		0,
-		&m_SessionKey );
+		&m_SessionKeyEn );
+	if ( !fReturn )
+	{
+		ReleaseResources();
+		return false;
+	}
+
+	fReturn = CryptImportKey(
+		m_ProvParty,
+		keyBlob,
+		dataLen,
+		m_PrivateKey,
+		0,
+		&m_SessionKeyDe );
 	if ( !fReturn )
 	{
 		ReleaseResources();
@@ -140,7 +153,18 @@ bool Crypt::GenerateSessionKey( PBYTE keyBlob, DWORD dataLen )
 	// Enable the party 1 public session key for use by setting the 
 	// ALGID.
 	fReturn = CryptSetKeyParam(
-		m_SessionKey,
+		m_SessionKeyEn,
+		KP_ALGID,
+		(PBYTE)&Algid,
+		0 );
+	if ( !fReturn )
+	{
+		ReleaseResources();
+		return false;
+	}
+
+	fReturn = CryptSetKeyParam(
+		m_SessionKeyDe,
 		KP_ALGID,
 		(PBYTE)&Algid,
 		0 );
@@ -158,10 +182,16 @@ bool Crypt::GenerateSessionKey( PBYTE keyBlob, DWORD dataLen )
 
 void Crypt::ReleaseResources()
 {
-	if ( m_SessionKey )
+	if ( m_SessionKeyEn )
 	{
-		CryptDestroyKey( m_SessionKey );
-		m_SessionKey = NULL;
+		CryptDestroyKey( m_SessionKeyEn );
+		m_SessionKeyEn = NULL;
+	}
+
+	if ( m_SessionKeyEn )
+	{
+		CryptDestroyKey( m_SessionKeyEn );
+		m_SessionKeyEn = NULL;
 	}
 
 	if ( m_KeyBlob )
@@ -185,11 +215,10 @@ void Crypt::ReleaseResources()
 
 bool Crypt::Encrypt( PBYTE data, DWORD length )
 {
-	/*
 	// Encrypt the data.
 	DWORD dwLength = length;
 	BOOL fReturn = CryptEncrypt(
-		m_SessionKey,
+		m_SessionKeyEn,
 		0,
 		TRUE,
 		0,
@@ -202,16 +231,15 @@ bool Crypt::Encrypt( PBYTE data, DWORD length )
 		ReleaseResources();
 		return false;
 	}
-	*/
+	
 	return true;
 }
 
 bool Crypt::Decrypt( PBYTE data, DWORD length )
 {
-	/*
 	DWORD dwLength = length;
 	BOOL fReturn = CryptDecrypt(
-		m_SessionKey,
+		m_SessionKeyDe,
 		0,
 		TRUE,
 		0,
@@ -223,6 +251,6 @@ bool Crypt::Decrypt( PBYTE data, DWORD length )
 		ReleaseResources();
 		return false;
 	}
-	*/
+	
 	return true;
 }

@@ -139,6 +139,10 @@ bool Session::FlushSend()
 
 	FastSpinlockGuard criticalSection(mSendBufferLock);
 
+	if ( 0 == mSendBuffer.GetContiguiousBytes() || mSendPendingCount > 0 )
+		return true;
+
+	/*
 	/// 보낼 데이터가 없는 경우
 	if (0 == mSendBuffer.GetContiguiousBytes())
 	{
@@ -154,10 +158,14 @@ bool Session::FlushSend()
 		return true;
 		// return false;
 		// 임시로 테스트를 위한 설정
+	*/
+
+	char* start = mSendBuffer.GetBufferStart();
+	ULONG len = mSendBuffer.GetContiguiousBytes();
 
 	if ( mIsKeyShared )
 	{
-		if ( !mCrypt.Encrypt( (PBYTE)( mSendBuffer.GetBufferStart() ), mSendBuffer.GetContiguiousBytes() ) )
+		if ( !mCrypt.Encrypt( (PBYTE)( start ), len ) )
 			printf( "[DH] Decrypt failed\n" );
 	}
 	
@@ -165,8 +173,8 @@ bool Session::FlushSend()
 
 	DWORD sendbytes = 0;
 	DWORD flags = 0;
-	sendContext->mWsaBuf.len = (ULONG)mSendBuffer.GetContiguiousBytes();
-	sendContext->mWsaBuf.buf = mSendBuffer.GetBufferStart();
+	sendContext->mWsaBuf.len = len;
+	sendContext->mWsaBuf.buf = start;
 
 	/// start async send
 	if (SOCKET_ERROR == WSASend(mSocket, &sendContext->mWsaBuf, 1, &sendbytes, flags, (LPWSAOVERLAPPED)sendContext, NULL))

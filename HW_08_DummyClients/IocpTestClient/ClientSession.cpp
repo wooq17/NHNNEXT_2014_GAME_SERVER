@@ -46,7 +46,10 @@ void ClientSession::SessionReset()
 	mRefCount = 0;
 	//memset(&mClientAddr, 0, sizeof(SOCKADDR_IN));
 
+	mSendBufferLock.EnterWriteLock();
 	mSendBuffer.BufferReset();
+	mSendBufferLock.LeaveWriteLock();
+
 	mRecvBuffer.BufferReset();
 
 	LINGER lingerOption;
@@ -267,6 +270,66 @@ bool ClientSession::PostSend( const char* packet, DWORD len )
 	return true;
 }
 
+bool ClientSession::FlushSend()
+{
+	if ( !IsConnected() )
+	{
+		return true;
+	}
+
+	FastSpinlockGuard criticalSection( mSendBufferLock );
+
+	/// 보낼 데이터가 없는 경우
+	if ( 0 == mSendBuffer.GetContiguiousBytes() )
+	{
+		/// 보낼 데이터도 없는 경우
+		if ( 0 == mSendPendingCount )
+			return true;
+
+		return false;
+	}
+
+	/// 이전의 send가 완료 안된 경우
+	if ( mSendPendingCount > 0 )
+		return false;
+
+	// for debug (use before encrypt)
+	// CRASH_ASSERT( IsValidData( (PacketHeader*)sendContext->mWsaBuf.buf, sendContext->mWsaBuf.len ) );
+
+	char* start = mSendBuffer.GetBufferStart();
+	ULONG len = mSendBuffer.GetContiguiousBytes();\
+
+	if ( mIsKeyShared )
+	{
+		if ( !mCrypt.Encrypt( (PBYTE)( start ), len ) )
+			printf( "[DH] Decrypt failed\n" );
+	}
+
+	OverlappedSendContext* sendContext = new OverlappedSendContext( this );
+
+	DWORD sendbytes = 0;
+	DWORD flags = 0;
+	sendContext->mWsaBuf.len = (ULONG)len;
+	sendContext->mWsaBuf.buf = start;
+
+	/// start async send
+	if ( SOCKET_ERROR == WSASend( mSocket, &sendContext->mWsaBuf, 1, &sendbytes, flags, (LPWSAOVERLAPPED)sendContext, NULL ) )
+	{
+		if ( WSAGetLastError() != WSA_IO_PENDING )
+		{
+			DeleteIoContext( sendContext );
+			printf_s( "ClientSession::PostSend Error : %d\n", GetLastError() );
+
+			return true;
+		}
+
+	}
+
+	mSendPendingCount++;
+
+	return mSendPendingCount == 1;
+}
+
 bool ClientSession::PacketHandler()
 {
 	size_t len = mRecvBuffer.GetContiguiousBytes();
@@ -297,7 +360,7 @@ bool ClientSession::PacketHandler()
 			ResponseMove( recvPacket );
 			break;
 		default:
-			printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+			// printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
 			break;
 	}
 
@@ -489,6 +552,11 @@ void ClientSession::RequestChat()
 
 void ClientSession::RequestLogout()
 {
+	if ( mState != LOGGED_IN )
+		return;
+
+	mState = WAIT_FOR_LOGOUT;
+
 	// payload 생성
 	MyPacket::MoveRequest logoutReqeust;
 	logoutReqeust.set_playerid( mPlayer->GetPlayerId() );	
@@ -591,65 +659,6 @@ bool ClientSession::IsValidData( PacketHeader* start, ULONG len )
 	return true;
 }
 
-bool ClientSession::FlushSend()
-{
-	if ( !IsConnected() )
-	{
-		return true;
-	}
-
-	FastSpinlockGuard criticalSection( mSendBufferLock );
-
-	/// 보낼 데이터가 없는 경우
-	if ( 0 == mSendBuffer.GetContiguiousBytes() )
-	{
-		/// 보낼 데이터도 없는 경우
-		if ( 0 == mSendPendingCount )
-			return true;
-
-		return false;
-	}
-
-	/// 이전의 send가 완료 안된 경우
-	if ( mSendPendingCount > 0 )
-		return false;
-
-	IsValidData( (PacketHeader*)( mSendBuffer.GetBufferStart() ), mSendBuffer.GetContiguiousBytes() );
-
-	if ( mIsKeyShared )
-	{
-		if ( !mCrypt.Encrypt( (PBYTE)( mSendBuffer.GetBufferStart() ), mSendBuffer.GetContiguiousBytes() ) )
-			printf( "[DH] Decrypt failed\n" );
-	}
-
-	OverlappedSendContext* sendContext = new OverlappedSendContext( this );
-
-	DWORD sendbytes = 0;
-	DWORD flags = 0;
-	sendContext->mWsaBuf.len = (ULONG)mSendBuffer.GetContiguiousBytes();
-	sendContext->mWsaBuf.buf = mSendBuffer.GetBufferStart();
-
-	// for debug (use before encrypt)
-	// CRASH_ASSERT( IsValidData( (PacketHeader*)sendContext->mWsaBuf.buf, sendContext->mWsaBuf.len ) );
-
-	/// start async send
-	if ( SOCKET_ERROR == WSASend( mSocket, &sendContext->mWsaBuf, 1, &sendbytes, flags, (LPWSAOVERLAPPED)sendContext, NULL ) )
-	{
-		if ( WSAGetLastError() != WSA_IO_PENDING )
-		{
-			DeleteIoContext( sendContext );
-			printf_s( "ClientSession::PostSend Error : %d\n", GetLastError() );
-
-			return true;
-		}
-
-	}
-
-	mSendPendingCount++;
-
-	return mSendPendingCount == 1;
-}
-
 void ClientSession::ResponseBaseKey( PacketHeader* recvPacket )
 {
 	// RSA 사용 버전
@@ -710,6 +719,8 @@ void ClientSession::ResponseBaseKey( PacketHeader* recvPacket )
 
 	delete pkt;
 	*/
+	if ( mState != SHARING_KEY )
+		return;
 
 	DATA_BLOB clientG;
 	DATA_BLOB clientP;
@@ -761,6 +772,9 @@ void ClientSession::ResponseBaseKey( PacketHeader* recvPacket )
 
 void ClientSession::ResponseExportedKey( PacketHeader* recvPacket )
 {
+	if ( mState != SHARING_KEY )
+		return;
+
 	DWORD exportedLen = 0;
 	memcpy( &exportedLen, recvPacket + sizeof( PacketHeader ), sizeof( DWORD ) );
 	PBYTE exportedData = PBYTE( recvPacket ) + sizeof(PacketHeader)+sizeof( DWORD );
@@ -779,6 +793,10 @@ void ClientSession::ResponseExportedKey( PacketHeader* recvPacket )
 
 void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 {
+	
+	if ( mState != WAIT_FOR_LOGIN )
+		return;
+
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::LoginResult loginResult;
 	loginResult.ParseFromArray( recvPacket + 1, recvPacket->mSize - packetHeaderSize );
@@ -793,6 +811,9 @@ void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 
 void ClientSession::ResponseLogout( PacketHeader* recvPacket )
 {
+	if ( mState != WAIT_FOR_LOGOUT )
+		return;
+
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::LogoutResult logoutResult;
 	logoutResult.ParseFromArray( recvPacket + 1, recvPacket->mSize - packetHeaderSize );
@@ -803,7 +824,7 @@ void ClientSession::ResponseLogout( PacketHeader* recvPacket )
 	{
 		mPlayer->PlayerReset();
 		// wprintf_s( L"[LOG] %s <<<< logout packet\n", mPlayer->GetName() );
-		DisconnectRequest( DR_NONE );
+		DisconnectRequest( DR_LOGOUT );
 	}
 
 

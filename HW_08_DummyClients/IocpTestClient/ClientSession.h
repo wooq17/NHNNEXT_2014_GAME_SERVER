@@ -30,6 +30,7 @@ enum DisconnectReason
 	DR_ONCONNECT_ERROR,
 	DR_IO_REQUEST_ERROR,
 	DR_COMPLETION_ERROR,
+	DR_LOGOUT,
 };
 
 struct OverlappedIOContext

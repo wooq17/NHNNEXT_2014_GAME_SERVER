@@ -9,7 +9,7 @@ class ClientSession;
 class SessionManager
 {
 public:
-	SessionManager() : mCurrentIssueCount(0), mCurrentReturnCount(0)
+	SessionManager() : mCurrentIssueCount( 0 ), mCurrentReturnCount( 0 ), mMaxConnection( 0 )
 	{}
 	
 	~SessionManager();
@@ -21,7 +21,7 @@ public:
 
 	void ReturnClientSession(ClientSession* client);
 		
-	void SetMaxConnection( int val ) { mMaxConnection = val; }	
+	void SetMaxConnection( int val ) { mInputMaxConnection = val; }
 	void DoPeriodJob();	
 	void DoSendJob();
 	sockaddr_in* GetServerAddr() { return &serverAddr; }
@@ -40,6 +40,7 @@ private:
 
 	sockaddr_in serverAddr;
 	int mMaxConnection;
+	int mInputMaxConnection;
 
 	uint64_t mCurrentIssueCount;
 	uint64_t mCurrentReturnCount;

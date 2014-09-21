@@ -1,4 +1,5 @@
-﻿#include "stdafx.h"
+﻿#include "stdafx.h"if ( mState != WAIT_FOR_LOGIN )
+		return;
 #include "Exception.h"
 #include "Log.h"
 #include "ThreadLocal.h"
@@ -355,6 +356,9 @@ bool ClientSession::SendBaseKey()
 
 void ClientSession::ResponseExportedKey( PacketHeader* recvPacket )
 {
+	if ( mState != SHARING_KEY )
+		return;
+
 	if ( !mCrypt.GeneratePrivateKey() )
 		return;
 
@@ -396,13 +400,16 @@ void ClientSession::ResponseExportedKey( PacketHeader* recvPacket )
 	}
 
 	mIsKeyShared = true;
-
 	mState = WAIT_FOR_LOGIN;
 }
 
 void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 {
-	// protobuf용 부분
+	
+	if ( mState != WAIT_FOR_LOGIN )
+		return;
+
+// protobuf용 부분
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::LoginRequest request;
 	int rtn = request.ParseFromArray( reinterpret_cast<const void*>( recvPacket + 1 ), recvPacket->mSize - packetHeaderSize );
@@ -421,11 +428,14 @@ void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 
 void ClientSession::ResponseLogout( PacketHeader* recvPacket )
 {
-	// protobuf용 부분
+	if ( mState != LOGGED_IN )
+		return;
+
+// protobuf용 부분
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::LogoutRequest request;
 	request.ParseFromArray( recvPacket + 1, recvPacket->mSize - packetHeaderSize );
-
+	mState = WAIT_FOR_LOGOUT;
 	mPlayer->RequestDeregisterPlayer( request.playerid() );
 	// protobuf 끄읕
 
@@ -438,6 +448,9 @@ void ClientSession::ResponseLogout( PacketHeader* recvPacket )
 
 void ClientSession::ResponseChat( PacketHeader* recvPacket )
 {
+	if ( mState != LOGGED_IN )
+		return;
+
 	// protobuf용 부분 - recieve
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::ChatRequest request;
@@ -489,6 +502,9 @@ void ClientSession::ResponseChat( PacketHeader* recvPacket )
 
 void ClientSession::ResponseMove( PacketHeader* recvPacket )
 {
+	if ( mState != LOGGED_IN )
+		return;
+
 	MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
 	if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
 		return;
