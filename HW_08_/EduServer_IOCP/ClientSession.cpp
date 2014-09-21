@@ -199,8 +199,36 @@ bool ClientSession::PacketHandling()
 
 	if ( len == 0 )
 		return true;
-
+	
 	PacketHeader* recvPacket = reinterpret_cast<PacketHeader*>( mRecvBuffer.GetBufferStart() );
+
+	/*
+	if ( recvPacket->mType == PKT_CS_EXPORT_PUBLIC_KEY )
+	{
+		ResponseExportedKey( recvPacket );
+		DWORD processedLen = recvPacket->mSize;
+		mRecvBuffer.Remove( processedLen );
+
+		return processedLen == len;
+	}
+
+	// protobuf
+	PacketHeader packetHeader;
+	google::protobuf::io::ArrayInputStream input_array_stream( mRecvBuffer.GetBufferStart(), len );
+	google::protobuf::io::CodedInputStream input_coded_stream( &input_array_stream );
+
+	input_coded_stream.ReadRaw( &packetHeader, sizeof( PacketHeader ) );
+	const void* payloadPtr = nullptr;
+	int remainSize = 0;
+	input_coded_stream.GetDirectBufferPointer( &payloadPtr, &remainSize );
+
+	google::protobuf::io::ArrayInputStream payload_array_stream( payloadPtr, packetHeader.mSize );
+	google::protobuf::io::CodedInputStream payload_coded_stream( &payload_array_stream );
+
+	input_coded_stream.Skip( packetHeader.mSize );
+	*/
+
+	MyPacket::LoginRequest loginPacket;
 
 	// for debug(use before encrypt)
 	// CRASH_ASSERT( IsValidData( recvPacket, len ) );
@@ -214,6 +242,12 @@ bool ClientSession::PacketHandling()
 		break;
 	case PKT_CS_LOGIN:
 		// db에 로그인하고 
+// 		loginPacket.ParseFromCodedStream( &payload_coded_stream );
+// 
+// 		wchar_t playerName[6];
+// 		MultiByteToWideChar( CP_ACP, 0, loginPacket.playername().c_str(), -1, playerName, 6 );
+// 		mPlayer->RequestRegisterPlayer( playerName );
+
 		ResponseLogin( recvPacket );
 		break;
 	case PKT_CS_LOGOUT:

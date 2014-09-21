@@ -4,7 +4,7 @@
 #include "FastSpinlock.h"
 
 class ClientSession;
-class PacketHeader;
+struct PacketHeader;
 
 class ClientSessionManager
 {

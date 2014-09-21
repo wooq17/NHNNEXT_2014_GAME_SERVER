@@ -30,1629 +30,1841 @@
 #include <google/protobuf/extension_set.h>
 // @@protoc_insertion_point(includes)
 
-namespace MyPacket {
+namespace MyPacket
+{
+
+	// Internal implementation detail -- do not call these.
+	void  protobuf_AddDesc_MyPacket_2eproto();
+	void protobuf_AssignDesc_MyPacket_2eproto();
+	void protobuf_ShutdownFile_MyPacket_2eproto();
+
+	class Position;
+	class LoginRequest;
+	class LoginResult;
+	class LogoutRequest;
+	class LogoutResult;
+	class ChatRequest;
+	class ChatResult;
+	class MoveRequest;
+	class MoveResult;
+
+	enum MessageType
+	{
+		PKT_CS_LOGIN = 1,
+		PKT_SC_LOGIN = 2,
+		PKT_CS_LOGOUT = 3,
+		PKT_SC_LOGOUT = 4,
+		PKT_CS_CHAT = 10,
+		PKT_SC_CHAT = 11,
+		PKT_CS_MOVE = 20,
+		PKT_SC_MOVE = 21,
+		PKT_SC_BASE_PUBLIC_KEY = 100,
+		PKT_CS_EXPORT_PUBLIC_KEY = 110,
+		PKT_SC_EXPORT_PUBLIC_KEY = 111
+	};
+	bool MessageType_IsValid( int value );
+	const MessageType MessageType_MIN = PKT_CS_LOGIN;
+	const MessageType MessageType_MAX = PKT_SC_EXPORT_PUBLIC_KEY;
+	const int MessageType_ARRAYSIZE = MessageType_MAX + 1;
+
+	// ===================================================================
+
+	class Position : public ::google::protobuf::MessageLite
+	{
+	public:
+		Position();
+		virtual ~Position();
+
+		Position( const Position& from );
+
+		inline Position& operator=( const Position& from )
+		{
+			CopyFrom( from );
+			return *this;
+		}
+
+		inline const ::std::string& unknown_fields() const
+		{
+			return _unknown_fields_;
+		}
+
+		inline ::std::string* mutable_unknown_fields()
+		{
+			return &_unknown_fields_;
+		}
+
+		static const Position& default_instance();
 
-// Internal implementation detail -- do not call these.
-void  protobuf_AddDesc_MyPacket_2eproto();
-void protobuf_AssignDesc_MyPacket_2eproto();
-void protobuf_ShutdownFile_MyPacket_2eproto();
-
-class Position;
-class LoginRequest;
-class LoginResult;
-class LogoutRequest;
-class LogoutResult;
-class ChatRequest;
-class ChatResult;
-class MoveRequest;
-class MoveResult;
-
-enum MessageType {
-  PKT_CS_LOGIN = 1,
-  PKT_SC_LOGIN = 2,
-  PKT_CS_LOGOUT = 3,
-  PKT_SC_LOGOUT = 4,
-  PKT_CS_CHAT = 10,
-  PKT_SC_CHAT = 11,
-  PKT_CS_MOVE = 20,
-  PKT_SC_MOVE = 21,
-  PKT_SC_BASE_PUBLIC_KEY = 100,
-  PKT_CS_EXPORT_PUBLIC_KEY = 110,
-  PKT_SC_EXPORT_PUBLIC_KEY = 111
-};
-bool MessageType_IsValid(int value);
-const MessageType MessageType_MIN = PKT_CS_LOGIN;
-const MessageType MessageType_MAX = PKT_SC_EXPORT_PUBLIC_KEY;
-const int MessageType_ARRAYSIZE = MessageType_MAX + 1;
-
-// ===================================================================
-
-class Position : public ::google::protobuf::MessageLite {
- public:
-  Position();
-  virtual ~Position();
-
-  Position(const Position& from);
-
-  inline Position& operator=(const Position& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::std::string& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::std::string* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const Position& default_instance();
-
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  // Returns the internal default instance pointer. This function can
-  // return NULL thus should not be used by the user. This is intended
-  // for Protobuf internal code. Please use default_instance() declared
-  // above instead.
-  static inline const Position* internal_default_instance() {
-    return default_instance_;
-  }
-  #endif
-
-  void Swap(Position* other);
-
-  // implements Message ----------------------------------------------
-
-  Position* New() const;
-  void CheckTypeAndMergeFrom(const ::google::protobuf::MessageLite& from);
-  void CopyFrom(const Position& from);
-  void MergeFrom(const Position& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  void DiscardUnknownFields();
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-  ::std::string GetTypeName() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // required float x = 1;
-  inline bool has_x() const;
-  inline void clear_x();
-  static const int kXFieldNumber = 1;
-  inline float x() const;
-  inline void set_x(float value);
-
-  // required float y = 2;
-  inline bool has_y() const;
-  inline void clear_y();
-  static const int kYFieldNumber = 2;
-  inline float y() const;
-  inline void set_y(float value);
-
-  // required float z = 3;
-  inline bool has_z() const;
-  inline void clear_z();
-  static const int kZFieldNumber = 3;
-  inline float z() const;
-  inline void set_z(float value);
-
-  // @@protoc_insertion_point(class_scope:MyPacket.Position)
- private:
-  inline void set_has_x();
-  inline void clear_has_x();
-  inline void set_has_y();
-  inline void clear_has_y();
-  inline void set_has_z();
-  inline void clear_has_z();
-
-  ::std::string _unknown_fields_;
-
-  ::google::protobuf::uint32 _has_bits_[1];
-  mutable int _cached_size_;
-  float x_;
-  float y_;
-  float z_;
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
-  #else
-  friend void  protobuf_AddDesc_MyPacket_2eproto();
-  #endif
-  friend void protobuf_AssignDesc_MyPacket_2eproto();
-  friend void protobuf_ShutdownFile_MyPacket_2eproto();
-
-  void InitAsDefaultInstance();
-  static Position* default_instance_;
-};
-// -------------------------------------------------------------------
-
-class LoginRequest : public ::google::protobuf::MessageLite {
- public:
-  LoginRequest();
-  virtual ~LoginRequest();
-
-  LoginRequest(const LoginRequest& from);
-
-  inline LoginRequest& operator=(const LoginRequest& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::std::string& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::std::string* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const LoginRequest& default_instance();
-
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  // Returns the internal default instance pointer. This function can
-  // return NULL thus should not be used by the user. This is intended
-  // for Protobuf internal code. Please use default_instance() declared
-  // above instead.
-  static inline const LoginRequest* internal_default_instance() {
-    return default_instance_;
-  }
-  #endif
-
-  void Swap(LoginRequest* other);
-
-  // implements Message ----------------------------------------------
-
-  LoginRequest* New() const;
-  void CheckTypeAndMergeFrom(const ::google::protobuf::MessageLite& from);
-  void CopyFrom(const LoginRequest& from);
-  void MergeFrom(const LoginRequest& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  void DiscardUnknownFields();
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-  ::std::string GetTypeName() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // required string PlayerName = 1;
-  inline bool has_playername() const;
-  inline void clear_playername();
-  static const int kPlayerNameFieldNumber = 1;
-  inline const ::std::string& playername() const;
-  inline void set_playername(const ::std::string& value);
-  inline void set_playername(const char* value);
-  inline void set_playername(const char* value, size_t size);
-  inline ::std::string* mutable_playername();
-  inline ::std::string* release_playername();
-  inline void set_allocated_playername(::std::string* playername);
-
-  // @@protoc_insertion_point(class_scope:MyPacket.LoginRequest)
- private:
-  inline void set_has_playername();
-  inline void clear_has_playername();
-
-  ::std::string _unknown_fields_;
-
-  ::google::protobuf::uint32 _has_bits_[1];
-  mutable int _cached_size_;
-  ::std::string* playername_;
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
-  #else
-  friend void  protobuf_AddDesc_MyPacket_2eproto();
-  #endif
-  friend void protobuf_AssignDesc_MyPacket_2eproto();
-  friend void protobuf_ShutdownFile_MyPacket_2eproto();
-
-  void InitAsDefaultInstance();
-  static LoginRequest* default_instance_;
-};
-// -------------------------------------------------------------------
-
-class LoginResult : public ::google::protobuf::MessageLite {
- public:
-  LoginResult();
-  virtual ~LoginResult();
-
-  LoginResult(const LoginResult& from);
-
-  inline LoginResult& operator=(const LoginResult& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::std::string& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::std::string* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const LoginResult& default_instance();
-
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  // Returns the internal default instance pointer. This function can
-  // return NULL thus should not be used by the user. This is intended
-  // for Protobuf internal code. Please use default_instance() declared
-  // above instead.
-  static inline const LoginResult* internal_default_instance() {
-    return default_instance_;
-  }
-  #endif
-
-  void Swap(LoginResult* other);
-
-  // implements Message ----------------------------------------------
-
-  LoginResult* New() const;
-  void CheckTypeAndMergeFrom(const ::google::protobuf::MessageLite& from);
-  void CopyFrom(const LoginResult& from);
-  void MergeFrom(const LoginResult& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  void DiscardUnknownFields();
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-  ::std::string GetTypeName() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // required int32 PlayerId = 1;
-  inline bool has_playerid() const;
-  inline void clear_playerid();
-  static const int kPlayerIdFieldNumber = 1;
-  inline ::google::protobuf::int32 playerid() const;
-  inline void set_playerid(::google::protobuf::int32 value);
-
-  // @@protoc_insertion_point(class_scope:MyPacket.LoginResult)
- private:
-  inline void set_has_playerid();
-  inline void clear_has_playerid();
-
-  ::std::string _unknown_fields_;
-
-  ::google::protobuf::uint32 _has_bits_[1];
-  mutable int _cached_size_;
-  ::google::protobuf::int32 playerid_;
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
-  #else
-  friend void  protobuf_AddDesc_MyPacket_2eproto();
-  #endif
-  friend void protobuf_AssignDesc_MyPacket_2eproto();
-  friend void protobuf_ShutdownFile_MyPacket_2eproto();
-
-  void InitAsDefaultInstance();
-  static LoginResult* default_instance_;
-};
-// -------------------------------------------------------------------
-
-class LogoutRequest : public ::google::protobuf::MessageLite {
- public:
-  LogoutRequest();
-  virtual ~LogoutRequest();
-
-  LogoutRequest(const LogoutRequest& from);
-
-  inline LogoutRequest& operator=(const LogoutRequest& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::std::string& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::std::string* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const LogoutRequest& default_instance();
-
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  // Returns the internal default instance pointer. This function can
-  // return NULL thus should not be used by the user. This is intended
-  // for Protobuf internal code. Please use default_instance() declared
-  // above instead.
-  static inline const LogoutRequest* internal_default_instance() {
-    return default_instance_;
-  }
-  #endif
-
-  void Swap(LogoutRequest* other);
-
-  // implements Message ----------------------------------------------
-
-  LogoutRequest* New() const;
-  void CheckTypeAndMergeFrom(const ::google::protobuf::MessageLite& from);
-  void CopyFrom(const LogoutRequest& from);
-  void MergeFrom(const LogoutRequest& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  void DiscardUnknownFields();
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-  ::std::string GetTypeName() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // required int32 PlayerId = 1;
-  inline bool has_playerid() const;
-  inline void clear_playerid();
-  static const int kPlayerIdFieldNumber = 1;
-  inline ::google::protobuf::int32 playerid() const;
-  inline void set_playerid(::google::protobuf::int32 value);
-
-  // @@protoc_insertion_point(class_scope:MyPacket.LogoutRequest)
- private:
-  inline void set_has_playerid();
-  inline void clear_has_playerid();
-
-  ::std::string _unknown_fields_;
-
-  ::google::protobuf::uint32 _has_bits_[1];
-  mutable int _cached_size_;
-  ::google::protobuf::int32 playerid_;
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
-  #else
-  friend void  protobuf_AddDesc_MyPacket_2eproto();
-  #endif
-  friend void protobuf_AssignDesc_MyPacket_2eproto();
-  friend void protobuf_ShutdownFile_MyPacket_2eproto();
-
-  void InitAsDefaultInstance();
-  static LogoutRequest* default_instance_;
-};
-// -------------------------------------------------------------------
-
-class LogoutResult : public ::google::protobuf::MessageLite {
- public:
-  LogoutResult();
-  virtual ~LogoutResult();
-
-  LogoutResult(const LogoutResult& from);
-
-  inline LogoutResult& operator=(const LogoutResult& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::std::string& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::std::string* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const LogoutResult& default_instance();
-
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  // Returns the internal default instance pointer. This function can
-  // return NULL thus should not be used by the user. This is intended
-  // for Protobuf internal code. Please use default_instance() declared
-  // above instead.
-  static inline const LogoutResult* internal_default_instance() {
-    return default_instance_;
-  }
-  #endif
-
-  void Swap(LogoutResult* other);
-
-  // implements Message ----------------------------------------------
-
-  LogoutResult* New() const;
-  void CheckTypeAndMergeFrom(const ::google::protobuf::MessageLite& from);
-  void CopyFrom(const LogoutResult& from);
-  void MergeFrom(const LogoutResult& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  void DiscardUnknownFields();
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-  ::std::string GetTypeName() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // required int32 PlayerId = 1;
-  inline bool has_playerid() const;
-  inline void clear_playerid();
-  static const int kPlayerIdFieldNumber = 1;
-  inline ::google::protobuf::int32 playerid() const;
-  inline void set_playerid(::google::protobuf::int32 value);
-
-  // @@protoc_insertion_point(class_scope:MyPacket.LogoutResult)
- private:
-  inline void set_has_playerid();
-  inline void clear_has_playerid();
-
-  ::std::string _unknown_fields_;
-
-  ::google::protobuf::uint32 _has_bits_[1];
-  mutable int _cached_size_;
-  ::google::protobuf::int32 playerid_;
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
-  #else
-  friend void  protobuf_AddDesc_MyPacket_2eproto();
-  #endif
-  friend void protobuf_AssignDesc_MyPacket_2eproto();
-  friend void protobuf_ShutdownFile_MyPacket_2eproto();
-
-  void InitAsDefaultInstance();
-  static LogoutResult* default_instance_;
-};
-// -------------------------------------------------------------------
-
-class ChatRequest : public ::google::protobuf::MessageLite {
- public:
-  ChatRequest();
-  virtual ~ChatRequest();
-
-  ChatRequest(const ChatRequest& from);
-
-  inline ChatRequest& operator=(const ChatRequest& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::std::string& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::std::string* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const ChatRequest& default_instance();
-
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  // Returns the internal default instance pointer. This function can
-  // return NULL thus should not be used by the user. This is intended
-  // for Protobuf internal code. Please use default_instance() declared
-  // above instead.
-  static inline const ChatRequest* internal_default_instance() {
-    return default_instance_;
-  }
-  #endif
-
-  void Swap(ChatRequest* other);
-
-  // implements Message ----------------------------------------------
-
-  ChatRequest* New() const;
-  void CheckTypeAndMergeFrom(const ::google::protobuf::MessageLite& from);
-  void CopyFrom(const ChatRequest& from);
-  void MergeFrom(const ChatRequest& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  void DiscardUnknownFields();
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-  ::std::string GetTypeName() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // required int32 PlayerId = 1;
-  inline bool has_playerid() const;
-  inline void clear_playerid();
-  static const int kPlayerIdFieldNumber = 1;
-  inline ::google::protobuf::int32 playerid() const;
-  inline void set_playerid(::google::protobuf::int32 value);
-
-  // required string PlayerMessage = 2;
-  inline bool has_playermessage() const;
-  inline void clear_playermessage();
-  static const int kPlayerMessageFieldNumber = 2;
-  inline const ::std::string& playermessage() const;
-  inline void set_playermessage(const ::std::string& value);
-  inline void set_playermessage(const char* value);
-  inline void set_playermessage(const char* value, size_t size);
-  inline ::std::string* mutable_playermessage();
-  inline ::std::string* release_playermessage();
-  inline void set_allocated_playermessage(::std::string* playermessage);
-
-  // @@protoc_insertion_point(class_scope:MyPacket.ChatRequest)
- private:
-  inline void set_has_playerid();
-  inline void clear_has_playerid();
-  inline void set_has_playermessage();
-  inline void clear_has_playermessage();
-
-  ::std::string _unknown_fields_;
-
-  ::google::protobuf::uint32 _has_bits_[1];
-  mutable int _cached_size_;
-  ::std::string* playermessage_;
-  ::google::protobuf::int32 playerid_;
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
-  #else
-  friend void  protobuf_AddDesc_MyPacket_2eproto();
-  #endif
-  friend void protobuf_AssignDesc_MyPacket_2eproto();
-  friend void protobuf_ShutdownFile_MyPacket_2eproto();
-
-  void InitAsDefaultInstance();
-  static ChatRequest* default_instance_;
-};
-// -------------------------------------------------------------------
-
-class ChatResult : public ::google::protobuf::MessageLite {
- public:
-  ChatResult();
-  virtual ~ChatResult();
-
-  ChatResult(const ChatResult& from);
-
-  inline ChatResult& operator=(const ChatResult& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::std::string& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::std::string* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const ChatResult& default_instance();
-
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  // Returns the internal default instance pointer. This function can
-  // return NULL thus should not be used by the user. This is intended
-  // for Protobuf internal code. Please use default_instance() declared
-  // above instead.
-  static inline const ChatResult* internal_default_instance() {
-    return default_instance_;
-  }
-  #endif
-
-  void Swap(ChatResult* other);
-
-  // implements Message ----------------------------------------------
-
-  ChatResult* New() const;
-  void CheckTypeAndMergeFrom(const ::google::protobuf::MessageLite& from);
-  void CopyFrom(const ChatResult& from);
-  void MergeFrom(const ChatResult& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  void DiscardUnknownFields();
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-  ::std::string GetTypeName() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // required int32 PlayerId = 1;
-  inline bool has_playerid() const;
-  inline void clear_playerid();
-  static const int kPlayerIdFieldNumber = 1;
-  inline ::google::protobuf::int32 playerid() const;
-  inline void set_playerid(::google::protobuf::int32 value);
-
-  // required string PlayerName = 2;
-  inline bool has_playername() const;
-  inline void clear_playername();
-  static const int kPlayerNameFieldNumber = 2;
-  inline const ::std::string& playername() const;
-  inline void set_playername(const ::std::string& value);
-  inline void set_playername(const char* value);
-  inline void set_playername(const char* value, size_t size);
-  inline ::std::string* mutable_playername();
-  inline ::std::string* release_playername();
-  inline void set_allocated_playername(::std::string* playername);
-
-  // required string PlayerMessage = 3;
-  inline bool has_playermessage() const;
-  inline void clear_playermessage();
-  static const int kPlayerMessageFieldNumber = 3;
-  inline const ::std::string& playermessage() const;
-  inline void set_playermessage(const ::std::string& value);
-  inline void set_playermessage(const char* value);
-  inline void set_playermessage(const char* value, size_t size);
-  inline ::std::string* mutable_playermessage();
-  inline ::std::string* release_playermessage();
-  inline void set_allocated_playermessage(::std::string* playermessage);
-
-  // @@protoc_insertion_point(class_scope:MyPacket.ChatResult)
- private:
-  inline void set_has_playerid();
-  inline void clear_has_playerid();
-  inline void set_has_playername();
-  inline void clear_has_playername();
-  inline void set_has_playermessage();
-  inline void clear_has_playermessage();
-
-  ::std::string _unknown_fields_;
-
-  ::google::protobuf::uint32 _has_bits_[1];
-  mutable int _cached_size_;
-  ::std::string* playername_;
-  ::std::string* playermessage_;
-  ::google::protobuf::int32 playerid_;
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
-  #else
-  friend void  protobuf_AddDesc_MyPacket_2eproto();
-  #endif
-  friend void protobuf_AssignDesc_MyPacket_2eproto();
-  friend void protobuf_ShutdownFile_MyPacket_2eproto();
-
-  void InitAsDefaultInstance();
-  static ChatResult* default_instance_;
-};
-// -------------------------------------------------------------------
-
-class MoveRequest : public ::google::protobuf::MessageLite {
- public:
-  MoveRequest();
-  virtual ~MoveRequest();
-
-  MoveRequest(const MoveRequest& from);
-
-  inline MoveRequest& operator=(const MoveRequest& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::std::string& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::std::string* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const MoveRequest& default_instance();
-
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  // Returns the internal default instance pointer. This function can
-  // return NULL thus should not be used by the user. This is intended
-  // for Protobuf internal code. Please use default_instance() declared
-  // above instead.
-  static inline const MoveRequest* internal_default_instance() {
-    return default_instance_;
-  }
-  #endif
-
-  void Swap(MoveRequest* other);
-
-  // implements Message ----------------------------------------------
-
-  MoveRequest* New() const;
-  void CheckTypeAndMergeFrom(const ::google::protobuf::MessageLite& from);
-  void CopyFrom(const MoveRequest& from);
-  void MergeFrom(const MoveRequest& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  void DiscardUnknownFields();
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-  ::std::string GetTypeName() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // required int32 PlayerId = 1;
-  inline bool has_playerid() const;
-  inline void clear_playerid();
-  static const int kPlayerIdFieldNumber = 1;
-  inline ::google::protobuf::int32 playerid() const;
-  inline void set_playerid(::google::protobuf::int32 value);
-
-  // required .MyPacket.Position PlayerPos = 2;
-  inline bool has_playerpos() const;
-  inline void clear_playerpos();
-  static const int kPlayerPosFieldNumber = 2;
-  inline const ::MyPacket::Position& playerpos() const;
-  inline ::MyPacket::Position* mutable_playerpos();
-  inline ::MyPacket::Position* release_playerpos();
-  inline void set_allocated_playerpos(::MyPacket::Position* playerpos);
-
-  // @@protoc_insertion_point(class_scope:MyPacket.MoveRequest)
- private:
-  inline void set_has_playerid();
-  inline void clear_has_playerid();
-  inline void set_has_playerpos();
-  inline void clear_has_playerpos();
-
-  ::std::string _unknown_fields_;
-
-  ::google::protobuf::uint32 _has_bits_[1];
-  mutable int _cached_size_;
-  ::MyPacket::Position* playerpos_;
-  ::google::protobuf::int32 playerid_;
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
-  #else
-  friend void  protobuf_AddDesc_MyPacket_2eproto();
-  #endif
-  friend void protobuf_AssignDesc_MyPacket_2eproto();
-  friend void protobuf_ShutdownFile_MyPacket_2eproto();
-
-  void InitAsDefaultInstance();
-  static MoveRequest* default_instance_;
-};
-// -------------------------------------------------------------------
-
-class MoveResult : public ::google::protobuf::MessageLite {
- public:
-  MoveResult();
-  virtual ~MoveResult();
-
-  MoveResult(const MoveResult& from);
-
-  inline MoveResult& operator=(const MoveResult& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::std::string& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::std::string* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const MoveResult& default_instance();
-
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  // Returns the internal default instance pointer. This function can
-  // return NULL thus should not be used by the user. This is intended
-  // for Protobuf internal code. Please use default_instance() declared
-  // above instead.
-  static inline const MoveResult* internal_default_instance() {
-    return default_instance_;
-  }
-  #endif
-
-  void Swap(MoveResult* other);
-
-  // implements Message ----------------------------------------------
-
-  MoveResult* New() const;
-  void CheckTypeAndMergeFrom(const ::google::protobuf::MessageLite& from);
-  void CopyFrom(const MoveResult& from);
-  void MergeFrom(const MoveResult& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  void DiscardUnknownFields();
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-  ::std::string GetTypeName() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // required int32 PlayerId = 1;
-  inline bool has_playerid() const;
-  inline void clear_playerid();
-  static const int kPlayerIdFieldNumber = 1;
-  inline ::google::protobuf::int32 playerid() const;
-  inline void set_playerid(::google::protobuf::int32 value);
-
-  // required .MyPacket.Position PlayerPos = 2;
-  inline bool has_playerpos() const;
-  inline void clear_playerpos();
-  static const int kPlayerPosFieldNumber = 2;
-  inline const ::MyPacket::Position& playerpos() const;
-  inline ::MyPacket::Position* mutable_playerpos();
-  inline ::MyPacket::Position* release_playerpos();
-  inline void set_allocated_playerpos(::MyPacket::Position* playerpos);
-
-  // @@protoc_insertion_point(class_scope:MyPacket.MoveResult)
- private:
-  inline void set_has_playerid();
-  inline void clear_has_playerid();
-  inline void set_has_playerpos();
-  inline void clear_has_playerpos();
-
-  ::std::string _unknown_fields_;
-
-  ::google::protobuf::uint32 _has_bits_[1];
-  mutable int _cached_size_;
-  ::MyPacket::Position* playerpos_;
-  ::google::protobuf::int32 playerid_;
-  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
-  #else
-  friend void  protobuf_AddDesc_MyPacket_2eproto();
-  #endif
-  friend void protobuf_AssignDesc_MyPacket_2eproto();
-  friend void protobuf_ShutdownFile_MyPacket_2eproto();
-
-  void InitAsDefaultInstance();
-  static MoveResult* default_instance_;
-};
-// ===================================================================
-
-
-// ===================================================================
-
-// Position
-
-// required float x = 1;
-inline bool Position::has_x() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void Position::set_has_x() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void Position::clear_has_x() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void Position::clear_x() {
-  x_ = 0;
-  clear_has_x();
-}
-inline float Position::x() const {
-  // @@protoc_insertion_point(field_get:MyPacket.Position.x)
-  return x_;
-}
-inline void Position::set_x(float value) {
-  set_has_x();
-  x_ = value;
-  // @@protoc_insertion_point(field_set:MyPacket.Position.x)
-}
-
-// required float y = 2;
-inline bool Position::has_y() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void Position::set_has_y() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void Position::clear_has_y() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void Position::clear_y() {
-  y_ = 0;
-  clear_has_y();
-}
-inline float Position::y() const {
-  // @@protoc_insertion_point(field_get:MyPacket.Position.y)
-  return y_;
-}
-inline void Position::set_y(float value) {
-  set_has_y();
-  y_ = value;
-  // @@protoc_insertion_point(field_set:MyPacket.Position.y)
-}
-
-// required float z = 3;
-inline bool Position::has_z() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
-}
-inline void Position::set_has_z() {
-  _has_bits_[0] |= 0x00000004u;
-}
-inline void Position::clear_has_z() {
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline void Position::clear_z() {
-  z_ = 0;
-  clear_has_z();
-}
-inline float Position::z() const {
-  // @@protoc_insertion_point(field_get:MyPacket.Position.z)
-  return z_;
-}
-inline void Position::set_z(float value) {
-  set_has_z();
-  z_ = value;
-  // @@protoc_insertion_point(field_set:MyPacket.Position.z)
-}
-
-// -------------------------------------------------------------------
-
-// LoginRequest
-
-// required string PlayerName = 1;
-inline bool LoginRequest::has_playername() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void LoginRequest::set_has_playername() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void LoginRequest::clear_has_playername() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void LoginRequest::clear_playername() {
-  if (playername_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playername_->clear();
-  }
-  clear_has_playername();
-}
-inline const ::std::string& LoginRequest::playername() const {
-  // @@protoc_insertion_point(field_get:MyPacket.LoginRequest.PlayerName)
-  return *playername_;
-}
-inline void LoginRequest::set_playername(const ::std::string& value) {
-  set_has_playername();
-  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playername_ = new ::std::string;
-  }
-  playername_->assign(value);
-  // @@protoc_insertion_point(field_set:MyPacket.LoginRequest.PlayerName)
-}
-inline void LoginRequest::set_playername(const char* value) {
-  set_has_playername();
-  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playername_ = new ::std::string;
-  }
-  playername_->assign(value);
-  // @@protoc_insertion_point(field_set_char:MyPacket.LoginRequest.PlayerName)
-}
-inline void LoginRequest::set_playername(const char* value, size_t size) {
-  set_has_playername();
-  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playername_ = new ::std::string;
-  }
-  playername_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:MyPacket.LoginRequest.PlayerName)
-}
-inline ::std::string* LoginRequest::mutable_playername() {
-  set_has_playername();
-  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playername_ = new ::std::string;
-  }
-  // @@protoc_insertion_point(field_mutable:MyPacket.LoginRequest.PlayerName)
-  return playername_;
-}
-inline ::std::string* LoginRequest::release_playername() {
-  clear_has_playername();
-  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    return NULL;
-  } else {
-    ::std::string* temp = playername_;
-    playername_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-    return temp;
-  }
-}
-inline void LoginRequest::set_allocated_playername(::std::string* playername) {
-  if (playername_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete playername_;
-  }
-  if (playername) {
-    set_has_playername();
-    playername_ = playername;
-  } else {
-    clear_has_playername();
-    playername_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  }
-  // @@protoc_insertion_point(field_set_allocated:MyPacket.LoginRequest.PlayerName)
-}
-
-// -------------------------------------------------------------------
-
-// LoginResult
-
-// required int32 PlayerId = 1;
-inline bool LoginResult::has_playerid() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void LoginResult::set_has_playerid() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void LoginResult::clear_has_playerid() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void LoginResult::clear_playerid() {
-  playerid_ = 0;
-  clear_has_playerid();
-}
-inline ::google::protobuf::int32 LoginResult::playerid() const {
-  // @@protoc_insertion_point(field_get:MyPacket.LoginResult.PlayerId)
-  return playerid_;
-}
-inline void LoginResult::set_playerid(::google::protobuf::int32 value) {
-  set_has_playerid();
-  playerid_ = value;
-  // @@protoc_insertion_point(field_set:MyPacket.LoginResult.PlayerId)
-}
-
-// -------------------------------------------------------------------
-
-// LogoutRequest
-
-// required int32 PlayerId = 1;
-inline bool LogoutRequest::has_playerid() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void LogoutRequest::set_has_playerid() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void LogoutRequest::clear_has_playerid() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void LogoutRequest::clear_playerid() {
-  playerid_ = 0;
-  clear_has_playerid();
-}
-inline ::google::protobuf::int32 LogoutRequest::playerid() const {
-  // @@protoc_insertion_point(field_get:MyPacket.LogoutRequest.PlayerId)
-  return playerid_;
-}
-inline void LogoutRequest::set_playerid(::google::protobuf::int32 value) {
-  set_has_playerid();
-  playerid_ = value;
-  // @@protoc_insertion_point(field_set:MyPacket.LogoutRequest.PlayerId)
-}
-
-// -------------------------------------------------------------------
-
-// LogoutResult
-
-// required int32 PlayerId = 1;
-inline bool LogoutResult::has_playerid() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void LogoutResult::set_has_playerid() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void LogoutResult::clear_has_playerid() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void LogoutResult::clear_playerid() {
-  playerid_ = 0;
-  clear_has_playerid();
-}
-inline ::google::protobuf::int32 LogoutResult::playerid() const {
-  // @@protoc_insertion_point(field_get:MyPacket.LogoutResult.PlayerId)
-  return playerid_;
-}
-inline void LogoutResult::set_playerid(::google::protobuf::int32 value) {
-  set_has_playerid();
-  playerid_ = value;
-  // @@protoc_insertion_point(field_set:MyPacket.LogoutResult.PlayerId)
-}
-
-// -------------------------------------------------------------------
-
-// ChatRequest
-
-// required int32 PlayerId = 1;
-inline bool ChatRequest::has_playerid() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void ChatRequest::set_has_playerid() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void ChatRequest::clear_has_playerid() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void ChatRequest::clear_playerid() {
-  playerid_ = 0;
-  clear_has_playerid();
-}
-inline ::google::protobuf::int32 ChatRequest::playerid() const {
-  // @@protoc_insertion_point(field_get:MyPacket.ChatRequest.PlayerId)
-  return playerid_;
-}
-inline void ChatRequest::set_playerid(::google::protobuf::int32 value) {
-  set_has_playerid();
-  playerid_ = value;
-  // @@protoc_insertion_point(field_set:MyPacket.ChatRequest.PlayerId)
-}
-
-// required string PlayerMessage = 2;
-inline bool ChatRequest::has_playermessage() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void ChatRequest::set_has_playermessage() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void ChatRequest::clear_has_playermessage() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void ChatRequest::clear_playermessage() {
-  if (playermessage_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playermessage_->clear();
-  }
-  clear_has_playermessage();
-}
-inline const ::std::string& ChatRequest::playermessage() const {
-  // @@protoc_insertion_point(field_get:MyPacket.ChatRequest.PlayerMessage)
-  return *playermessage_;
-}
-inline void ChatRequest::set_playermessage(const ::std::string& value) {
-  set_has_playermessage();
-  if (playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playermessage_ = new ::std::string;
-  }
-  playermessage_->assign(value);
-  // @@protoc_insertion_point(field_set:MyPacket.ChatRequest.PlayerMessage)
-}
-inline void ChatRequest::set_playermessage(const char* value) {
-  set_has_playermessage();
-  if (playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playermessage_ = new ::std::string;
-  }
-  playermessage_->assign(value);
-  // @@protoc_insertion_point(field_set_char:MyPacket.ChatRequest.PlayerMessage)
-}
-inline void ChatRequest::set_playermessage(const char* value, size_t size) {
-  set_has_playermessage();
-  if (playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playermessage_ = new ::std::string;
-  }
-  playermessage_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:MyPacket.ChatRequest.PlayerMessage)
-}
-inline ::std::string* ChatRequest::mutable_playermessage() {
-  set_has_playermessage();
-  if (playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playermessage_ = new ::std::string;
-  }
-  // @@protoc_insertion_point(field_mutable:MyPacket.ChatRequest.PlayerMessage)
-  return playermessage_;
-}
-inline ::std::string* ChatRequest::release_playermessage() {
-  clear_has_playermessage();
-  if (playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    return NULL;
-  } else {
-    ::std::string* temp = playermessage_;
-    playermessage_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-    return temp;
-  }
-}
-inline void ChatRequest::set_allocated_playermessage(::std::string* playermessage) {
-  if (playermessage_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete playermessage_;
-  }
-  if (playermessage) {
-    set_has_playermessage();
-    playermessage_ = playermessage;
-  } else {
-    clear_has_playermessage();
-    playermessage_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  }
-  // @@protoc_insertion_point(field_set_allocated:MyPacket.ChatRequest.PlayerMessage)
-}
-
-// -------------------------------------------------------------------
-
-// ChatResult
-
-// required int32 PlayerId = 1;
-inline bool ChatResult::has_playerid() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void ChatResult::set_has_playerid() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void ChatResult::clear_has_playerid() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void ChatResult::clear_playerid() {
-  playerid_ = 0;
-  clear_has_playerid();
-}
-inline ::google::protobuf::int32 ChatResult::playerid() const {
-  // @@protoc_insertion_point(field_get:MyPacket.ChatResult.PlayerId)
-  return playerid_;
-}
-inline void ChatResult::set_playerid(::google::protobuf::int32 value) {
-  set_has_playerid();
-  playerid_ = value;
-  // @@protoc_insertion_point(field_set:MyPacket.ChatResult.PlayerId)
-}
-
-// required string PlayerName = 2;
-inline bool ChatResult::has_playername() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void ChatResult::set_has_playername() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void ChatResult::clear_has_playername() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void ChatResult::clear_playername() {
-  if (playername_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playername_->clear();
-  }
-  clear_has_playername();
-}
-inline const ::std::string& ChatResult::playername() const {
-  // @@protoc_insertion_point(field_get:MyPacket.ChatResult.PlayerName)
-  return *playername_;
-}
-inline void ChatResult::set_playername(const ::std::string& value) {
-  set_has_playername();
-  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playername_ = new ::std::string;
-  }
-  playername_->assign(value);
-  // @@protoc_insertion_point(field_set:MyPacket.ChatResult.PlayerName)
-}
-inline void ChatResult::set_playername(const char* value) {
-  set_has_playername();
-  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playername_ = new ::std::string;
-  }
-  playername_->assign(value);
-  // @@protoc_insertion_point(field_set_char:MyPacket.ChatResult.PlayerName)
-}
-inline void ChatResult::set_playername(const char* value, size_t size) {
-  set_has_playername();
-  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playername_ = new ::std::string;
-  }
-  playername_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:MyPacket.ChatResult.PlayerName)
-}
-inline ::std::string* ChatResult::mutable_playername() {
-  set_has_playername();
-  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playername_ = new ::std::string;
-  }
-  // @@protoc_insertion_point(field_mutable:MyPacket.ChatResult.PlayerName)
-  return playername_;
-}
-inline ::std::string* ChatResult::release_playername() {
-  clear_has_playername();
-  if (playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    return NULL;
-  } else {
-    ::std::string* temp = playername_;
-    playername_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-    return temp;
-  }
-}
-inline void ChatResult::set_allocated_playername(::std::string* playername) {
-  if (playername_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete playername_;
-  }
-  if (playername) {
-    set_has_playername();
-    playername_ = playername;
-  } else {
-    clear_has_playername();
-    playername_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  }
-  // @@protoc_insertion_point(field_set_allocated:MyPacket.ChatResult.PlayerName)
-}
-
-// required string PlayerMessage = 3;
-inline bool ChatResult::has_playermessage() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
-}
-inline void ChatResult::set_has_playermessage() {
-  _has_bits_[0] |= 0x00000004u;
-}
-inline void ChatResult::clear_has_playermessage() {
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline void ChatResult::clear_playermessage() {
-  if (playermessage_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playermessage_->clear();
-  }
-  clear_has_playermessage();
-}
-inline const ::std::string& ChatResult::playermessage() const {
-  // @@protoc_insertion_point(field_get:MyPacket.ChatResult.PlayerMessage)
-  return *playermessage_;
-}
-inline void ChatResult::set_playermessage(const ::std::string& value) {
-  set_has_playermessage();
-  if (playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playermessage_ = new ::std::string;
-  }
-  playermessage_->assign(value);
-  // @@protoc_insertion_point(field_set:MyPacket.ChatResult.PlayerMessage)
-}
-inline void ChatResult::set_playermessage(const char* value) {
-  set_has_playermessage();
-  if (playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playermessage_ = new ::std::string;
-  }
-  playermessage_->assign(value);
-  // @@protoc_insertion_point(field_set_char:MyPacket.ChatResult.PlayerMessage)
-}
-inline void ChatResult::set_playermessage(const char* value, size_t size) {
-  set_has_playermessage();
-  if (playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playermessage_ = new ::std::string;
-  }
-  playermessage_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:MyPacket.ChatResult.PlayerMessage)
-}
-inline ::std::string* ChatResult::mutable_playermessage() {
-  set_has_playermessage();
-  if (playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    playermessage_ = new ::std::string;
-  }
-  // @@protoc_insertion_point(field_mutable:MyPacket.ChatResult.PlayerMessage)
-  return playermessage_;
-}
-inline ::std::string* ChatResult::release_playermessage() {
-  clear_has_playermessage();
-  if (playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    return NULL;
-  } else {
-    ::std::string* temp = playermessage_;
-    playermessage_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-    return temp;
-  }
-}
-inline void ChatResult::set_allocated_playermessage(::std::string* playermessage) {
-  if (playermessage_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete playermessage_;
-  }
-  if (playermessage) {
-    set_has_playermessage();
-    playermessage_ = playermessage;
-  } else {
-    clear_has_playermessage();
-    playermessage_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  }
-  // @@protoc_insertion_point(field_set_allocated:MyPacket.ChatResult.PlayerMessage)
-}
-
-// -------------------------------------------------------------------
-
-// MoveRequest
-
-// required int32 PlayerId = 1;
-inline bool MoveRequest::has_playerid() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void MoveRequest::set_has_playerid() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void MoveRequest::clear_has_playerid() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void MoveRequest::clear_playerid() {
-  playerid_ = 0;
-  clear_has_playerid();
-}
-inline ::google::protobuf::int32 MoveRequest::playerid() const {
-  // @@protoc_insertion_point(field_get:MyPacket.MoveRequest.PlayerId)
-  return playerid_;
-}
-inline void MoveRequest::set_playerid(::google::protobuf::int32 value) {
-  set_has_playerid();
-  playerid_ = value;
-  // @@protoc_insertion_point(field_set:MyPacket.MoveRequest.PlayerId)
-}
-
-// required .MyPacket.Position PlayerPos = 2;
-inline bool MoveRequest::has_playerpos() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void MoveRequest::set_has_playerpos() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void MoveRequest::clear_has_playerpos() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void MoveRequest::clear_playerpos() {
-  if (playerpos_ != NULL) playerpos_->::MyPacket::Position::Clear();
-  clear_has_playerpos();
-}
-inline const ::MyPacket::Position& MoveRequest::playerpos() const {
-  // @@protoc_insertion_point(field_get:MyPacket.MoveRequest.PlayerPos)
 #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  return playerpos_ != NULL ? *playerpos_ : *default_instance().playerpos_;
-#else
-  return playerpos_ != NULL ? *playerpos_ : *default_instance_->playerpos_;
+		// Returns the internal default instance pointer. This function can
+		// return NULL thus should not be used by the user. This is intended
+		// for Protobuf internal code. Please use default_instance() declared
+		// above instead.
+		static inline const Position* internal_default_instance() {
+			return default_instance_;
+		}
 #endif
-}
-inline ::MyPacket::Position* MoveRequest::mutable_playerpos() {
-  set_has_playerpos();
-  if (playerpos_ == NULL) playerpos_ = new ::MyPacket::Position;
-  // @@protoc_insertion_point(field_mutable:MyPacket.MoveRequest.PlayerPos)
-  return playerpos_;
-}
-inline ::MyPacket::Position* MoveRequest::release_playerpos() {
-  clear_has_playerpos();
-  ::MyPacket::Position* temp = playerpos_;
-  playerpos_ = NULL;
-  return temp;
-}
-inline void MoveRequest::set_allocated_playerpos(::MyPacket::Position* playerpos) {
-  delete playerpos_;
-  playerpos_ = playerpos;
-  if (playerpos) {
-    set_has_playerpos();
-  } else {
-    clear_has_playerpos();
-  }
-  // @@protoc_insertion_point(field_set_allocated:MyPacket.MoveRequest.PlayerPos)
-}
 
-// -------------------------------------------------------------------
+		void Swap( Position* other );
 
-// MoveResult
+		// implements Message ----------------------------------------------
 
-// required int32 PlayerId = 1;
-inline bool MoveResult::has_playerid() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void MoveResult::set_has_playerid() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void MoveResult::clear_has_playerid() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void MoveResult::clear_playerid() {
-  playerid_ = 0;
-  clear_has_playerid();
-}
-inline ::google::protobuf::int32 MoveResult::playerid() const {
-  // @@protoc_insertion_point(field_get:MyPacket.MoveResult.PlayerId)
-  return playerid_;
-}
-inline void MoveResult::set_playerid(::google::protobuf::int32 value) {
-  set_has_playerid();
-  playerid_ = value;
-  // @@protoc_insertion_point(field_set:MyPacket.MoveResult.PlayerId)
-}
+		Position* New() const;
+		void CheckTypeAndMergeFrom( const ::google::protobuf::MessageLite& from );
+		void CopyFrom( const Position& from );
+		void MergeFrom( const Position& from );
+		void Clear();
+		bool IsInitialized() const;
 
-// required .MyPacket.Position PlayerPos = 2;
-inline bool MoveResult::has_playerpos() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void MoveResult::set_has_playerpos() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void MoveResult::clear_has_playerpos() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void MoveResult::clear_playerpos() {
-  if (playerpos_ != NULL) playerpos_->::MyPacket::Position::Clear();
-  clear_has_playerpos();
-}
-inline const ::MyPacket::Position& MoveResult::playerpos() const {
-  // @@protoc_insertion_point(field_get:MyPacket.MoveResult.PlayerPos)
+		int ByteSize() const;
+		bool MergePartialFromCodedStream(
+			::google::protobuf::io::CodedInputStream* input );
+		void SerializeWithCachedSizes(
+			::google::protobuf::io::CodedOutputStream* output ) const;
+		void DiscardUnknownFields();
+		int GetCachedSize() const { return _cached_size_; }
+	private:
+		void SharedCtor();
+		void SharedDtor();
+		void SetCachedSize( int size ) const;
+	public:
+		::std::string GetTypeName() const;
+
+		// nested types ----------------------------------------------------
+
+		// accessors -------------------------------------------------------
+
+		// required float x = 1;
+		inline bool has_x() const;
+		inline void clear_x();
+		static const int kXFieldNumber = 1;
+		inline float x() const;
+		inline void set_x( float value );
+
+		// required float y = 2;
+		inline bool has_y() const;
+		inline void clear_y();
+		static const int kYFieldNumber = 2;
+		inline float y() const;
+		inline void set_y( float value );
+
+		// required float z = 3;
+		inline bool has_z() const;
+		inline void clear_z();
+		static const int kZFieldNumber = 3;
+		inline float z() const;
+		inline void set_z( float value );
+
+		// @@protoc_insertion_point(class_scope:MyPacket.Position)
+	private:
+		inline void set_has_x();
+		inline void clear_has_x();
+		inline void set_has_y();
+		inline void clear_has_y();
+		inline void set_has_z();
+		inline void clear_has_z();
+
+		::std::string _unknown_fields_;
+
+		::google::protobuf::uint32 _has_bits_[1];
+		mutable int _cached_size_;
+		float x_;
+		float y_;
+		float z_;
 #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
-  return playerpos_ != NULL ? *playerpos_ : *default_instance().playerpos_;
+		friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
 #else
-  return playerpos_ != NULL ? *playerpos_ : *default_instance_->playerpos_;
+		friend void  protobuf_AddDesc_MyPacket_2eproto();
 #endif
-}
-inline ::MyPacket::Position* MoveResult::mutable_playerpos() {
-  set_has_playerpos();
-  if (playerpos_ == NULL) playerpos_ = new ::MyPacket::Position;
-  // @@protoc_insertion_point(field_mutable:MyPacket.MoveResult.PlayerPos)
-  return playerpos_;
-}
-inline ::MyPacket::Position* MoveResult::release_playerpos() {
-  clear_has_playerpos();
-  ::MyPacket::Position* temp = playerpos_;
-  playerpos_ = NULL;
-  return temp;
-}
-inline void MoveResult::set_allocated_playerpos(::MyPacket::Position* playerpos) {
-  delete playerpos_;
-  playerpos_ = playerpos;
-  if (playerpos) {
-    set_has_playerpos();
-  } else {
-    clear_has_playerpos();
-  }
-  // @@protoc_insertion_point(field_set_allocated:MyPacket.MoveResult.PlayerPos)
-}
+		friend void protobuf_AssignDesc_MyPacket_2eproto();
+		friend void protobuf_ShutdownFile_MyPacket_2eproto();
+
+		void InitAsDefaultInstance();
+		static Position* default_instance_;
+	};
+	// -------------------------------------------------------------------
+
+	class LoginRequest : public ::google::protobuf::MessageLite
+	{
+	public:
+		LoginRequest();
+		virtual ~LoginRequest();
+
+		LoginRequest( const LoginRequest& from );
+
+		inline LoginRequest& operator=( const LoginRequest& from )
+		{
+			CopyFrom( from );
+			return *this;
+		}
+
+		inline const ::std::string& unknown_fields() const
+		{
+			return _unknown_fields_;
+		}
+
+		inline ::std::string* mutable_unknown_fields()
+		{
+			return &_unknown_fields_;
+		}
+
+		static const LoginRequest& default_instance();
+
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+		// Returns the internal default instance pointer. This function can
+		// return NULL thus should not be used by the user. This is intended
+		// for Protobuf internal code. Please use default_instance() declared
+		// above instead.
+		static inline const LoginRequest* internal_default_instance() {
+			return default_instance_;
+		}
+#endif
+
+		void Swap( LoginRequest* other );
+
+		// implements Message ----------------------------------------------
+
+		LoginRequest* New() const;
+		void CheckTypeAndMergeFrom( const ::google::protobuf::MessageLite& from );
+		void CopyFrom( const LoginRequest& from );
+		void MergeFrom( const LoginRequest& from );
+		void Clear();
+		bool IsInitialized() const;
+
+		int ByteSize() const;
+		bool MergePartialFromCodedStream(
+			::google::protobuf::io::CodedInputStream* input );
+		void SerializeWithCachedSizes(
+			::google::protobuf::io::CodedOutputStream* output ) const;
+		void DiscardUnknownFields();
+		int GetCachedSize() const { return _cached_size_; }
+	private:
+		void SharedCtor();
+		void SharedDtor();
+		void SetCachedSize( int size ) const;
+	public:
+		::std::string GetTypeName() const;
+
+		// nested types ----------------------------------------------------
+
+		// accessors -------------------------------------------------------
+
+		// required string PlayerName = 1;
+		inline bool has_playername() const;
+		inline void clear_playername();
+		static const int kPlayerNameFieldNumber = 1;
+		inline const ::std::string& playername() const;
+		inline void set_playername( const ::std::string& value );
+		inline void set_playername( const char* value );
+		inline void set_playername( const char* value, size_t size );
+		inline ::std::string* mutable_playername();
+		inline ::std::string* release_playername();
+		inline void set_allocated_playername( ::std::string* playername );
+
+		// @@protoc_insertion_point(class_scope:MyPacket.LoginRequest)
+	private:
+		inline void set_has_playername();
+		inline void clear_has_playername();
+
+		::std::string _unknown_fields_;
+
+		::google::protobuf::uint32 _has_bits_[1];
+		mutable int _cached_size_;
+		::std::string* playername_;
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+		friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
+#else
+		friend void  protobuf_AddDesc_MyPacket_2eproto();
+#endif
+		friend void protobuf_AssignDesc_MyPacket_2eproto();
+		friend void protobuf_ShutdownFile_MyPacket_2eproto();
+
+		void InitAsDefaultInstance();
+		static LoginRequest* default_instance_;
+	};
+	// -------------------------------------------------------------------
+
+	class LoginResult : public ::google::protobuf::MessageLite
+	{
+	public:
+		LoginResult();
+		virtual ~LoginResult();
+
+		LoginResult( const LoginResult& from );
+
+		inline LoginResult& operator=( const LoginResult& from )
+		{
+			CopyFrom( from );
+			return *this;
+		}
+
+		inline const ::std::string& unknown_fields() const
+		{
+			return _unknown_fields_;
+		}
+
+		inline ::std::string* mutable_unknown_fields()
+		{
+			return &_unknown_fields_;
+		}
+
+		static const LoginResult& default_instance();
+
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+		// Returns the internal default instance pointer. This function can
+		// return NULL thus should not be used by the user. This is intended
+		// for Protobuf internal code. Please use default_instance() declared
+		// above instead.
+		static inline const LoginResult* internal_default_instance() {
+			return default_instance_;
+		}
+#endif
+
+		void Swap( LoginResult* other );
+
+		// implements Message ----------------------------------------------
+
+		LoginResult* New() const;
+		void CheckTypeAndMergeFrom( const ::google::protobuf::MessageLite& from );
+		void CopyFrom( const LoginResult& from );
+		void MergeFrom( const LoginResult& from );
+		void Clear();
+		bool IsInitialized() const;
+
+		int ByteSize() const;
+		bool MergePartialFromCodedStream(
+			::google::protobuf::io::CodedInputStream* input );
+		void SerializeWithCachedSizes(
+			::google::protobuf::io::CodedOutputStream* output ) const;
+		void DiscardUnknownFields();
+		int GetCachedSize() const { return _cached_size_; }
+	private:
+		void SharedCtor();
+		void SharedDtor();
+		void SetCachedSize( int size ) const;
+	public:
+		::std::string GetTypeName() const;
+
+		// nested types ----------------------------------------------------
+
+		// accessors -------------------------------------------------------
+
+		// required int32 PlayerId = 1;
+		inline bool has_playerid() const;
+		inline void clear_playerid();
+		static const int kPlayerIdFieldNumber = 1;
+		inline ::google::protobuf::int32 playerid() const;
+		inline void set_playerid( ::google::protobuf::int32 value );
+
+		// @@protoc_insertion_point(class_scope:MyPacket.LoginResult)
+	private:
+		inline void set_has_playerid();
+		inline void clear_has_playerid();
+
+		::std::string _unknown_fields_;
+
+		::google::protobuf::uint32 _has_bits_[1];
+		mutable int _cached_size_;
+		::google::protobuf::int32 playerid_;
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+		friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
+#else
+		friend void  protobuf_AddDesc_MyPacket_2eproto();
+#endif
+		friend void protobuf_AssignDesc_MyPacket_2eproto();
+		friend void protobuf_ShutdownFile_MyPacket_2eproto();
+
+		void InitAsDefaultInstance();
+		static LoginResult* default_instance_;
+	};
+	// -------------------------------------------------------------------
+
+	class LogoutRequest : public ::google::protobuf::MessageLite
+	{
+	public:
+		LogoutRequest();
+		virtual ~LogoutRequest();
+
+		LogoutRequest( const LogoutRequest& from );
+
+		inline LogoutRequest& operator=( const LogoutRequest& from )
+		{
+			CopyFrom( from );
+			return *this;
+		}
+
+		inline const ::std::string& unknown_fields() const
+		{
+			return _unknown_fields_;
+		}
+
+		inline ::std::string* mutable_unknown_fields()
+		{
+			return &_unknown_fields_;
+		}
+
+		static const LogoutRequest& default_instance();
+
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+		// Returns the internal default instance pointer. This function can
+		// return NULL thus should not be used by the user. This is intended
+		// for Protobuf internal code. Please use default_instance() declared
+		// above instead.
+		static inline const LogoutRequest* internal_default_instance() {
+			return default_instance_;
+		}
+#endif
+
+		void Swap( LogoutRequest* other );
+
+		// implements Message ----------------------------------------------
+
+		LogoutRequest* New() const;
+		void CheckTypeAndMergeFrom( const ::google::protobuf::MessageLite& from );
+		void CopyFrom( const LogoutRequest& from );
+		void MergeFrom( const LogoutRequest& from );
+		void Clear();
+		bool IsInitialized() const;
+
+		int ByteSize() const;
+		bool MergePartialFromCodedStream(
+			::google::protobuf::io::CodedInputStream* input );
+		void SerializeWithCachedSizes(
+			::google::protobuf::io::CodedOutputStream* output ) const;
+		void DiscardUnknownFields();
+		int GetCachedSize() const { return _cached_size_; }
+	private:
+		void SharedCtor();
+		void SharedDtor();
+		void SetCachedSize( int size ) const;
+	public:
+		::std::string GetTypeName() const;
+
+		// nested types ----------------------------------------------------
+
+		// accessors -------------------------------------------------------
+
+		// required int32 PlayerId = 1;
+		inline bool has_playerid() const;
+		inline void clear_playerid();
+		static const int kPlayerIdFieldNumber = 1;
+		inline ::google::protobuf::int32 playerid() const;
+		inline void set_playerid( ::google::protobuf::int32 value );
+
+		// @@protoc_insertion_point(class_scope:MyPacket.LogoutRequest)
+	private:
+		inline void set_has_playerid();
+		inline void clear_has_playerid();
+
+		::std::string _unknown_fields_;
+
+		::google::protobuf::uint32 _has_bits_[1];
+		mutable int _cached_size_;
+		::google::protobuf::int32 playerid_;
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+		friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
+#else
+		friend void  protobuf_AddDesc_MyPacket_2eproto();
+#endif
+		friend void protobuf_AssignDesc_MyPacket_2eproto();
+		friend void protobuf_ShutdownFile_MyPacket_2eproto();
+
+		void InitAsDefaultInstance();
+		static LogoutRequest* default_instance_;
+	};
+	// -------------------------------------------------------------------
+
+	class LogoutResult : public ::google::protobuf::MessageLite
+	{
+	public:
+		LogoutResult();
+		virtual ~LogoutResult();
+
+		LogoutResult( const LogoutResult& from );
+
+		inline LogoutResult& operator=( const LogoutResult& from )
+		{
+			CopyFrom( from );
+			return *this;
+		}
+
+		inline const ::std::string& unknown_fields() const
+		{
+			return _unknown_fields_;
+		}
+
+		inline ::std::string* mutable_unknown_fields()
+		{
+			return &_unknown_fields_;
+		}
+
+		static const LogoutResult& default_instance();
+
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+		// Returns the internal default instance pointer. This function can
+		// return NULL thus should not be used by the user. This is intended
+		// for Protobuf internal code. Please use default_instance() declared
+		// above instead.
+		static inline const LogoutResult* internal_default_instance() {
+			return default_instance_;
+		}
+#endif
+
+		void Swap( LogoutResult* other );
+
+		// implements Message ----------------------------------------------
+
+		LogoutResult* New() const;
+		void CheckTypeAndMergeFrom( const ::google::protobuf::MessageLite& from );
+		void CopyFrom( const LogoutResult& from );
+		void MergeFrom( const LogoutResult& from );
+		void Clear();
+		bool IsInitialized() const;
+
+		int ByteSize() const;
+		bool MergePartialFromCodedStream(
+			::google::protobuf::io::CodedInputStream* input );
+		void SerializeWithCachedSizes(
+			::google::protobuf::io::CodedOutputStream* output ) const;
+		void DiscardUnknownFields();
+		int GetCachedSize() const { return _cached_size_; }
+	private:
+		void SharedCtor();
+		void SharedDtor();
+		void SetCachedSize( int size ) const;
+	public:
+		::std::string GetTypeName() const;
+
+		// nested types ----------------------------------------------------
+
+		// accessors -------------------------------------------------------
+
+		// required int32 PlayerId = 1;
+		inline bool has_playerid() const;
+		inline void clear_playerid();
+		static const int kPlayerIdFieldNumber = 1;
+		inline ::google::protobuf::int32 playerid() const;
+		inline void set_playerid( ::google::protobuf::int32 value );
+
+		// @@protoc_insertion_point(class_scope:MyPacket.LogoutResult)
+	private:
+		inline void set_has_playerid();
+		inline void clear_has_playerid();
+
+		::std::string _unknown_fields_;
+
+		::google::protobuf::uint32 _has_bits_[1];
+		mutable int _cached_size_;
+		::google::protobuf::int32 playerid_;
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+		friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
+#else
+		friend void  protobuf_AddDesc_MyPacket_2eproto();
+#endif
+		friend void protobuf_AssignDesc_MyPacket_2eproto();
+		friend void protobuf_ShutdownFile_MyPacket_2eproto();
+
+		void InitAsDefaultInstance();
+		static LogoutResult* default_instance_;
+	};
+	// -------------------------------------------------------------------
+
+	class ChatRequest : public ::google::protobuf::MessageLite
+	{
+	public:
+		ChatRequest();
+		virtual ~ChatRequest();
+
+		ChatRequest( const ChatRequest& from );
+
+		inline ChatRequest& operator=( const ChatRequest& from )
+		{
+			CopyFrom( from );
+			return *this;
+		}
+
+		inline const ::std::string& unknown_fields() const
+		{
+			return _unknown_fields_;
+		}
+
+		inline ::std::string* mutable_unknown_fields()
+		{
+			return &_unknown_fields_;
+		}
+
+		static const ChatRequest& default_instance();
+
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+		// Returns the internal default instance pointer. This function can
+		// return NULL thus should not be used by the user. This is intended
+		// for Protobuf internal code. Please use default_instance() declared
+		// above instead.
+		static inline const ChatRequest* internal_default_instance() {
+			return default_instance_;
+		}
+#endif
+
+		void Swap( ChatRequest* other );
+
+		// implements Message ----------------------------------------------
+
+		ChatRequest* New() const;
+		void CheckTypeAndMergeFrom( const ::google::protobuf::MessageLite& from );
+		void CopyFrom( const ChatRequest& from );
+		void MergeFrom( const ChatRequest& from );
+		void Clear();
+		bool IsInitialized() const;
+
+		int ByteSize() const;
+		bool MergePartialFromCodedStream(
+			::google::protobuf::io::CodedInputStream* input );
+		void SerializeWithCachedSizes(
+			::google::protobuf::io::CodedOutputStream* output ) const;
+		void DiscardUnknownFields();
+		int GetCachedSize() const { return _cached_size_; }
+	private:
+		void SharedCtor();
+		void SharedDtor();
+		void SetCachedSize( int size ) const;
+	public:
+		::std::string GetTypeName() const;
+
+		// nested types ----------------------------------------------------
+
+		// accessors -------------------------------------------------------
+
+		// required int32 PlayerId = 1;
+		inline bool has_playerid() const;
+		inline void clear_playerid();
+		static const int kPlayerIdFieldNumber = 1;
+		inline ::google::protobuf::int32 playerid() const;
+		inline void set_playerid( ::google::protobuf::int32 value );
+
+		// required string PlayerMessage = 2;
+		inline bool has_playermessage() const;
+		inline void clear_playermessage();
+		static const int kPlayerMessageFieldNumber = 2;
+		inline const ::std::string& playermessage() const;
+		inline void set_playermessage( const ::std::string& value );
+		inline void set_playermessage( const char* value );
+		inline void set_playermessage( const char* value, size_t size );
+		inline ::std::string* mutable_playermessage();
+		inline ::std::string* release_playermessage();
+		inline void set_allocated_playermessage( ::std::string* playermessage );
+
+		// @@protoc_insertion_point(class_scope:MyPacket.ChatRequest)
+	private:
+		inline void set_has_playerid();
+		inline void clear_has_playerid();
+		inline void set_has_playermessage();
+		inline void clear_has_playermessage();
+
+		::std::string _unknown_fields_;
+
+		::google::protobuf::uint32 _has_bits_[1];
+		mutable int _cached_size_;
+		::std::string* playermessage_;
+		::google::protobuf::int32 playerid_;
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+		friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
+#else
+		friend void  protobuf_AddDesc_MyPacket_2eproto();
+#endif
+		friend void protobuf_AssignDesc_MyPacket_2eproto();
+		friend void protobuf_ShutdownFile_MyPacket_2eproto();
+
+		void InitAsDefaultInstance();
+		static ChatRequest* default_instance_;
+	};
+	// -------------------------------------------------------------------
+
+	class ChatResult : public ::google::protobuf::MessageLite
+	{
+	public:
+		ChatResult();
+		virtual ~ChatResult();
+
+		ChatResult( const ChatResult& from );
+
+		inline ChatResult& operator=( const ChatResult& from )
+		{
+			CopyFrom( from );
+			return *this;
+		}
+
+		inline const ::std::string& unknown_fields() const
+		{
+			return _unknown_fields_;
+		}
+
+		inline ::std::string* mutable_unknown_fields()
+		{
+			return &_unknown_fields_;
+		}
+
+		static const ChatResult& default_instance();
+
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+		// Returns the internal default instance pointer. This function can
+		// return NULL thus should not be used by the user. This is intended
+		// for Protobuf internal code. Please use default_instance() declared
+		// above instead.
+		static inline const ChatResult* internal_default_instance() {
+			return default_instance_;
+		}
+#endif
+
+		void Swap( ChatResult* other );
+
+		// implements Message ----------------------------------------------
+
+		ChatResult* New() const;
+		void CheckTypeAndMergeFrom( const ::google::protobuf::MessageLite& from );
+		void CopyFrom( const ChatResult& from );
+		void MergeFrom( const ChatResult& from );
+		void Clear();
+		bool IsInitialized() const;
+
+		int ByteSize() const;
+		bool MergePartialFromCodedStream(
+			::google::protobuf::io::CodedInputStream* input );
+		void SerializeWithCachedSizes(
+			::google::protobuf::io::CodedOutputStream* output ) const;
+		void DiscardUnknownFields();
+		int GetCachedSize() const { return _cached_size_; }
+	private:
+		void SharedCtor();
+		void SharedDtor();
+		void SetCachedSize( int size ) const;
+	public:
+		::std::string GetTypeName() const;
+
+		// nested types ----------------------------------------------------
+
+		// accessors -------------------------------------------------------
+
+		// required int32 PlayerId = 1;
+		inline bool has_playerid() const;
+		inline void clear_playerid();
+		static const int kPlayerIdFieldNumber = 1;
+		inline ::google::protobuf::int32 playerid() const;
+		inline void set_playerid( ::google::protobuf::int32 value );
+
+		// required string PlayerName = 2;
+		inline bool has_playername() const;
+		inline void clear_playername();
+		static const int kPlayerNameFieldNumber = 2;
+		inline const ::std::string& playername() const;
+		inline void set_playername( const ::std::string& value );
+		inline void set_playername( const char* value );
+		inline void set_playername( const char* value, size_t size );
+		inline ::std::string* mutable_playername();
+		inline ::std::string* release_playername();
+		inline void set_allocated_playername( ::std::string* playername );
+
+		// required string PlayerMessage = 3;
+		inline bool has_playermessage() const;
+		inline void clear_playermessage();
+		static const int kPlayerMessageFieldNumber = 3;
+		inline const ::std::string& playermessage() const;
+		inline void set_playermessage( const ::std::string& value );
+		inline void set_playermessage( const char* value );
+		inline void set_playermessage( const char* value, size_t size );
+		inline ::std::string* mutable_playermessage();
+		inline ::std::string* release_playermessage();
+		inline void set_allocated_playermessage( ::std::string* playermessage );
+
+		// @@protoc_insertion_point(class_scope:MyPacket.ChatResult)
+	private:
+		inline void set_has_playerid();
+		inline void clear_has_playerid();
+		inline void set_has_playername();
+		inline void clear_has_playername();
+		inline void set_has_playermessage();
+		inline void clear_has_playermessage();
+
+		::std::string _unknown_fields_;
+
+		::google::protobuf::uint32 _has_bits_[1];
+		mutable int _cached_size_;
+		::std::string* playername_;
+		::std::string* playermessage_;
+		::google::protobuf::int32 playerid_;
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+		friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
+#else
+		friend void  protobuf_AddDesc_MyPacket_2eproto();
+#endif
+		friend void protobuf_AssignDesc_MyPacket_2eproto();
+		friend void protobuf_ShutdownFile_MyPacket_2eproto();
+
+		void InitAsDefaultInstance();
+		static ChatResult* default_instance_;
+	};
+	// -------------------------------------------------------------------
+
+	class MoveRequest : public ::google::protobuf::MessageLite
+	{
+	public:
+		MoveRequest();
+		virtual ~MoveRequest();
+
+		MoveRequest( const MoveRequest& from );
+
+		inline MoveRequest& operator=( const MoveRequest& from )
+		{
+			CopyFrom( from );
+			return *this;
+		}
+
+		inline const ::std::string& unknown_fields() const
+		{
+			return _unknown_fields_;
+		}
+
+		inline ::std::string* mutable_unknown_fields()
+		{
+			return &_unknown_fields_;
+		}
+
+		static const MoveRequest& default_instance();
+
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+		// Returns the internal default instance pointer. This function can
+		// return NULL thus should not be used by the user. This is intended
+		// for Protobuf internal code. Please use default_instance() declared
+		// above instead.
+		static inline const MoveRequest* internal_default_instance() {
+			return default_instance_;
+		}
+#endif
+
+		void Swap( MoveRequest* other );
+
+		// implements Message ----------------------------------------------
+
+		MoveRequest* New() const;
+		void CheckTypeAndMergeFrom( const ::google::protobuf::MessageLite& from );
+		void CopyFrom( const MoveRequest& from );
+		void MergeFrom( const MoveRequest& from );
+		void Clear();
+		bool IsInitialized() const;
+
+		int ByteSize() const;
+		bool MergePartialFromCodedStream(
+			::google::protobuf::io::CodedInputStream* input );
+		void SerializeWithCachedSizes(
+			::google::protobuf::io::CodedOutputStream* output ) const;
+		void DiscardUnknownFields();
+		int GetCachedSize() const { return _cached_size_; }
+	private:
+		void SharedCtor();
+		void SharedDtor();
+		void SetCachedSize( int size ) const;
+	public:
+		::std::string GetTypeName() const;
+
+		// nested types ----------------------------------------------------
+
+		// accessors -------------------------------------------------------
+
+		// required int32 PlayerId = 1;
+		inline bool has_playerid() const;
+		inline void clear_playerid();
+		static const int kPlayerIdFieldNumber = 1;
+		inline ::google::protobuf::int32 playerid() const;
+		inline void set_playerid( ::google::protobuf::int32 value );
+
+		// required .MyPacket.Position PlayerPos = 2;
+		inline bool has_playerpos() const;
+		inline void clear_playerpos();
+		static const int kPlayerPosFieldNumber = 2;
+		inline const ::MyPacket::Position& playerpos() const;
+		inline ::MyPacket::Position* mutable_playerpos();
+		inline ::MyPacket::Position* release_playerpos();
+		inline void set_allocated_playerpos( ::MyPacket::Position* playerpos );
+
+		// @@protoc_insertion_point(class_scope:MyPacket.MoveRequest)
+	private:
+		inline void set_has_playerid();
+		inline void clear_has_playerid();
+		inline void set_has_playerpos();
+		inline void clear_has_playerpos();
+
+		::std::string _unknown_fields_;
+
+		::google::protobuf::uint32 _has_bits_[1];
+		mutable int _cached_size_;
+		::MyPacket::Position* playerpos_;
+		::google::protobuf::int32 playerid_;
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+		friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
+#else
+		friend void  protobuf_AddDesc_MyPacket_2eproto();
+#endif
+		friend void protobuf_AssignDesc_MyPacket_2eproto();
+		friend void protobuf_ShutdownFile_MyPacket_2eproto();
+
+		void InitAsDefaultInstance();
+		static MoveRequest* default_instance_;
+	};
+	// -------------------------------------------------------------------
+
+	class MoveResult : public ::google::protobuf::MessageLite
+	{
+	public:
+		MoveResult();
+		virtual ~MoveResult();
+
+		MoveResult( const MoveResult& from );
+
+		inline MoveResult& operator=( const MoveResult& from )
+		{
+			CopyFrom( from );
+			return *this;
+		}
+
+		inline const ::std::string& unknown_fields() const
+		{
+			return _unknown_fields_;
+		}
+
+		inline ::std::string* mutable_unknown_fields()
+		{
+			return &_unknown_fields_;
+		}
+
+		static const MoveResult& default_instance();
+
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+		// Returns the internal default instance pointer. This function can
+		// return NULL thus should not be used by the user. This is intended
+		// for Protobuf internal code. Please use default_instance() declared
+		// above instead.
+		static inline const MoveResult* internal_default_instance() {
+			return default_instance_;
+		}
+#endif
+
+		void Swap( MoveResult* other );
+
+		// implements Message ----------------------------------------------
+
+		MoveResult* New() const;
+		void CheckTypeAndMergeFrom( const ::google::protobuf::MessageLite& from );
+		void CopyFrom( const MoveResult& from );
+		void MergeFrom( const MoveResult& from );
+		void Clear();
+		bool IsInitialized() const;
+
+		int ByteSize() const;
+		bool MergePartialFromCodedStream(
+			::google::protobuf::io::CodedInputStream* input );
+		void SerializeWithCachedSizes(
+			::google::protobuf::io::CodedOutputStream* output ) const;
+		void DiscardUnknownFields();
+		int GetCachedSize() const { return _cached_size_; }
+	private:
+		void SharedCtor();
+		void SharedDtor();
+		void SetCachedSize( int size ) const;
+	public:
+		::std::string GetTypeName() const;
+
+		// nested types ----------------------------------------------------
+
+		// accessors -------------------------------------------------------
+
+		// required int32 PlayerId = 1;
+		inline bool has_playerid() const;
+		inline void clear_playerid();
+		static const int kPlayerIdFieldNumber = 1;
+		inline ::google::protobuf::int32 playerid() const;
+		inline void set_playerid( ::google::protobuf::int32 value );
+
+		// required .MyPacket.Position PlayerPos = 2;
+		inline bool has_playerpos() const;
+		inline void clear_playerpos();
+		static const int kPlayerPosFieldNumber = 2;
+		inline const ::MyPacket::Position& playerpos() const;
+		inline ::MyPacket::Position* mutable_playerpos();
+		inline ::MyPacket::Position* release_playerpos();
+		inline void set_allocated_playerpos( ::MyPacket::Position* playerpos );
+
+		// @@protoc_insertion_point(class_scope:MyPacket.MoveResult)
+	private:
+		inline void set_has_playerid();
+		inline void clear_has_playerid();
+		inline void set_has_playerpos();
+		inline void clear_has_playerpos();
+
+		::std::string _unknown_fields_;
+
+		::google::protobuf::uint32 _has_bits_[1];
+		mutable int _cached_size_;
+		::MyPacket::Position* playerpos_;
+		::google::protobuf::int32 playerid_;
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+		friend void  protobuf_AddDesc_MyPacket_2eproto_impl();
+#else
+		friend void  protobuf_AddDesc_MyPacket_2eproto();
+#endif
+		friend void protobuf_AssignDesc_MyPacket_2eproto();
+		friend void protobuf_ShutdownFile_MyPacket_2eproto();
+
+		void InitAsDefaultInstance();
+		static MoveResult* default_instance_;
+	};
+	// ===================================================================
 
 
-// @@protoc_insertion_point(namespace_scope)
+	// ===================================================================
+
+	// Position
+
+	// required float x = 1;
+	inline bool Position::has_x() const
+	{
+		return ( _has_bits_[0] & 0x00000001u ) != 0;
+	}
+	inline void Position::set_has_x()
+	{
+		_has_bits_[0] |= 0x00000001u;
+	}
+	inline void Position::clear_has_x()
+	{
+		_has_bits_[0] &= ~0x00000001u;
+	}
+	inline void Position::clear_x()
+	{
+		x_ = 0;
+		clear_has_x();
+	}
+	inline float Position::x() const
+	{
+		// @@protoc_insertion_point(field_get:MyPacket.Position.x)
+		return x_;
+	}
+	inline void Position::set_x( float value )
+	{
+		set_has_x();
+		x_ = value;
+		// @@protoc_insertion_point(field_set:MyPacket.Position.x)
+	}
+
+	// required float y = 2;
+	inline bool Position::has_y() const
+	{
+		return ( _has_bits_[0] & 0x00000002u ) != 0;
+	}
+	inline void Position::set_has_y()
+	{
+		_has_bits_[0] |= 0x00000002u;
+	}
+	inline void Position::clear_has_y()
+	{
+		_has_bits_[0] &= ~0x00000002u;
+	}
+	inline void Position::clear_y()
+	{
+		y_ = 0;
+		clear_has_y();
+	}
+	inline float Position::y() const
+	{
+		// @@protoc_insertion_point(field_get:MyPacket.Position.y)
+		return y_;
+	}
+	inline void Position::set_y( float value )
+	{
+		set_has_y();
+		y_ = value;
+		// @@protoc_insertion_point(field_set:MyPacket.Position.y)
+	}
+
+	// required float z = 3;
+	inline bool Position::has_z() const
+	{
+		return ( _has_bits_[0] & 0x00000004u ) != 0;
+	}
+	inline void Position::set_has_z()
+	{
+		_has_bits_[0] |= 0x00000004u;
+	}
+	inline void Position::clear_has_z()
+	{
+		_has_bits_[0] &= ~0x00000004u;
+	}
+	inline void Position::clear_z()
+	{
+		z_ = 0;
+		clear_has_z();
+	}
+	inline float Position::z() const
+	{
+		// @@protoc_insertion_point(field_get:MyPacket.Position.z)
+		return z_;
+	}
+	inline void Position::set_z( float value )
+	{
+		set_has_z();
+		z_ = value;
+		// @@protoc_insertion_point(field_set:MyPacket.Position.z)
+	}
+
+	// -------------------------------------------------------------------
+
+	// LoginRequest
+
+	// required string PlayerName = 1;
+	inline bool LoginRequest::has_playername() const
+	{
+		return ( _has_bits_[0] & 0x00000001u ) != 0;
+	}
+	inline void LoginRequest::set_has_playername()
+	{
+		_has_bits_[0] |= 0x00000001u;
+	}
+	inline void LoginRequest::clear_has_playername()
+	{
+		_has_bits_[0] &= ~0x00000001u;
+	}
+	inline void LoginRequest::clear_playername()
+	{
+		if ( playername_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playername_->clear();
+		}
+		clear_has_playername();
+	}
+	inline const ::std::string& LoginRequest::playername() const
+	{
+		// @@protoc_insertion_point(field_get:MyPacket.LoginRequest.PlayerName)
+		return *playername_;
+	}
+	inline void LoginRequest::set_playername( const ::std::string& value )
+	{
+		set_has_playername();
+		if ( playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playername_ = new ::std::string;
+		}
+		playername_->assign( value );
+		// @@protoc_insertion_point(field_set:MyPacket.LoginRequest.PlayerName)
+	}
+	inline void LoginRequest::set_playername( const char* value )
+	{
+		set_has_playername();
+		if ( playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playername_ = new ::std::string;
+		}
+		playername_->assign( value );
+		// @@protoc_insertion_point(field_set_char:MyPacket.LoginRequest.PlayerName)
+	}
+	inline void LoginRequest::set_playername( const char* value, size_t size )
+	{
+		set_has_playername();
+		if ( playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playername_ = new ::std::string;
+		}
+		playername_->assign( reinterpret_cast<const char*>( value ), size );
+		// @@protoc_insertion_point(field_set_pointer:MyPacket.LoginRequest.PlayerName)
+	}
+	inline ::std::string* LoginRequest::mutable_playername()
+	{
+		set_has_playername();
+		if ( playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playername_ = new ::std::string;
+		}
+		// @@protoc_insertion_point(field_mutable:MyPacket.LoginRequest.PlayerName)
+		return playername_;
+	}
+	inline ::std::string* LoginRequest::release_playername()
+	{
+		clear_has_playername();
+		if ( playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			return NULL;
+		}
+		else
+		{
+			::std::string* temp = playername_;
+			playername_ = const_cast<::std::string*>( &::google::protobuf::internal::GetEmptyStringAlreadyInited() );
+			return temp;
+		}
+	}
+	inline void LoginRequest::set_allocated_playername( ::std::string* playername )
+	{
+		if ( playername_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			delete playername_;
+		}
+		if ( playername )
+		{
+			set_has_playername();
+			playername_ = playername;
+		}
+		else
+		{
+			clear_has_playername();
+			playername_ = const_cast<::std::string*>( &::google::protobuf::internal::GetEmptyStringAlreadyInited() );
+		}
+		// @@protoc_insertion_point(field_set_allocated:MyPacket.LoginRequest.PlayerName)
+	}
+
+	// -------------------------------------------------------------------
+
+	// LoginResult
+
+	// required int32 PlayerId = 1;
+	inline bool LoginResult::has_playerid() const
+	{
+		return ( _has_bits_[0] & 0x00000001u ) != 0;
+	}
+	inline void LoginResult::set_has_playerid()
+	{
+		_has_bits_[0] |= 0x00000001u;
+	}
+	inline void LoginResult::clear_has_playerid()
+	{
+		_has_bits_[0] &= ~0x00000001u;
+	}
+	inline void LoginResult::clear_playerid()
+	{
+		playerid_ = 0;
+		clear_has_playerid();
+	}
+	inline ::google::protobuf::int32 LoginResult::playerid() const
+	{
+		// @@protoc_insertion_point(field_get:MyPacket.LoginResult.PlayerId)
+		return playerid_;
+	}
+	inline void LoginResult::set_playerid( ::google::protobuf::int32 value )
+	{
+		set_has_playerid();
+		playerid_ = value;
+		// @@protoc_insertion_point(field_set:MyPacket.LoginResult.PlayerId)
+	}
+
+	// -------------------------------------------------------------------
+
+	// LogoutRequest
+
+	// required int32 PlayerId = 1;
+	inline bool LogoutRequest::has_playerid() const
+	{
+		return ( _has_bits_[0] & 0x00000001u ) != 0;
+	}
+	inline void LogoutRequest::set_has_playerid()
+	{
+		_has_bits_[0] |= 0x00000001u;
+	}
+	inline void LogoutRequest::clear_has_playerid()
+	{
+		_has_bits_[0] &= ~0x00000001u;
+	}
+	inline void LogoutRequest::clear_playerid()
+	{
+		playerid_ = 0;
+		clear_has_playerid();
+	}
+	inline ::google::protobuf::int32 LogoutRequest::playerid() const
+	{
+		// @@protoc_insertion_point(field_get:MyPacket.LogoutRequest.PlayerId)
+		return playerid_;
+	}
+	inline void LogoutRequest::set_playerid( ::google::protobuf::int32 value )
+	{
+		set_has_playerid();
+		playerid_ = value;
+		// @@protoc_insertion_point(field_set:MyPacket.LogoutRequest.PlayerId)
+	}
+
+	// -------------------------------------------------------------------
+
+	// LogoutResult
+
+	// required int32 PlayerId = 1;
+	inline bool LogoutResult::has_playerid() const
+	{
+		return ( _has_bits_[0] & 0x00000001u ) != 0;
+	}
+	inline void LogoutResult::set_has_playerid()
+	{
+		_has_bits_[0] |= 0x00000001u;
+	}
+	inline void LogoutResult::clear_has_playerid()
+	{
+		_has_bits_[0] &= ~0x00000001u;
+	}
+	inline void LogoutResult::clear_playerid()
+	{
+		playerid_ = 0;
+		clear_has_playerid();
+	}
+	inline ::google::protobuf::int32 LogoutResult::playerid() const
+	{
+		// @@protoc_insertion_point(field_get:MyPacket.LogoutResult.PlayerId)
+		return playerid_;
+	}
+	inline void LogoutResult::set_playerid( ::google::protobuf::int32 value )
+	{
+		set_has_playerid();
+		playerid_ = value;
+		// @@protoc_insertion_point(field_set:MyPacket.LogoutResult.PlayerId)
+	}
+
+	// -------------------------------------------------------------------
+
+	// ChatRequest
+
+	// required int32 PlayerId = 1;
+	inline bool ChatRequest::has_playerid() const
+	{
+		return ( _has_bits_[0] & 0x00000001u ) != 0;
+	}
+	inline void ChatRequest::set_has_playerid()
+	{
+		_has_bits_[0] |= 0x00000001u;
+	}
+	inline void ChatRequest::clear_has_playerid()
+	{
+		_has_bits_[0] &= ~0x00000001u;
+	}
+	inline void ChatRequest::clear_playerid()
+	{
+		playerid_ = 0;
+		clear_has_playerid();
+	}
+	inline ::google::protobuf::int32 ChatRequest::playerid() const
+	{
+		// @@protoc_insertion_point(field_get:MyPacket.ChatRequest.PlayerId)
+		return playerid_;
+	}
+	inline void ChatRequest::set_playerid( ::google::protobuf::int32 value )
+	{
+		set_has_playerid();
+		playerid_ = value;
+		// @@protoc_insertion_point(field_set:MyPacket.ChatRequest.PlayerId)
+	}
+
+	// required string PlayerMessage = 2;
+	inline bool ChatRequest::has_playermessage() const
+	{
+		return ( _has_bits_[0] & 0x00000002u ) != 0;
+	}
+	inline void ChatRequest::set_has_playermessage()
+	{
+		_has_bits_[0] |= 0x00000002u;
+	}
+	inline void ChatRequest::clear_has_playermessage()
+	{
+		_has_bits_[0] &= ~0x00000002u;
+	}
+	inline void ChatRequest::clear_playermessage()
+	{
+		if ( playermessage_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playermessage_->clear();
+		}
+		clear_has_playermessage();
+	}
+	inline const ::std::string& ChatRequest::playermessage() const
+	{
+		// @@protoc_insertion_point(field_get:MyPacket.ChatRequest.PlayerMessage)
+		return *playermessage_;
+	}
+	inline void ChatRequest::set_playermessage( const ::std::string& value )
+	{
+		set_has_playermessage();
+		if ( playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playermessage_ = new ::std::string;
+		}
+		playermessage_->assign( value );
+		// @@protoc_insertion_point(field_set:MyPacket.ChatRequest.PlayerMessage)
+	}
+	inline void ChatRequest::set_playermessage( const char* value )
+	{
+		set_has_playermessage();
+		if ( playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playermessage_ = new ::std::string;
+		}
+		playermessage_->assign( value );
+		// @@protoc_insertion_point(field_set_char:MyPacket.ChatRequest.PlayerMessage)
+	}
+	inline void ChatRequest::set_playermessage( const char* value, size_t size )
+	{
+		set_has_playermessage();
+		if ( playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playermessage_ = new ::std::string;
+		}
+		playermessage_->assign( reinterpret_cast<const char*>( value ), size );
+		// @@protoc_insertion_point(field_set_pointer:MyPacket.ChatRequest.PlayerMessage)
+	}
+	inline ::std::string* ChatRequest::mutable_playermessage()
+	{
+		set_has_playermessage();
+		if ( playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playermessage_ = new ::std::string;
+		}
+		// @@protoc_insertion_point(field_mutable:MyPacket.ChatRequest.PlayerMessage)
+		return playermessage_;
+	}
+	inline ::std::string* ChatRequest::release_playermessage()
+	{
+		clear_has_playermessage();
+		if ( playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			return NULL;
+		}
+		else
+		{
+			::std::string* temp = playermessage_;
+			playermessage_ = const_cast<::std::string*>( &::google::protobuf::internal::GetEmptyStringAlreadyInited() );
+			return temp;
+		}
+	}
+	inline void ChatRequest::set_allocated_playermessage( ::std::string* playermessage )
+	{
+		if ( playermessage_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			delete playermessage_;
+		}
+		if ( playermessage )
+		{
+			set_has_playermessage();
+			playermessage_ = playermessage;
+		}
+		else
+		{
+			clear_has_playermessage();
+			playermessage_ = const_cast<::std::string*>( &::google::protobuf::internal::GetEmptyStringAlreadyInited() );
+		}
+		// @@protoc_insertion_point(field_set_allocated:MyPacket.ChatRequest.PlayerMessage)
+	}
+
+	// -------------------------------------------------------------------
+
+	// ChatResult
+
+	// required int32 PlayerId = 1;
+	inline bool ChatResult::has_playerid() const
+	{
+		return ( _has_bits_[0] & 0x00000001u ) != 0;
+	}
+	inline void ChatResult::set_has_playerid()
+	{
+		_has_bits_[0] |= 0x00000001u;
+	}
+	inline void ChatResult::clear_has_playerid()
+	{
+		_has_bits_[0] &= ~0x00000001u;
+	}
+	inline void ChatResult::clear_playerid()
+	{
+		playerid_ = 0;
+		clear_has_playerid();
+	}
+	inline ::google::protobuf::int32 ChatResult::playerid() const
+	{
+		// @@protoc_insertion_point(field_get:MyPacket.ChatResult.PlayerId)
+		return playerid_;
+	}
+	inline void ChatResult::set_playerid( ::google::protobuf::int32 value )
+	{
+		set_has_playerid();
+		playerid_ = value;
+		// @@protoc_insertion_point(field_set:MyPacket.ChatResult.PlayerId)
+	}
+
+	// required string PlayerName = 2;
+	inline bool ChatResult::has_playername() const
+	{
+		return ( _has_bits_[0] & 0x00000002u ) != 0;
+	}
+	inline void ChatResult::set_has_playername()
+	{
+		_has_bits_[0] |= 0x00000002u;
+	}
+	inline void ChatResult::clear_has_playername()
+	{
+		_has_bits_[0] &= ~0x00000002u;
+	}
+	inline void ChatResult::clear_playername()
+	{
+		if ( playername_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playername_->clear();
+		}
+		clear_has_playername();
+	}
+	inline const ::std::string& ChatResult::playername() const
+	{
+		// @@protoc_insertion_point(field_get:MyPacket.ChatResult.PlayerName)
+		return *playername_;
+	}
+	inline void ChatResult::set_playername( const ::std::string& value )
+	{
+		set_has_playername();
+		if ( playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playername_ = new ::std::string;
+		}
+		playername_->assign( value );
+		// @@protoc_insertion_point(field_set:MyPacket.ChatResult.PlayerName)
+	}
+	inline void ChatResult::set_playername( const char* value )
+	{
+		set_has_playername();
+		if ( playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playername_ = new ::std::string;
+		}
+		playername_->assign( value );
+		// @@protoc_insertion_point(field_set_char:MyPacket.ChatResult.PlayerName)
+	}
+	inline void ChatResult::set_playername( const char* value, size_t size )
+	{
+		set_has_playername();
+		if ( playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playername_ = new ::std::string;
+		}
+		playername_->assign( reinterpret_cast<const char*>( value ), size );
+		// @@protoc_insertion_point(field_set_pointer:MyPacket.ChatResult.PlayerName)
+	}
+	inline ::std::string* ChatResult::mutable_playername()
+	{
+		set_has_playername();
+		if ( playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playername_ = new ::std::string;
+		}
+		// @@protoc_insertion_point(field_mutable:MyPacket.ChatResult.PlayerName)
+		return playername_;
+	}
+	inline ::std::string* ChatResult::release_playername()
+	{
+		clear_has_playername();
+		if ( playername_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			return NULL;
+		}
+		else
+		{
+			::std::string* temp = playername_;
+			playername_ = const_cast<::std::string*>( &::google::protobuf::internal::GetEmptyStringAlreadyInited() );
+			return temp;
+		}
+	}
+	inline void ChatResult::set_allocated_playername( ::std::string* playername )
+	{
+		if ( playername_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			delete playername_;
+		}
+		if ( playername )
+		{
+			set_has_playername();
+			playername_ = playername;
+		}
+		else
+		{
+			clear_has_playername();
+			playername_ = const_cast<::std::string*>( &::google::protobuf::internal::GetEmptyStringAlreadyInited() );
+		}
+		// @@protoc_insertion_point(field_set_allocated:MyPacket.ChatResult.PlayerName)
+	}
+
+	// required string PlayerMessage = 3;
+	inline bool ChatResult::has_playermessage() const
+	{
+		return ( _has_bits_[0] & 0x00000004u ) != 0;
+	}
+	inline void ChatResult::set_has_playermessage()
+	{
+		_has_bits_[0] |= 0x00000004u;
+	}
+	inline void ChatResult::clear_has_playermessage()
+	{
+		_has_bits_[0] &= ~0x00000004u;
+	}
+	inline void ChatResult::clear_playermessage()
+	{
+		if ( playermessage_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playermessage_->clear();
+		}
+		clear_has_playermessage();
+	}
+	inline const ::std::string& ChatResult::playermessage() const
+	{
+		// @@protoc_insertion_point(field_get:MyPacket.ChatResult.PlayerMessage)
+		return *playermessage_;
+	}
+	inline void ChatResult::set_playermessage( const ::std::string& value )
+	{
+		set_has_playermessage();
+		if ( playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playermessage_ = new ::std::string;
+		}
+		playermessage_->assign( value );
+		// @@protoc_insertion_point(field_set:MyPacket.ChatResult.PlayerMessage)
+	}
+	inline void ChatResult::set_playermessage( const char* value )
+	{
+		set_has_playermessage();
+		if ( playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playermessage_ = new ::std::string;
+		}
+		playermessage_->assign( value );
+		// @@protoc_insertion_point(field_set_char:MyPacket.ChatResult.PlayerMessage)
+	}
+	inline void ChatResult::set_playermessage( const char* value, size_t size )
+	{
+		set_has_playermessage();
+		if ( playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playermessage_ = new ::std::string;
+		}
+		playermessage_->assign( reinterpret_cast<const char*>( value ), size );
+		// @@protoc_insertion_point(field_set_pointer:MyPacket.ChatResult.PlayerMessage)
+	}
+	inline ::std::string* ChatResult::mutable_playermessage()
+	{
+		set_has_playermessage();
+		if ( playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			playermessage_ = new ::std::string;
+		}
+		// @@protoc_insertion_point(field_mutable:MyPacket.ChatResult.PlayerMessage)
+		return playermessage_;
+	}
+	inline ::std::string* ChatResult::release_playermessage()
+	{
+		clear_has_playermessage();
+		if ( playermessage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			return NULL;
+		}
+		else
+		{
+			::std::string* temp = playermessage_;
+			playermessage_ = const_cast<::std::string*>( &::google::protobuf::internal::GetEmptyStringAlreadyInited() );
+			return temp;
+		}
+	}
+	inline void ChatResult::set_allocated_playermessage( ::std::string* playermessage )
+	{
+		if ( playermessage_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited() )
+		{
+			delete playermessage_;
+		}
+		if ( playermessage )
+		{
+			set_has_playermessage();
+			playermessage_ = playermessage;
+		}
+		else
+		{
+			clear_has_playermessage();
+			playermessage_ = const_cast<::std::string*>( &::google::protobuf::internal::GetEmptyStringAlreadyInited() );
+		}
+		// @@protoc_insertion_point(field_set_allocated:MyPacket.ChatResult.PlayerMessage)
+	}
+
+	// -------------------------------------------------------------------
+
+	// MoveRequest
+
+	// required int32 PlayerId = 1;
+	inline bool MoveRequest::has_playerid() const
+	{
+		return ( _has_bits_[0] & 0x00000001u ) != 0;
+	}
+	inline void MoveRequest::set_has_playerid()
+	{
+		_has_bits_[0] |= 0x00000001u;
+	}
+	inline void MoveRequest::clear_has_playerid()
+	{
+		_has_bits_[0] &= ~0x00000001u;
+	}
+	inline void MoveRequest::clear_playerid()
+	{
+		playerid_ = 0;
+		clear_has_playerid();
+	}
+	inline ::google::protobuf::int32 MoveRequest::playerid() const
+	{
+		// @@protoc_insertion_point(field_get:MyPacket.MoveRequest.PlayerId)
+		return playerid_;
+	}
+	inline void MoveRequest::set_playerid( ::google::protobuf::int32 value )
+	{
+		set_has_playerid();
+		playerid_ = value;
+		// @@protoc_insertion_point(field_set:MyPacket.MoveRequest.PlayerId)
+	}
+
+	// required .MyPacket.Position PlayerPos = 2;
+	inline bool MoveRequest::has_playerpos() const
+	{
+		return ( _has_bits_[0] & 0x00000002u ) != 0;
+	}
+	inline void MoveRequest::set_has_playerpos()
+	{
+		_has_bits_[0] |= 0x00000002u;
+	}
+	inline void MoveRequest::clear_has_playerpos()
+	{
+		_has_bits_[0] &= ~0x00000002u;
+	}
+	inline void MoveRequest::clear_playerpos()
+	{
+		if ( playerpos_ != NULL ) playerpos_->::MyPacket::Position::Clear();
+		clear_has_playerpos();
+	}
+	inline const ::MyPacket::Position& MoveRequest::playerpos() const
+	{
+		// @@protoc_insertion_point(field_get:MyPacket.MoveRequest.PlayerPos)
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+		return playerpos_ != NULL ? *playerpos_ : *default_instance().playerpos_;
+#else
+		return playerpos_ != NULL ? *playerpos_ : *default_instance_->playerpos_;
+#endif
+	}
+	inline ::MyPacket::Position* MoveRequest::mutable_playerpos()
+	{
+		set_has_playerpos();
+		if ( playerpos_ == NULL ) playerpos_ = new ::MyPacket::Position;
+		// @@protoc_insertion_point(field_mutable:MyPacket.MoveRequest.PlayerPos)
+		return playerpos_;
+	}
+	inline ::MyPacket::Position* MoveRequest::release_playerpos()
+	{
+		clear_has_playerpos();
+		::MyPacket::Position* temp = playerpos_;
+		playerpos_ = NULL;
+		return temp;
+	}
+	inline void MoveRequest::set_allocated_playerpos( ::MyPacket::Position* playerpos )
+	{
+		delete playerpos_;
+		playerpos_ = playerpos;
+		if ( playerpos )
+		{
+			set_has_playerpos();
+		}
+		else
+		{
+			clear_has_playerpos();
+		}
+		// @@protoc_insertion_point(field_set_allocated:MyPacket.MoveRequest.PlayerPos)
+	}
+
+	// -------------------------------------------------------------------
+
+	// MoveResult
+
+	// required int32 PlayerId = 1;
+	inline bool MoveResult::has_playerid() const
+	{
+		return ( _has_bits_[0] & 0x00000001u ) != 0;
+	}
+	inline void MoveResult::set_has_playerid()
+	{
+		_has_bits_[0] |= 0x00000001u;
+	}
+	inline void MoveResult::clear_has_playerid()
+	{
+		_has_bits_[0] &= ~0x00000001u;
+	}
+	inline void MoveResult::clear_playerid()
+	{
+		playerid_ = 0;
+		clear_has_playerid();
+	}
+	inline ::google::protobuf::int32 MoveResult::playerid() const
+	{
+		// @@protoc_insertion_point(field_get:MyPacket.MoveResult.PlayerId)
+		return playerid_;
+	}
+	inline void MoveResult::set_playerid( ::google::protobuf::int32 value )
+	{
+		set_has_playerid();
+		playerid_ = value;
+		// @@protoc_insertion_point(field_set:MyPacket.MoveResult.PlayerId)
+	}
+
+	// required .MyPacket.Position PlayerPos = 2;
+	inline bool MoveResult::has_playerpos() const
+	{
+		return ( _has_bits_[0] & 0x00000002u ) != 0;
+	}
+	inline void MoveResult::set_has_playerpos()
+	{
+		_has_bits_[0] |= 0x00000002u;
+	}
+	inline void MoveResult::clear_has_playerpos()
+	{
+		_has_bits_[0] &= ~0x00000002u;
+	}
+	inline void MoveResult::clear_playerpos()
+	{
+		if ( playerpos_ != NULL ) playerpos_->::MyPacket::Position::Clear();
+		clear_has_playerpos();
+	}
+	inline const ::MyPacket::Position& MoveResult::playerpos() const
+	{
+		// @@protoc_insertion_point(field_get:MyPacket.MoveResult.PlayerPos)
+#ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+		return playerpos_ != NULL ? *playerpos_ : *default_instance().playerpos_;
+#else
+		return playerpos_ != NULL ? *playerpos_ : *default_instance_->playerpos_;
+#endif
+	}
+	inline ::MyPacket::Position* MoveResult::mutable_playerpos()
+	{
+		set_has_playerpos();
+		if ( playerpos_ == NULL ) playerpos_ = new ::MyPacket::Position;
+		// @@protoc_insertion_point(field_mutable:MyPacket.MoveResult.PlayerPos)
+		return playerpos_;
+	}
+	inline ::MyPacket::Position* MoveResult::release_playerpos()
+	{
+		clear_has_playerpos();
+		::MyPacket::Position* temp = playerpos_;
+		playerpos_ = NULL;
+		return temp;
+	}
+	inline void MoveResult::set_allocated_playerpos( ::MyPacket::Position* playerpos )
+	{
+		delete playerpos_;
+		playerpos_ = playerpos;
+		if ( playerpos )
+		{
+			set_has_playerpos();
+		}
+		else
+		{
+			clear_has_playerpos();
+		}
+		// @@protoc_insertion_point(field_set_allocated:MyPacket.MoveResult.PlayerPos)
+	}
+
+
+	// @@protoc_insertion_point(namespace_scope)
 
 }  // namespace MyPacket
 

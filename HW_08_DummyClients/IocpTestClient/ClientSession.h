@@ -5,7 +5,7 @@
 #include "ContentsConfig.h"
 #include "Player.h"
 #include "Crypt.h"
-#include <google\protobuf\message_lite.h>
+#include "MyPacket.pb.h"
 
 #define BUFSIZE	65536
 #define SEND_BUFF 4096
@@ -135,6 +135,7 @@ public:
 	static LPFN_ACCEPTEX mFnAcceptEx;
 	static LPFN_CONNECTEX mFnConnectEx;
 
+	//void WriteMessageToStream( MyPacket::MessageType msgType, const google::protobuf::Message& message, google::protobuf::io::CodedOutputStream& stream );
 	void RequestLogin();
 	void RequestMove();
 	void RequestChat();

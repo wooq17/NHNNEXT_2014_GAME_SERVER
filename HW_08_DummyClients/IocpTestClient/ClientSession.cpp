@@ -324,6 +324,15 @@ void ClientSession::ReleaseRef()
 	}
 }
 
+// void WriteMessageToStream( MyPacket::MessageType msgType, const google::protobuf::Message& message, google::protobuf::io::CodedOutputStream& stream )
+// {
+// 	PacketHeader packetHeader;
+// 	packetHeader.mSize = message.ByteSize();
+// 	packetHeader.mType = msgType;
+// 	stream.WriteRaw( &packetHeader, sizeof( PacketHeader ) );
+// 	message.SerializeToCodedStream( &stream );
+// }
+
 void ClientSession::RequestLogin()
 {
 	wchar_t name[6];
@@ -351,16 +360,26 @@ void ClientSession::RequestLogin()
 	// Á¶¸³
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	size_t serializedPacketSize = packetHeader.mSize + packetHeaderSize;
-	char* encoded = new char[serializedPacketSize];
-	memcpy( encoded, &packetHeader, packetHeaderSize );
-	int encodingResult = loginRequest.SerializeToArray( encoded + packetHeaderSize, packetHeader.mSize );
+	google::protobuf::uint8* outputBuf = new google::protobuf::uint8[serializedPacketSize];
 
-	if ( !PostSend( reinterpret_cast<const char*>( &encoded ), serializedPacketSize ) )
+	google::protobuf::io::ArrayOutputStream output_array_stream( outputBuf, serializedPacketSize );
+	google::protobuf::io::CodedOutputStream output_coded_stream( &output_array_stream );
+
+	output_coded_stream.WriteRaw( &packetHeader, sizeof( PacketHeader ) );
+	loginRequest.SerializeToCodedStream( &output_coded_stream );
+
+	//WriteMessageToStream( MyPacket::PKT_CS_LOGIN, loginRequest, output_coded_stream );
+
+// 	char* encoded = new char[serializedPacketSize];
+// 	memcpy( encoded, &packetHeader, packetHeaderSize );
+// 	int encodingResult = loginRequest.SerializeToArray( encoded + packetHeaderSize, packetHeader.mSize );
+
+	if ( !PostSend( reinterpret_cast<const char*>( &output_coded_stream ), serializedPacketSize ) )
 	{
 		// disconnect
 		DisconnectRequest( DR_IO_REQUEST_ERROR );
 	}
-	delete[] encoded;
+	delete[] outputBuf;
 
  //	LoginRequest loginRequest;
 // 
