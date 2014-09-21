@@ -23,7 +23,4 @@
 #include <stdlib.h>
 #include <ctime>
 
-#include <google\protobuf\message_lite.h>
-#include <google\protobuf\io\coded_stream.h>
-#include <google\protobuf\io\zero_copy_stream_impl_lite.h>
 // TODO: reference additional headers your program requires here

@@ -138,9 +138,7 @@
     <ClInclude Include="RSA.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="MyPacket.pb.h">
-      <Filter>Contents</Filter>
-    </ClInclude>
+    <ClInclude Include="MyPacket.pb.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -231,7 +229,7 @@
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="MyPacket.pb.cc">
-      <Filter>Contents</Filter>
+      <Filter>Main</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -199,36 +199,8 @@ bool ClientSession::PacketHandling()
 
 	if ( len == 0 )
 		return true;
-	
+
 	PacketHeader* recvPacket = reinterpret_cast<PacketHeader*>( mRecvBuffer.GetBufferStart() );
-
-	/*
-	if ( recvPacket->mType == PKT_CS_EXPORT_PUBLIC_KEY )
-	{
-		ResponseExportedKey( recvPacket );
-		DWORD processedLen = recvPacket->mSize;
-		mRecvBuffer.Remove( processedLen );
-
-		return processedLen == len;
-	}
-
-	// protobuf
-	PacketHeader packetHeader;
-	google::protobuf::io::ArrayInputStream input_array_stream( mRecvBuffer.GetBufferStart(), len );
-	google::protobuf::io::CodedInputStream input_coded_stream( &input_array_stream );
-
-	input_coded_stream.ReadRaw( &packetHeader, sizeof( PacketHeader ) );
-	const void* payloadPtr = nullptr;
-	int remainSize = 0;
-	input_coded_stream.GetDirectBufferPointer( &payloadPtr, &remainSize );
-
-	google::protobuf::io::ArrayInputStream payload_array_stream( payloadPtr, packetHeader.mSize );
-	google::protobuf::io::CodedInputStream payload_coded_stream( &payload_array_stream );
-
-	input_coded_stream.Skip( packetHeader.mSize );
-	*/
-
-	MyPacket::LoginRequest loginPacket;
 
 	// for debug(use before encrypt)
 	// CRASH_ASSERT( IsValidData( recvPacket, len ) );
@@ -242,12 +214,6 @@ bool ClientSession::PacketHandling()
 		break;
 	case PKT_CS_LOGIN:
 		// db에 로그인하고 
-// 		loginPacket.ParseFromCodedStream( &payload_coded_stream );
-// 
-// 		wchar_t playerName[6];
-// 		MultiByteToWideChar( CP_ACP, 0, loginPacket.playername().c_str(), -1, playerName, 6 );
-// 		mPlayer->RequestRegisterPlayer( playerName );
-
 		ResponseLogin( recvPacket );
 		break;
 	case PKT_CS_LOGOUT:
@@ -439,7 +405,7 @@ void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 	// protobuf용 부분
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::LoginRequest request;
-	request.ParseFromArray( recvPacket + packetHeaderSize, recvPacket->mSize );
+	int rtn = request.ParseFromArray( reinterpret_cast<const void*>(recvPacket + 1), recvPacket->mSize );
 
 	wchar_t playerName[6];
 	MultiByteToWideChar( CP_ACP, 0, request.playername().c_str(), -1, playerName, 6);
@@ -458,7 +424,7 @@ void ClientSession::ResponseLogout( PacketHeader* recvPacket )
 	// protobuf용 부분
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::LogoutRequest request;
-	request.ParseFromArray( recvPacket + packetHeaderSize, recvPacket->mSize );
+	request.ParseFromArray( recvPacket + 1, recvPacket->mSize );
 
 	mPlayer->RequestDeregisterPlayer( request.playerid() );
 	// protobuf 끄읕
@@ -475,27 +441,31 @@ void ClientSession::ResponseChat( PacketHeader* recvPacket )
 	// protobuf용 부분 - recieve
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::ChatRequest request;
-	request.ParseFromArray( recvPacket + packetHeaderSize, recvPacket->mSize );
+	request.ParseFromArray( recvPacket + 1, recvPacket->mSize );
 		
-	// protobuf send
-	MyPacket::ChatResult chatResult;
+	// protobuf용 부분 - send
+	// content 생성
 	char playerName[6];
 	WideCharToMultiByte( CP_ACP, 0, mPlayer->GetName(), -1, playerName, 6, NULL, NULL );
+	
+	// payload 생성
+	MyPacket::ChatResult chatResult;
 	chatResult.set_playername( playerName );
 	chatResult.set_playerid( request.playerid() );
 	chatResult.set_playermessage( request.playermessage() );
-
-	// serialize packet 
+		
+	// header 생성
 	PacketHeader packetHeader;
 	packetHeader.mType = MyPacket::PKT_SC_CHAT;
-	packetHeader.mSize = chatResult.ByteSize();
+	size_t packetPayloadSize = chatResult.ByteSize();
+	packetHeader.mSize = packetHeaderSize + packetPayloadSize;
 		
-	size_t serializedPacketSize = packetHeader.mSize + packetHeaderSize;
-	char* encoded = new char[serializedPacketSize];
+	// 조립
+	char* encoded = new char[packetHeader.mSize];
 	memcpy( encoded, &packetHeader, packetHeaderSize );
-	int encodingResult = chatResult.SerializeToArray( encoded + packetHeaderSize, packetHeader.mSize );
+	int encodingResult = chatResult.SerializeToArray( encoded + BYTE( packetHeaderSize ), packetPayloadSize );
 
-	GClientSessionManager->NearbyBroadcast( encoded, serializedPacketSize, mPlayer->GetZoneIdx() );
+	GClientSessionManager->NearbyBroadcast( encoded, packetHeader.mSize, mPlayer->GetZoneIdx() );
 	delete[] encoded;
 	// protobuf 끄읕
 	

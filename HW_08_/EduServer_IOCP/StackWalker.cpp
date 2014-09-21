@@ -71,8 +71,6 @@
  *   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  **********************************************************************/
-#pragma once
-#include "stdafx.h"
 #include <windows.h>
 #include <tchar.h>
 #include <stdio.h>
