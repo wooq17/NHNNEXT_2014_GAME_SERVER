@@ -398,7 +398,7 @@ void ClientSession::ResponseLogin( PacketHeader* recvPacket )
 	// protobuf용 부분
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::LoginRequest request;
-	int rtn = request.ParseFromArray( reinterpret_cast<const void*>(recvPacket + 1), recvPacket->mSize );
+	int rtn = request.ParseFromArray( reinterpret_cast<const void*>( recvPacket + 1 ), recvPacket->mSize - packetHeaderSize );
 
 	wchar_t playerName[6];
 	MultiByteToWideChar( CP_ACP, 0, request.playername().c_str(), -1, playerName, 6);
@@ -416,7 +416,7 @@ void ClientSession::ResponseLogout( PacketHeader* recvPacket )
 	// protobuf용 부분
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::LogoutRequest request;
-	request.ParseFromArray( recvPacket + 1, recvPacket->mSize );
+	request.ParseFromArray( recvPacket + 1, recvPacket->mSize - packetHeaderSize );
 	mState = WAIT_FOR_LOGOUT;
 	mPlayer->RequestDeregisterPlayer( request.playerid() );
 	// protobuf 끄읕
@@ -430,7 +430,7 @@ void ClientSession::ResponseChat( PacketHeader* recvPacket )
 	// protobuf용 부분 - recieve
 	size_t packetHeaderSize = sizeof( PacketHeader );
 	MyPacket::ChatRequest request;
-	request.ParseFromArray( recvPacket + 1, recvPacket->mSize );
+	request.ParseFromArray( recvPacket + 1, recvPacket->mSize - packetHeaderSize );
 		
 	// protobuf용 부분 - send
 	// content 생성
@@ -464,9 +464,14 @@ void ClientSession::ResponseMove( PacketHeader* recvPacket )
 	if ( mState != LOGGED_IN )
 		return;
 
-	MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
-	if ( mPlayer->GetPlayerId() != clientPacket->mPlayerId )
+	//MoveRequest* clientPacket = reinterpret_cast<MoveRequest*>( recvPacket );
+	size_t packetHeaderSize = sizeof( PacketHeader );
+	MyPacket::MoveRequest request;
+	request.ParseFromArray( recvPacket + 1, recvPacket->mSize - packetHeaderSize );
+
+
+	if ( mPlayer->GetPlayerId() != request.playerid() )
 		return;
 
-	mPlayer->RequestUpdatePosition( clientPacket->mX, clientPacket->mY, clientPacket->mZ );
+	mPlayer->RequestUpdatePosition( request.playerpos().x(), request.playerpos().y(), request.playerpos().z() );
 }
