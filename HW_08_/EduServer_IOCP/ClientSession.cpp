@@ -185,10 +185,15 @@ bool ClientSession::PacketHandling()
 
 	size_t len = mRecvBuffer.GetContiguiousBytes();
 
-	if ( len == 0 )
+	// 헤더를 읽을 수 없다
+	if ( len < sizeof( PacketHeader ) )
 		return true;
 
 	PacketHeader* recvPacket = reinterpret_cast<PacketHeader*>( mRecvBuffer.GetBufferStart() );
+
+	// payload가 다 안 왔다 - 있다가 추가로 데이터 오면 다시 보자
+	if ( len < recvPacket->mSize )
+		return true;
 
 	// for debug(use before encrypt)
 	// CRASH_ASSERT( IsValidData( recvPacket, len ) );
