@@ -220,10 +220,9 @@ void Session::RecvCompletion(DWORD transferred)
 {
 	TRACE_THIS;
 
-	mRecvBuffer.Commit(transferred);
-
 	// 이미 복호화는 완료했지만 패킷이 모두 수신 되지 않아서 버퍼에 남아 있는 영역은 스킵
-	size_t alreadyDecrypted = mRecvBuffer.GetContiguiousBytes() - transferred;
+	size_t alreadyDecrypted = mRecvBuffer.GetContiguiousBytes();
+	mRecvBuffer.Commit(transferred);
 
 	if ( mIsKeyShared )
 	{
